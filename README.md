@@ -1,2 +1,2 @@
-# SCwmo
+# wmoSC
 WMO Site Classification
