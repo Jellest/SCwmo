@@ -3,18 +3,18 @@
 \docType{data}
 \name{AWS.sp}
 \alias{AWS.sp}
-\title{Spatial data of the AWSs}
+\title{spatial data}
 \format{An object of class \code{SpatialPointsDataFrame} with 46 rows and 7 columns.}
 \usage{
 AWS.sp
 }
 \description{
-spatial data of AWS.df
+some desc
 }
 \section{Slots}{
 
 \describe{
-\item{\code{DS_CODE}}{code station}
+\item{\code{DS_CODE}}{iets}
 }}
 
 \keyword{datasets}
