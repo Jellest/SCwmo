@@ -6,13 +6,17 @@ AWS.df$IT_DATETIME<-as.Date(AWS.df$IT_DATETIME,format="%Y%m%d_240000_000000")
 
 devtools::use_data(AWS.df,overwrite=TRUE)
 
-AWS.sp<-data.frame(AWS.df)
+AWS.sp<-AWS.df
 coordinates(AWS.sp)<-~DS_LAT+DS_LON
+<<<<<<< HEAD
 crs(AWS.sp)<-CRS("+init=epsg:4326") #coordinaten kloppen wss niet of iets anders gaat mis
 
 devtools::use_data(AWS.sp,overwrite=TRUE)
 
 # AWS.RD<-spTransform(AWS.sp,CRS("+init=epsg:28992"))  #rgdal wil niet installeren op pc132090
+=======
+  
+>>>>>>> parent of 130b175... test
 # library(lubridate)
 # start<-as.Date("2010-01-01")
 # stop<-as.Date("2010-12-31")
