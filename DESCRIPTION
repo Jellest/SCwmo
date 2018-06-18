@@ -1,0 +1,15 @@
+Package: wmoSC
+Title: WMO Site Classification of automatic weather stations
+Version: 0.0.0.9000
+Authors@R: person("Jelle", "Stuurman", email = "jelle.stuurman@knmi.nl", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+Depends: R (>= 3.4.4)
+License: GPL3
+Encoding: UTF-8
+LazyData: true
+Imports: data.table,
+         lubridate,
+         raster,
+         rgdal,
+         sp
+RoxygenNote: 6.0.1
