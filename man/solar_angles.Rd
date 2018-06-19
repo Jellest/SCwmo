@@ -2,7 +2,7 @@
 % Please edit documentation in R/solar_angles.R
 \name{solar_angles}
 \alias{solar_angles}
-\title{Calculating the solar angles for AWS locations}
+\title{solar angles}
 \usage{
 solar_angles(lat = 54.32556, lon = 2.935833, elv = 42.7, jd = 3)
 }
@@ -13,14 +13,22 @@ solar_angles(lat = 54.32556, lon = 2.935833, elv = 42.7, jd = 3)
 
 \item{elv}{elevation}
 
-\item{jd}{julian day}
+\item{jd}{julian daysolar}
+}
+\value{
+dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,...
 }
 \description{
+iets over wat de functie doet
+}
+\details{
 Calculating the solar angles for AWS locations
 }
 \examples{
 
 data(AWS.df)
-#solar_angles()
-
+solar_angles(jd=seq(1,20,by=0.1)) #for the first 20 days with an accuracy of approximately 2.5 hours
+}
+\author{
+Jelle Stuurman
 }
