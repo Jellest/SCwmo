@@ -28,3 +28,10 @@
 #' @slot DS_CODE iets
 #' 
 "AWS.sp"
+
+#'AHN3 data for the Bilt
+#'@description data can be downloaded from \url{https://www.pdok.nl/nl/ahn3-downloads}
+#'
+#'@slot r_32cn1 kaartblad number for the bilt with height elevation data
+#'
+"ahn3_deBilt"

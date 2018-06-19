@@ -12,6 +12,9 @@ crs(AWS.sp)<-CRS("+init=epsg:4326") #coordinaten kloppen wss niet of iets anders
 
 devtools::use_data(AWS.sp,overwrite=TRUE)
 
+#ahn3 de bilt
+ahn3_deBilt<-stack("/nobackup/users/dirksen/data/r_32cn1.tif")
+devtools::use_data(ahn3_deBilt,overwrite = TRUE)
 # AWS.RD<-spTransform(AWS.sp,CRS("+init=epsg:28992"))  #rgdal wil niet installeren op pc132090
 
 # library(lubridate)
