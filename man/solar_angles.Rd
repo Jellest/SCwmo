@@ -4,7 +4,7 @@
 \alias{solar_angles}
 \title{Calculating the solar angles for AWS locations}
 \usage{
-solar_angles(lat, lon, elv, jd)
+solar_angles(lat = 54.32556, lon = 2.935833, elv = 42.7, jd = 3)
 }
 \arguments{
 \item{lat}{latitude of the station in WGS84}

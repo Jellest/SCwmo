@@ -11,5 +11,6 @@ Imports: data.table,
          lubridate,
          raster,
          rgdal,
-         sp
+         sp,
+         insol
 RoxygenNote: 6.0.1
