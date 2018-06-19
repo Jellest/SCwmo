@@ -16,15 +16,17 @@ shadow_angles<-function(sp,
   #(1) spatial points with epsg and elv
   
   #(2) grid with epsg and elv 
+  #?sp::spTransform
+  #?raster::crs
   
   #(3) sp and grid equal? overlap?
   
-  #extract(x = grid, y = sp, method=bilinear)
+  #raster::extract(x = grid, y = sp, method=bilinear)
   #check if xyz match
   
   #if everything fits/no errors
   #crop and mask raster with a max distance from the points 
-  #horizon_grid<-horizonSearch(grid)
+  #horizon_grid<-horizon::horizonSearch(grid)
   
   #sp_theta_azimuth<-extract(x = horizon_grid, y = sp, method=bilinear)
   
