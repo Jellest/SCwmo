@@ -10,6 +10,6 @@ shadow_angles(sp, grid)
 calculates the angles of to the obstacles for a point
 }
 \examples{
-#kaartblad AHN3 for the bilt equals 32cn1
+#kaartblad AHN3 for the bilt is 32cn1
 #downloadlink: 
 }

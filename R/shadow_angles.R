@@ -5,14 +5,14 @@
 #'@param sp
 #'@param grid
 #'@examples
-#'#kaartblad AHN3 for the bilt equals 32cn1
+#'#kaartblad AHN3 for the bilt is 32cn1
 #'#downloadlink: 
 #'@export
 #'
 shadow_angles<-function(sp,
                         grid){
   requireNamespace("raster")
-  #checking coord ref
+  #checking coord refrgd
   #(1) spatial points with epsg and elv
   
   #(2) grid with epsg and elv 
