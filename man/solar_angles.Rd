@@ -13,7 +13,7 @@ solar_angles(lat = 54.32556, lon = 2.935833, elv = 42.7, jd = 3)
 
 \item{elv}{elevation}
 
-\item{jd}{julian daysolar}
+\item{jd}{julian day}
 }
 \value{
 dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,...

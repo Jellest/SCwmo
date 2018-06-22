@@ -9,6 +9,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: data.table,
          lubridate,
+         horizon,
          raster,
          rgdal,
          sp,

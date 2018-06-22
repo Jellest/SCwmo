@@ -4,12 +4,40 @@
 \alias{shadow_angles}
 \title{shadow angles}
 \usage{
-shadow_angles(sp, grid)
+shadow_angles(spatialpoint, rastergrid, angle, maxDist)
+}
+\arguments{
+\item{spatialpoint}{point of AWS.}
+
+\item{rastergrid}{ahn3 De Bilt}
+
+\item{angle}{in degrees, starting with 0 in the north over east}
+
+\item{maxDist}{maximum Distance}
 }
 \description{
 calculates the angles of to the obstacles for a point
 }
+\details{
+Shadow angles from a height grid around a point
+
+something
+}
 \examples{
-#kaartblad AHN3 for the bilt is 32cn1
-#downloadlink: 
+#ahn3 de bilt
+library(sp)
+library(raster)
+
+data("ahn3_deBilt")
+data("AWS.df")
+deBilt<-AWS.df[which(AWS.df$DS_NAME == "De Bilt"),]
+deBilt.sp<-data.frame(deBilt)
+coordinates(deBilt.sp) <- ~DS_LON+DS_LAT
+crs(deBilt.sp)<-CRS("+init=epsg:4326")
+deBilt.rd <- spTransform(x = deBilt.sp, CRS = crs(ahn3_deBilt))
+
+shadow_angles(spatialpoint=deBilt.rd,
+rastergrid=ahn3_deBilt,
+angle=50,
+maxDist=100)
 }
