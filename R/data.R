@@ -1,6 +1,5 @@
 #' AWS coordinates 
-#'
-#' Dataset contains lat lon of all the aws stations. 
+#'#' Dataset contains lat lon of all the aws stations. 
 #'
 #' @format A data frame with 46 rows and 9 variables:
 #' \describe{
@@ -35,3 +34,28 @@
 #'@slot r_32cn1 kaartblad number for the bilt with height elevation data
 #'
 "ahn3_deBilt"
+
+#' coordinates sensors De Bilt 
+#' Dataset contains x, y, lat lon of all the sensors at The Bilt.
+#'  
+#' @format A data frame with 11 rows and 5 variables:
+#' \describe{
+#'   \item{X}{RD X Coordinate, in meters}
+#'   \item{Y}{RD Y coordinate, in meters}
+#'   \item{LAT}{Latitude}
+#'   \item{LON}{Longitude}
+#'   \item{Sensor}{name of sensor}
+#' }
+#' @examples 
+#' data(sensor_coordsDeBilt.df)
+#' str(sensor_coordsDeBilt.df)
+#' summary(sensor_coordsDeBilt.df)
+"sensor_coordsDeBilt.df"
+
+
+#' coordinates sensors De Bilt
+#'
+#' some description
+#'
+#' @slot Sensor
+"sensor_coordsDeBilt.sp"
