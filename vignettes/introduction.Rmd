@@ -1,0 +1,58 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+Here we:
+
+* add library
+* load the data of the point (one selected) and height raster
+* transform coordinates to the same crs
+
+
+```{r load data}
+library(raster)
+library(sp)
+
+load("~/wmoSC/data/sensor_coordsDeBilt.df.rda")
+load("~/wmoSC/data/ahn3_deBilt.rda")
+
+deBilt.sp<-data.frame(sensor_coordsDeBilt.df[1,])
+coordinates(deBilt.sp) <- ~LON+LAT
+crs(deBilt.sp)<-CRS("+init=epsg:4326")
+deBilt.rd <- spTransform(x = deBilt.sp, CRS = crs(ahn3_deBilt))
+```
+## Calculate solar angles
+
+```{r solar angles,eval=FALSE}
+library(insol)
+sun_ang<-solar_angles(lat = sensor_coordsDeBilt.df$LAT,
+             lon = sensor_coordsDeBilt.df$LON)
+print(sun_ang)
+```
+
+## Calculate shadow angles
+> Make sure to download AHN3 data before running this code! 
+
+```{r shadow angles,eval=FALSE}
+shadow_angles(spatialpoint=deBilt.rd,
+ rastergrid=ahn3_deBilt,
+ angle=50,
+ maxDist=100)
+```
+
