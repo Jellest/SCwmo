@@ -59,3 +59,15 @@
 #'
 #' @slot Sensor
 "sensor_coordsDeBilt.sp"
+
+#'CBS Bodemkaart
+#'@format shapefile of the Whole NL with 15 land use categrories
+#'\describe{
+#'  \item{Hoofdgroep}{land use categories}
+#'  \item{Shape_Leng}{shape length}
+#'  \item{Shape_Area}{shape area}
+#'}
+#'@examples
+#' 
+
+"cbs_bodemgebruik"

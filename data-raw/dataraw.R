@@ -26,6 +26,10 @@ proj4string(ahn3_deBilt)<-CRS("+init=epsg:28992")
 devtools::use_data(ahn3_deBilt,overwrite = TRUE)
 # AWS.RD<-spTransform(AWS.sp,CRS("+init=epsg:28992"))  #rgdal wil niet installeren op pc132090
 
+#CBS bodemkaart
+cbs_bodem_gebruik.shp<-readOGR("/nobackup/users/stuurman/data/cbs_bomdemGebruik", "BBG2012hoofdgroep")
+devtools::use_data(cbs_bodem_gebruik.shp,overwrite = TRUE)
+
 # library(lubridate)
 # start<-as.Date("2010-01-01")
 # stop<-as.Date("2010-12-31")
