@@ -7,7 +7,7 @@ bgt_wfs <- "WFS:https://geodata.nationaalgeoregister.nl/beta/bgt/wfs?request=get
 #ogrinfo(bgt_wfs, so=TRUE)
 
 #load pand layer and make shapefile
-ogr2ogr(dsn, "bgt.shp", "bgt:pand")
+ogr2ogr(bgt_wfs, "bgt.shp", "bgt:pand")
 library(rgdal)
 on
 
