@@ -21,35 +21,33 @@ bgt_wfs <- paste("WFS:", bgt_wfsBaseUrl, "&SRSNAME=", my_EPSG, "&BBOX=", my_bbox
 
 #ogrinfo(bgt_wfs, so=TRUE)
 
-<<<<<<< HEAD
 #list of features
 ogrListLayers(bgt_wfs)
 bgtFeatureNamesList <- c("bgt:begroeidterreindeel", "bgt:functioneelgebied", "bgt:onbegroeidterreindeel", "bgt:ondersteunendwaterdeel", "bgt:waterdeel", "bgt:ondersteunendwegdeel", "bgt:wegdeel", "bgt:pand", "bgt:spoor")
-featurNamesList <- c("begroeid", "functioneel", "onbegroeid","ondersteunendWater", "water", "ondersteunendWeg", "weg", "pand", "spoor")  
+featureNamesList <- c("begroeidterreindeel", "functioneelgebied", "onbegroeidterreindeel","ondersteunendwaterdeel", "waterdeel", "ondersteunendwegdeel", "wegdeel", "pand", "spoor")  
 
 #define features to be loaded
+bgtShpList <- list()
 
-for(j in seq_along(featurNamesList)){
-assign(paste("Feature_", featurNamesList[j], sep = ""), j)
+for (i in seq_along(featureNamesList)){
+  feature_name = paste("feature",featureNamesList[i], sep="_")
+  #assign(paste("Feature", bgtFeatureNamesList[i], sep = "_"), SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()))
+  feature = assign(feature_name, SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()))
+  #bgtShpList[feature_name]<- feature
+}
+for(j in seq_along(bgtFeatureNamesList)){
+
+  #layer_name = paste("bgt",bgtFeatureNamesList[j],sep= ":")
+  #print(layer_name)
+  print(featureNamesList[j])
+  print(bgtFeatureNamesList[j])
+  
+  shape_file  = paste(featureNamesList[j],".shp",sep="")
+  ogr2ogr(bgt_wfs, shape_file, bgtFeatureNamesList[j])
+  bgtShpList[j] <- readOGR(shape_file, featureNamesList[j], stringsAsFactors=FALSE)
 }
 
-for(i in seq_along(bgtFeaturNamesList)){
-  featureName <- bgtFeatureNamesList[i]
-  #create shapefile from features
-  ogr2ogr(bgt_wfs, "bgt.shp", featureName)
-}
-
-
-
-colNames(datos) <- paste("X", i, sep="") then? Then you can access them with datos$X1, datos$X2
-
-=======
 #load pand layer and make shapefile
-ogr2ogr(bgt_wfs, "bgt.shp", "bgt:pand")
-library(rgdal)
-on
-
-#plot BGT
-bgt <- readOGR("bgt.shp", "bgt", stringsAsFactors=FALSE)
-plot(bgt, max.plot = 19)
->>>>>>> f9d6593f6477e0f0c65105989681c4f0c218e6e5
+ogr2ogr(bgt_wfs, "bgt.shp", "bgt:functioneelgebied")
+bgtTest <- readOGR("bgt.shp", "bgt", stringsAsFactors=FALSE)
+plot(bgtTest)
