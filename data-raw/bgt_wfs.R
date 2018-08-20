@@ -14,7 +14,7 @@ coordinates(debilt)<-~lat+lon
 #create 200 meter buffer arouond sensor
 surroundingBuffer <- buffer(debilt,width=200) #since RDcoords are in meters width is also in m
 
-data_location <- paste("/nobackup/users/stuurman/data/", dataset, station, sep="")
+data_location <- paste("/nobackup/users/stuurman/data/", dataset, "/", station, "/", sep="")
 
 #get BBOX extent of buffer area
 surroundingExtent <- extent(surroundingBuffer)
@@ -29,21 +29,51 @@ bgt_wfs <- paste("WFS:", bgt_wfsBaseUrl, "&SRSNAME=", my_EPSG, "&BBOX=", my_bbox
 
 #list of features
 ogrListLayers(bgt_wfs)
-bgtFeatureNamesList <- c("bgt:begroeidterreindeel", "bgt:functioneelgebied", "bgt:onbegroeidterreindeel", "bgt:ondersteunendwaterdeel", "bgt:waterdeel", "bgt:ondersteunendwegdeel", "bgt:wegdeel", "bgt:pand", "bgt:spoor")
-featureNamesList <- c("begroeidterreindeel", "functioneelgebied", "onbegroeidterreindeel","ondersteunendwaterdeel", "waterdeel", "ondersteunendwegdeel", "wegdeel", "pand", "spoor")  
+bgtFeatureNamesList <- c("bgt:begroeidterreindeel", "bgt:functioneelgebied", "bgt:onbegroeidterreindeel", "bgt:ondersteunendwaterdeel", "bgt:waterdeel", "bgt:ondersteunendwegdeel", "bgt:wegdeel", "bgt:pand", "bgt:spoor", "bgt:mast")
+featureNamesList <- c("begroeidterreindeel", "functioneelgebied", "onbegroeidterreindeel","ondersteunendwaterdeel", "waterdeel", "ondersteunendwegdeel", "wegdeel", "pand", "spoor", "mast")
+all_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
+                         
 
-read_bgt<-function(bgt_feature,feature_name_short, storage_location){
-  feature_name = paste("feature",bgt_feature, sep="_")
-  feature = assign(feature_name, SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()))
-
+read_bgt<-function(all_bgt_features, wfs, bgt_feature, feature_name_short, storage_location){
+  feature_name <- paste("feature",feature_name_short, sep="_")
+  feature <- assign(feature_name, SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()))
+  rowname <- paste(station,feature_name_short,sep="_")
   print(feature_name)
-  shape_file  = paste(storage_location, feature_name_short,".shp",sep="")
-
-  ogr2ogr(src_datasource_name = bgt_wfs, dst_datasource_name = shape_file, layer = feature_name_short)
-  
-  bgtShpList <- tryCatch(readOGR(dsn = shape_file, layer = feature_name_short, storage_location, stringsAsFactors=FALSE),error=function(e) e)
-  
-  return(bgtShpList)
+  shape_file  <- paste(storage_location, feature_name_short,".shp",sep="")
+  print(shape_file)
+  feature <- tryCatch({
+    ogr2ogr(src_datasource_name = wfs    , dst_datasource_name = shape_file, layer = bgt_feature, overwrite = TRUE)
+    feature_name <- readOGR(dsn = storage_location, layer = feature_name_short, stringsAsFactors=FALSE)
+    
+    feature_count <- length(feature_name@data)
+    str(feature_name)
+    entry_t <- data.frame(station, feature_name_short, TRUE, feature_count, stringsAsFactors=FALSE)
+    names(entry_t) <- c("station", "feature_type", "has_features", "features_count")
+    rownames(entry_t) <- rowname
+    all_bgt_features <- rbind(all_bgt_features, entry_t, stringsAsFactors=FALSE)
+    
+    #return(feature)
+    },
+  error=function(e){
+    e
+    entry_f <- data.frame(station, feature_name_short, FALSE, 0, stringsAsFactors=FALSE)
+    names(entry_f) <- c("station", "feature_type", "has_features", "features_count")
+    rownames(entry_f) <- rowname
+    all_bgt_features <- rbind(all_bgt_features, entry_f, stringsAsFactors=FALSE)
+    message(paste("No features found in", feature_name_short, sep=" "))
+  }
+  )
+  return (feature_name)
 }
 
-bgt_list<-mapply(read_bgt,bgt_feature = bgtFeatureNamesList, feature_name_short = featureNamesList, storage_location = data_location)
+single_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
+my_rowname <- paste(station, "pand", sep="_")
+
+bgt_single <- read_bgt(single_bgt_features, wfs = bgt_wfs, bgt_feature = "bgt:pand", feature_name_short = "pand", storage_location = data_location)
+single_count <- length(bgt_single@data)
+entry_test <- data.frame(station, "pand", TRUE, single_count, stringsAsFactors=FALSE)
+names(entry_test) <- c("station", "feature_type", "has_features", "features_count")
+rownames(entry_test) <- rowname
+single_bgt_features <- rbind(single_bgt_features, entry_test)
+
+bgt_list<- mapply(read_bgt, all_bgt_features, wfs = bgt_wfs, bgt_feature = bgtFeatureNamesList, feature_name_short = featureNamesList, storage_location = data_location)
