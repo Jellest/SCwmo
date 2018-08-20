@@ -66,14 +66,18 @@ read_bgt<-function(all_bgt_features, wfs, bgt_feature, feature_name_short, stora
   return (feature_name)
 }
 
-single_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
-my_rowname <- paste(station, "pand", sep="_")
-
-bgt_single <- read_bgt(single_bgt_features, wfs = bgt_wfs, bgt_feature = "bgt:pand", feature_name_short = "pand", storage_location = data_location)
-single_count <- length(bgt_single@data)
-entry_test <- data.frame(station, "pand", TRUE, single_count, stringsAsFactors=FALSE)
-names(entry_test) <- c("station", "feature_type", "has_features", "features_count")
-rownames(entry_test) <- rowname
-single_bgt_features <- rbind(single_bgt_features, entry_test)
 
 bgt_list<- mapply(read_bgt, all_bgt_features, wfs = bgt_wfs, bgt_feature = bgtFeatureNamesList, feature_name_short = featureNamesList, storage_location = data_location)
+
+
+##single features test script
+
+#single_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
+#my_rowname <- paste(station, "pand", sep="_")
+
+#single_bgt_features <- rbind(single_bgt_features, entry_test)
+#bgt_single <- read_bgt(single_bgt_features, wfs = bgt_wfs, bgt_feature = "bgt:pand", feature_name_short = "pand", storage_location = data_location)
+#single_count <- length(bgt_single@data)
+#entry_test <- data.frame(station, "pand", TRUE, single_count, stringsAsFactors=FALSE)
+#names(entry_test) <- c("station", "feature_type", "has_features", "features_count")
+#rownames(entry_test) <- rowname
