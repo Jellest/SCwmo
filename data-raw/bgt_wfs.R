@@ -43,10 +43,9 @@ read_bgt<-function(all_bgt_features, wfs, bgt_feature, feature_name_short, stora
   print(shape_file)
   feature <- tryCatch({
     ogr2ogr(src_datasource_name = wfs    , dst_datasource_name = shape_file, layer = bgt_feature, overwrite = TRUE)
-    feature_name <- readOGR(dsn = storage_location, layer = feature_name_short, stringsAsFactors=FALSE)
-    
     feature_count <- length(feature_name@data)
-    str(feature_name)
+    print(feature_count)
+    feature_name <- readOGR(dsn = storage_location, layer = feature_name_short, stringsAsFactors=FALSE)
     entry_t <- data.frame(station, feature_name_short, TRUE, feature_count, stringsAsFactors=FALSE)
     names(entry_t) <- c("station", "feature_type", "has_features", "features_count")
     rownames(entry_t) <- rowname
@@ -72,12 +71,12 @@ bgt_list<- mapply(read_bgt, all_bgt_features, wfs = bgt_wfs, bgt_feature = bgtFe
 
 ##single features test script
 
-#single_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
-#my_rowname <- paste(station, "pand", sep="_")
+single_bgt_features <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("station", "feature_type", "has_features"))
+my_rowname <- paste(station, "pand", sep="_")
 
-#single_bgt_features <- rbind(single_bgt_features, entry_test)
-#bgt_single <- read_bgt(single_bgt_features, wfs = bgt_wfs, bgt_feature = "bgt:pand", feature_name_short = "pand", storage_location = data_location)
-#single_count <- length(bgt_single@data)
-#entry_test <- data.frame(station, "pand", TRUE, single_count, stringsAsFactors=FALSE)
-#names(entry_test) <- c("station", "feature_type", "has_features", "features_count")
-#rownames(entry_test) <- rowname
+bgt_single <- read_bgt(single_bgt_features, wfs = bgt_wfs, bgt_feature = "bgt:pand", feature_name_short = "pand", storage_location = data_location)
+single_count <- length(bgt_single@data)
+entry_test <- data.frame(station, "pand", TRUE, single_count, stringsAsFactors=FALSE)
+names(entry_test) <- c("station", "feature_type", "has_features", "features_count")
+rownames(entry_test) <- my_rowname
+single_bgt_features <- rbind(single_bgt_features, entry_test)
