@@ -34,11 +34,10 @@ shadow_angles<-function(spatialpoint,
   requireNamespace("raster")
   # requireNamespace("rgdal")
 
-# if(crs(spatialpoint)!=crs(rastergrid)){
-#   message("crs not equal")
-#   return(FALSE)
-# }  
- 
+  # if(crs(spatialpoint)!=crs(rastergrid)){
+  #   message("crs not equal")
+  #   return(FALSE)
+  # }  
 
   deBilt_mask<-raster::buffer(spatialpoint,width=maxDist)
   
