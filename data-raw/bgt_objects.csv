@@ -1,0 +1,10 @@
+object_short_name,bgt_object_name
+begroeidterreindeel,bgt:begroeidterreindeel
+onbegroeidterreindeel,bgt:onbegroeidterreindeel
+waterdeel,bgt:waterdeel
+wegdeel,bgt:wegdeel
+scheiding,bgt:scheiding
+pand,bgt:pand
+overigbouwwerk,bgt:overigbouwwerk
+spoor,bgt:spoor
+functioneelgebied,bgt:functioneelgebied
