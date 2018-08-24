@@ -1,6 +1,6 @@
 ### Global variables
 
-# for linux/windows storage settings, see inst? *_config
+# Load linux/windows config first. See inst? *_config in inst>*_config.
 
 #De Bilt station
 station <- "deBilt"
