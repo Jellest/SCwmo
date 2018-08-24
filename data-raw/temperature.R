@@ -5,9 +5,9 @@ criteria_colNames <-  c("Class", "Criteria")
 V_Temp_slope_ct <- c(19, 19, NA, NA, NA) 
 V_Temp_slope <- data.frame(class=1:5, criteria=V_Temp_slope_ct)
 
-V_Temp_openSpace_ct < c(100, 30, NA, NA, NA)
+V_Temp_openSpace_ct <- c(100, 30, NA, NA, NA)
 V_Temp_openSpace <- data.frame(class=1:5, criteria=V_Temp_openSpace_ct)
-;
+
 V_Temp_vege_ct <- c(10, 10, 25, NA, NA)
 V_Temp_vege <- data.frame(class=1:5, criteria=V_Temp_vege_ct)
 
