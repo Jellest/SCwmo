@@ -1,6 +1,6 @@
 ### Global variables
 
-# Load linux/windows config first. See inst? *_config in inst>*_config.
+# Load computer config first. See inst? computer_config in inst>computer_config.R
 
 #De Bilt station
 station <- "deBilt"
