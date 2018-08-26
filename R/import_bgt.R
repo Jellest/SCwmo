@@ -26,7 +26,7 @@ bgt_wfs <- paste("WFS:", bgt_wfsBaseUrl, "&SRSNAME=", my_EPSG, "&BBOX=", my_bbox
 xls_location <- c( "/nobackup/users/stuurman/wmoSC/data-raw/bgt_names_features.xlsx", "C:\\Users\\KNMI\\Dropbox\\KNMI\\R_SPQJ\\wmoSC\\data-raw\\bgt_names_features.xlsx")
 #bgt_objects.xlsx <- read.xls(xls_location[storage_settings], sheet="bgt_objects")
 
-bgt_objects.csv <- read.table(paste("wmoSC", "data-raw", "bgt_objects.csv", sep=folder_structure ), header = TRUE, sep=",")
+bgt_objects.csv <- read.table(paste("wmoSC", "data-raw", "bgt_objects.csv", sep=folder_structure), header = TRUE, sep=",")
 bgt_objects_shortname_list <- as.vector(data.frame(lapply(bgt_objects.csv[1], as.character), stringsAsFactors=FALSE)[,1])
 bgt_objects_name_list <- as.vector(data.frame(lapply(bgt_objects.csv[2], as.character), stringsAsFactors=FALSE)[,1])
 
@@ -73,7 +73,7 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
   print(rowname)
   
   
-  raw_shape_file_directory <- paste(working_directory, "raw", "", sep=folder_structure)
+  raw_shape_file_directory <- paste(working_directory, "raw/", sep=folder_structure)
   shape_file <- paste( raw_shape_file_directory, object_name_short, ".shp", sep="")
   print(paste("shapefile: ", shape_file, sep=""))
   
@@ -81,7 +81,7 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
     ogr2ogr(src_datasource_name = wfs    , dst_datasource_name = shape_file, layer = bgt_object_name, overwrite = TRUE)
     
     raw_data_location_1 <- paste(working_directory, "/raw/", sep="")
-    raw_data_location_2 <- paste(working_directory, "\\raw", sep="")
+    raw_data_location_2 <- paste(working_directory, "/raw", sep="")
     
     raw_data_locations <- c(raw_data_location_1, raw_data_location_2)
     raw_data_location <- raw_data_locations[storage_settings]
