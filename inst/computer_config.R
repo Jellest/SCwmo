@@ -1,19 +1,16 @@
 # computer configurations
-storage_settings <- 2 # 1 = Linux Jelle, 2 = windows Jelle
+setup_settings <- NULL 
+home_directory <- NULL
+folder_structure <- NULL
 
-getWorkingDirectory <- function(storage_settings){
-  # make sure home directory is directry that refers to R folders and data foder.
-  working_directories <- c("/nobackup/users/stuurman","C:/Users/KNMI/Dropbox/KNMI/R_SPQJ")
-  wd <- working_directories[storage_settings]
+hd <- function(settings){
+  # make sure home directory is directry that includes  R folder and the data foder.
+  setup_settings <<- settings
+  home_directories <- c("/nobackup/users/stuurman","C:/Users/KNMI/Dropbox/KNMI/R_SPQJ")
+  home_directory <<- home_directories[settings]
+  folder_structures <- c("/", "/")
+  folder_structure <<- folder_structures[settings]
+  setwd(home_directory)
+  print(paste("setup_settings:", settings, sep="  "))
+  print(paste("home directory:", home_directory, sep=" "))
 }
-home_directory <- getWorkingDirectory(storage_settings)
-setwd(home_directory)
-
-# folder structure
-
-# getFolderStructure <- function(storage_settings){
-#   folder_structures <- c("/", "/")
-#   fs <- folder_structures[storage_settings]
-# return (fs)
-#   } 
-# folder_structure <- getFolderStructure(storage_settings)
