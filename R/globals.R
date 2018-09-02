@@ -6,3 +6,4 @@
 station <- "deBilt"
 debilt<-data.frame("lat"=140802.698, "lon"=456881.8)
 coordinates(debilt)<-~lat+lon
+

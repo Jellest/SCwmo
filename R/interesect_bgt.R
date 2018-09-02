@@ -25,17 +25,17 @@ epsg28992 <- leafletCRS(crsClass = 'L.Proj.CRS', code = 'EPSG:28992',
                         resolutions = resolutions,
                         bounds=   c(-285401.92, 22598.08, 595401.9199999999, 903401.9199999999))
 
-urls<-(c('https://geodata.nationaalgeoregister.nl/tiles/service/wmts/grijs/EPSG:3857/{z}/{x}/{y}.png', 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts/1.0.0/Actueel_ortho25/EPSG:28992/{z}/{x}/{y}.jpeg', 'http://geodata.nationaalgeoregister.nl/tms/1.0.0/brtachtergrondkaart/{z}/{x}/{y}.png'))
+urls<-(c('https://geodata.nationaalgeoregister.nl/tiles/service/wms?', 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts/1.0.0/Actueel_ortho25/EPSG:28992/{z}/{x}/{y}.jpeg', 'http://geodata.nationaalgeoregister.nl/tms/1.0.0/brtachtergrondkaart/{z}/{x}/{y}.png'))
 leaflet(options = leafletOptions(
   crs = epsg28992, 
   minZoom = minZoom, maxZoom = maxZoom)) %>%
   
   addTiles() %>%
   setView(456881.8, 140802.698, zoom = 12) %>%  
+  
+  
   addWMSTiles(baseUrl = urls[1],
               options = WMSTileOptions(format = "image/png", transparent = TRUE),
-              layers= 'Actueel_ortho25',
-              attribution = ""
-  
-  
-)
+              layers= 'brtachtergrondkaart',
+              attribution = "")
+

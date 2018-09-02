@@ -42,6 +42,7 @@ bgt_scheiding_features <- data.frame(lapply(bgt_features_perObject.csv[5], as.ch
 bgt_pand_features <- data.frame(lapply(bgt_features_perObject.csv[6], as.character), stringsAsFactors=FALSE)
 bgt_overigbouwwerk_features <- data.frame(lapply(bgt_features_perObject.csv[7], as.character), stringsAsFactors=FALSE)
 bgt_spoor_features <- data.frame(lapply(bgt_features_perObject.csv[8], as.character), stringsAsFactors=FALSE)
+
 bgt_functioneelgebied_features <- data.frame(lapply(bgt_features_perObject.csv[9], as.character), stringsAsFactors=FALSE)
 
 bgt_features_list <- list(bgt_begroeidterrein_features, bgt_onbegroeidterrein_features, bgt_waterdeel_features, bgt_wegdeel_features, bgt_scheiding_features, bgt_pand_features, bgt_overigbouwwerk_features, bgt_spoor_features, bgt_functioneelgebied_features)
@@ -61,6 +62,10 @@ bgt_begroeidterrein_features[complete.cases(bgt_begroeidterrein_features),]
 
 all_bgt_objects_200m <- data.frame(aws = character(0), feature_type = character(0), has_features = logical(0), features_count = numeric(0), stringsAsFactors = FALSE) 
 
+
+bgt_shape <- assign(paste("BGT", station, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()), envir = .GlobalEnv)
+crs(bgt_shape) <- crs("+init=epsg:28992")
+bgt_objectType_count <- 0
 read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
   bgt_directory <- paste("data", "BGT", sep=folder_structure)
   dir.create(paste(bgt_directory, station, sep=folder_structure), showWarnings = FALSE)
@@ -85,20 +90,28 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
     
     object_name <- readOGR(dsn = raw_data_location, layer = object_name_short, stringsAsFactors=FALSE)
     object_name@data$object_type<- c(object_name_short)
+    crs(object_name) <- crs("+init=epsg:28992")
+    
     object_count <- length(object_name)
     entry_t <- data.frame(aws, object_name_short, TRUE, object_count, stringsAsFactors=FALSE)
     names(entry_t) <- c("aws", "object_type", "has_features", "feature_count")
     rownames(entry_t) <- rowname
     all_bgt_objects_200m <<- rbind(all_bgt_objects_200m, entry_t, stringsAsFactors=FALSE)
-  },
-  error=function(e){
+    
+    # bgt_objectType_count <<- bgt_objectType_count + 1
+    # if(bgt_objectType_count == 1){
+    #   bgt_shape <<- object_name
+    # } else {
+    #   rbind(bgt_shape, object_name)
+    # }
+  }, error=function(e){
     object <- NA
     #remove empty shp
     shp <- paste(raw_shape_file_path, object_name_short, ".shp", sep="")
     dbf <- paste(raw_shape_file_path, object_name_short, ".dbf", sep="")
     prj <- paste(raw_shape_file_path, object_name_short, ".prj", sep="")
     shx <- paste(raw_shape_file_path, object_name_short, ".shx", sep="")
-    file.remove(shp, dbf, prj, shx)
+    #file.remove(shp, dbf, prj, shx)
     
     print(e)
     #enter that object has no features
@@ -112,10 +125,15 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
   )
   return (object_name)
 }
+
 #create list of shape files
 bgt_list <- list()
 bgt_list <- mapply(read_bgt,aws = aws, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list, object_name_short = bgt_objects_shortname_list)
 
+shp_files <- list.files(paste("data", "BGT", station, "raw", sep=folder_structure), pattern = "\\.shp$")
+
 names(bgt_list) <- bgt_objects_shortname_list
 pand_shape <- bgt_list[["pand"]]
 crs(pand_shape)<- CRS("+init=epsg:28992")
+crs(pand_shape)
+crs(bgt_shape)
