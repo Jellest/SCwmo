@@ -3,6 +3,7 @@ library(rgeos)
 library(rgdal)
 library(gdalUtils)
 library(gdata)
+library(sf)
 
 dataset <- "BGT"
 
@@ -62,10 +63,99 @@ bgt_begroeidterrein_features[complete.cases(bgt_begroeidterrein_features),]
 
 all_bgt_objects_200m <- data.frame(aws = character(0), feature_type = character(0), has_features = logical(0), features_count = numeric(0), stringsAsFactors = FALSE) 
 
+bgt_colNames <- c("bgt-functi", "bgt-fysiek", "bgt-type", "bronhouder", "gml_id", "object_type", "plus-fun_1", "plus-fun_2", "plus-funct", "plus-fys_2", "plus-fysie", "plus-sta_1", "plus-sta_2", "plus-statu", "plus-typ_1", "plus-type", "relatieveh", "status")
+bgt.df <- setNames(data.frame(matrix(ncol = 18, nrow = 0), stringsAsFactors = FALSE), bgt_colNames)
+bgt.df <- data.frame(lapply(bgt.df, function(x) if(is.logical(x)) {return(as.character(x))} else { return(x)}), stringsAsFactors=FALSE)
 
-bgt_shape <- assign(paste("BGT", station, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()), envir = .GlobalEnv)
-crs(bgt_shape) <- crs("+init=epsg:28992")
-bgt_objectType_count <- 0
+assign(paste("BGT", station, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list()), data=bgt.df), envir = .GlobalEnv)
+#bgt_shape <- assign(paste("BGT", station, sep="_"), st_sfc(st_polygon(list())))
+
+crs(BGT_deBilt) <- crs("+init=epsg:28992")
+
+
+#
+addColumns <- function(raw_data_location, object_name_short){
+  print("adding columns...")
+  shp <- readOGR(dsn = raw_data_location, layer = object_name_short, stringsAsFactors=FALSE)
+  
+  ## add the different mising columns to proceed later with correct rbind
+  if(object_name_short == "begroeidterreindeel"){
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["plus-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c()
+  } else if(object_name_short == "onbegroeidterreindeel"){
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["plus-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c()
+  } else if(object_name_short == "waterdeel"){
+    shp@data["plus-fysie"] <- c()
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["bgt-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["plus-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c() 
+  } else if(object_name_short == "wegdeel"){
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c() 
+  } else if(object_name_short == "scheiding"){
+    shp@data["plus-fysie"] <- c()
+    shp@data["plus-functplus-fun_1"] <- c()
+    shp@data["plus-fun_2bgt-functi"] <- c()
+    shp@data["bgt-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c()
+  } else if(object_name_short == "pand"){
+    shp@data["plus-fysie"] <- c()
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["plus-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["bgt-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c()
+  } else if(object_name_short == ""){
+    shp@data["plus-fysie"] <- c()
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["plus-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["bgt-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c()
+  } else if(object_name_short == "spoor"){
+    shp@data["plus-fysie"] <- c()
+    shp@data["bgt-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+    shp@data["bgt-type"] <- c()
+  } else if(object_name_short == ""){
+    shp@data["plus-fysie"] <- c()
+    shp@data["plus-funct"] <- c()
+    shp@data["plus-fun_1"] <- c()
+    shp@data["plus-fun_2"] <- c()
+    shp@data["bgt-functi"] <- c()
+    shp@data["bgt-fysiek"] <- c()
+    shp@data["plus-fys_2"] <- c()
+    shp@data["plus-typ_1"] <- c()
+    shp@data["plus-type"] <- c()
+  }
+  shp[ , order(names(shp))]
+  
+return (shp)}
 read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
   bgt_directory <- paste("data", "BGT", sep=folder_structure)
   dir.create(paste(bgt_directory, station, sep=folder_structure), showWarnings = FALSE)
@@ -87,23 +177,25 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
   object <- tryCatch({
     ogr2ogr(src_datasource_name = wfs    , dst_datasource_name = shape_file, layer = bgt_object_name, overwrite = TRUE)
     
-    
     object_name <- readOGR(dsn = raw_data_location, layer = object_name_short, stringsAsFactors=FALSE)
     object_name@data$object_type<- c(object_name_short)
     crs(object_name) <- crs("+init=epsg:28992")
+    #proj4string(object_name) <- CRS("+init=epsg:28992")
     
+    #rbind
+    object_name <- addColumns(raw_data_location, object_name_short)
+    crs(object_name) <- crs("+init=epsg:28992")
+    print(crs(object_name))
+    print(str(BGT_deBilt))
+    print(crs(BGT_deBilt))
+    rbind(BGT_deBilt, object_name, makeUniqueIDs = TRUE)
+
     object_count <- length(object_name)
     entry_t <- data.frame(aws, object_name_short, TRUE, object_count, stringsAsFactors=FALSE)
     names(entry_t) <- c("aws", "object_type", "has_features", "feature_count")
     rownames(entry_t) <- rowname
     all_bgt_objects_200m <<- rbind(all_bgt_objects_200m, entry_t, stringsAsFactors=FALSE)
     
-    # bgt_objectType_count <<- bgt_objectType_count + 1
-    # if(bgt_objectType_count == 1){
-    #   bgt_shape <<- object_name
-    # } else {
-    #   rbind(bgt_shape, object_name)
-    # }
   }, error=function(e){
     object <- NA
     #remove empty shp
@@ -128,9 +220,9 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
 
 #create list of shape files
 bgt_list <- list()
-bgt_list <- mapply(read_bgt,aws = aws, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list, object_name_short = bgt_objects_shortname_list)
+bgt_list <- mapply(read_bgt,aws = aws, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list[1], object_name_short = bgt_objects_shortname_list[1])
 
-shp_files <- list.files(paste("data", "BGT", station, "raw", sep=folder_structure), pattern = "\\.shp$")
+bgt_shp_files <- list.files(paste("data", "BGT", station, "raw", sep=folder_structure), pattern = "\\.shp$")
 
 names(bgt_list) <- bgt_objects_shortname_list
 pand_shape <- bgt_list[["pand"]]
