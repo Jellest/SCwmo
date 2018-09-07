@@ -22,17 +22,17 @@ map <- leaflet(options = leafletOptions(
   , crs = RD_New
   )) %>%
   setView(5.2, 52.4990065, zoom = 1) %>%
-  addTiles(basemap_rd, group="BRT") %>%
-  addMouseCoordinates %>%
-  addWMSTiles(
-    "https://geodata.nationaalgeoregister.nl/ahn2/wms?"
-    , layers = "ahn2_05m_ruw"
-    , options = WMSTileOptions(format = "image/png", transparent = F, crs = leafletCRS(crsClass = 'L.Proj.CRS', code = 'EPSG:28992',
-                                                                                       proj4def = '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs',
-                                                                                       resolutions = resolutions
-                                                                                       , bounds = c(-285401.92, 22598.08, 595401.9199999999, 903401.9199999999)))
-    , group = "AHN2"
-  ) %>%
+  addTiles(old, group="BRT") %>%
+  addMouseCoordinates() %>%
+  # addWMSTiles(
+  #   "https://geodata.nationaalgeoregister.nl/ahn2/wms?"
+  #   , layers = "ahn2_05m_ruw"
+  #   , options = WMSTileOptions(format = "image/png", transparent = F, crs = leafletCRS(crsClass = 'L.Proj.CRS', code = 'EPSG:28992',
+  #                                                                                      proj4def = '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs',
+  #                                                                                      resolutions = resolutions
+  #                                                                                      , bounds = c(-285401.92, 22598.08, 595401.9199999999, 903401.9199999999)))
+  #   , group = "AHN2"
+  #) %>%
   addLayersControl(
      baseGroups = c("BRT"),
      overlayGroups = c("AHN2"),
