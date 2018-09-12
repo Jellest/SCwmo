@@ -5,26 +5,42 @@ library(gdalUtils)
 library(gdata)
 library(sf)
 
-dataset <- "BGT"
+#aws station
+station <- "De Bilt"
+getAWS_name <- function (aws){
+  aws_name_untrimmed <- AWS.df$AWS[which(AWS.df$AWS == aws)][1]
+  if(is.na(aws_name_untrimmed) == TRUE) {
+    aws_name <- stop(paste("No aws station found with the following name:", aws))
+  } else{
+    aws_name <- gsub(" ", "", aws_name_untrimmed)
+  }
+return (aws_name)}
 
-#De Bilt
-aws <- "deBilt"
-debilt<-data.frame("lat"=140802.698, "lon"=456881.8)
-coordinates(debilt)<-~lat+lon
-crs(debilt)<- CRS("+init=epsg:28992")
+rd_new_CRS <- CRS("+init=epsg:28992")
+wgs_CRS <- CRS("+init=epsg:28992")
+aws_name <- getAWS_name("De Bilt")
+
+aws_debilt_wgs.sp <- data.frame("lat"= subset(AWS.df, AWS == station & Sensor == "site")$LAT, "lon"=subset(AWS.df, AWS == station & Sensor == "site")$LON) 
+coordinates(aws_debilt_wgs.sp)<-~lon+lat
+crs(aws_debilt_wgs.sp)<- CRS("+init=epsg:4326")
+
+aws_debilt_rd.sp <- spTransform(aws_debilt_wgs.sp, CRS= CRS("+init=epsg:28992"))
 
 #create 200 meter buffer arouond sensor
-surroundingBuffer <- buffer(debilt,width=200) #since RDcoords are in meters width is also in m
+surroundingBuffer <- buffer(aws_debilt_rd.sp,width=200)
 
 #get BBOX extent of buffer area
 surroundingExtent <- extent(surroundingBuffer)
 
 #create WFS string
-bgt_wfsBaseUrl <- "https://geodata.nationaalgeoregister.nl/beta/bgt/wfs?request=getcapabilities"
-my_EPSG <- "EPSG:28992"
-my_bbox <- paste(toString(surroundingExtent@xmin), toString(surroundingExtent@ymin), toString(surroundingExtent@xmax), toString(surroundingExtent@ymax), sep=",")
-bgt_wfs <- paste("WFS:", bgt_wfsBaseUrl, "&SRSNAME=", my_EPSG, "&BBOX=", my_bbox, sep="")
+createWFS_string <- function(WFSbase_url, epsg, bbox){
+  bgt_wfs <- paste("WFS:", WFSbase_url, "&SRSNAME=", epsg, "&BBOX=", bbox, sep="")
+return (bgt_wfs)}
 
+bgt_wfs <- createWFS_string(WFSbase_url = "https://geodata.nationaalgeoregister.nl/beta/bgt/wfs?request=getcapabilities" 
+                , epsg = "EPSG:28992"
+                , bbox = paste(toString(surroundingExtent@xmin), toString(surroundingExtent@ymin), toString(surroundingExtent@xmax), toString(surroundingExtent@ymax), sep=",")
+                )
 #xls_location <- paste(home_directory, wmoSC,data-raw, " bgt_names_features.xlsx", sep= folder_structure)
 #bgt_objects.xlsx <- read.xls(xls_location[setup_settings], sheet="bgt_objects")
 
@@ -67,7 +83,6 @@ bgt_colNames <- c("bgt-functi", "bgt-fysiek", "bgt-type", "bronhouder", "gml_id"
 bgt.df <- setNames(data.frame(matrix(ncol = 19, nrow = 0), stringsAsFactors = FALSE), bgt_colNames)
 bgt.df <- data.frame(lapply(bgt.df, function(x) if(is.logical(x)) {return(as.character(x))} else { return(x)}), stringsAsFactors=FALSE)
 
-#assign(paste("BGT", station, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list()), data=bgt.df), envir = .GlobalEnv)
 #bgt_shape <- assign(paste("BGT", station, sep="_"), st_sfc(st_polygon(list())))
 
 #crs(BGT_deBilt) <- crs("+init=epsg:28992")
@@ -216,18 +231,21 @@ adjustColumns <- function(raw_data_location, object_name_short){
   return (shp)
 }
 
-bg_counter <- 0
-read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
+bgt_counter <- 0
+read_bgt<-function(aws_name, wfs, bgt_object_name, object_name_short){
   bgt_directory <- paste("data", "BGT", sep=folder_structure)
-  dir.create(paste(bgt_directory, station, sep=folder_structure), showWarnings = FALSE)
-  working_directory <- paste(bgt_directory, station, sep=folder_structure)
+  dir.create(paste(bgt_directory, aws_name, sep=folder_structure), showWarnings = FALSE)
+  working_directory <- paste(bgt_directory, aws_name, sep=folder_structure)
   dir.create(paste(working_directory, "raw", sep=folder_structure), showWarnings = FALSE)
   dir.create(paste(working_directory, "selections", sep=folder_structure), showWarnings = FALSE)
   
   object_name <- paste("object", object_name_short, sep="_")
   object <- assign(object_name, SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame()))
-  rowname <- paste(aws,object_name_short,sep="_")
+  
+  rowname <- paste(aws_name,object_name_short,sep="_")
+  print(" ")
   print(rowname)
+  
   
   raw_data_location <- paste(working_directory, "raw", sep=folder_structure)
   print(paste("raw data location: ", raw_data_location, sep=""))
@@ -251,21 +269,20 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
     bgt_counter <<- bgt_counter + 1
     
     if(bgt_counter == 1){
-      print("in 1")
+      #print("in 1")
       #print(length(object_name))
-      BGT_station.sdf <<- object_name
+      BGT_station.sp <<- object_name
       #print(length(BGT_shape))
     } else {
-      print("in >1")
+      #print("in >1")
       print(paste("length new object:",length(object_name), sep=" "))
-      print(paste("length BGT:",length(BGT_station.sdf), sep=" "))
+      print(paste("length BGT:",length(BGT_station.sp), sep=" "))
       
-      
-      BGT_station.sdf <<- rbind(BGT_station.sdf, object_name, makeUniqueIDs = TRUE)
-      print(paste("new length BGT:",length(BGT_station.sdf), sep=" "))
+      BGT_station.sp <<- rbind(BGT_station.sp, object_name, makeUniqueIDs = TRUE)
+      print(paste("new length BGT:",length(BGT_station.sp), sep=" "))
     }
     object_count <- length(object_name)
-    entry_t <- data.frame(aws, object_name_short, TRUE, object_count, stringsAsFactors=FALSE)
+    entry_t <- data.frame(aws_name, object_name_short, TRUE, object_count, stringsAsFactors=FALSE)
     names(entry_t) <- c("aws", "object_type", "has_features", "feature_count")
     rownames(entry_t) <- rowname
     all_bgt_objects_200m <<- rbind(all_bgt_objects_200m, entry_t, stringsAsFactors=FALSE)
@@ -282,30 +299,33 @@ read_bgt<-function(aws, wfs, bgt_object_name, object_name_short){
     
     print(e)
     #enter that object has no features
-    entry_f <- data.frame(aws, object_name_short, FALSE, 0, stringsAsFactors=FALSE)
+    entry_f <- data.frame(aws_name, object_name_short, FALSE, 0, stringsAsFactors=FALSE)
     names(entry_f) <- c("aws", "object_type", "has_features", "feature_count")
     rownames(entry_f) <- rowname
     all_bgt_objects_200m <<- rbind(all_bgt_objects_200m, entry_f, stringsAsFactors=FALSE)
-    message(paste("No features found for", object_name_short, "in", aws, sep=" "))
+    message(paste("No features found for", object_name_short, "in", aws_name, sep=" "))
     object_name <- NA
   }
   )
   
   if(bgt_counter == length(bgt_objects_name_list)){
     shp_name <- paste("BGT", station, sep="_")
-    writeOGR(obj = BGT_station.sdf, dsn = working_directory, layer = shp_name, driver = "ESRI Shapefile", overwrite_layer = TRUE)
-    remove(BGT_station.sdf)
+    BGT_station.sp$AREA <-sapply(slot(BGT_station.sp, 'polygons'), function(i) slot(i, 'area')) 
+    writeOGR(obj = BGT_station.sp, dsn = working_directory, layer = shp_name, driver = "ESRI Shapefile", overwrite_layer = TRUE)
+    BGT_station.sf <<- st_as_sf(BGT_station.sf)
   }
-  return (object_name)
 }
 
-#create list of shape files
+#read BGt and create one BGT shp for the aws.
 bgt_counter <- 0
-remove(BGT_station.sdf)
-bgt_list <- list()
-bgt_list <- mapply(read_bgt,aws = aws, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list, object_name_short = bgt_objects_shortname_list)
+mapply(read_bgt,aws_name = aws_name, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list, object_name_short = bgt_objects_shortname_list)
+ 
 
-bgt_shp_files <- list.files(paste("data", "BGT", station, "raw", sep=folder_structure), pattern = "\\.shp$")
+#assign(paste("BGT", aws_name, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list(BGT_station.sp)), data=BGT_station.sp), envir = .GlobalEnv)
+bgt_counter <- 0
+
+
+bgt_shp_files <- list.files(paste("data", "BGT", aws_name, "raw", sep=folder_structure), pattern = ".shp")
 
 names(bgt_list) <- bgt_objects_shortname_list
 pand_shape <- bgt_list[pand]

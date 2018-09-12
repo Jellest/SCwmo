@@ -14,4 +14,3 @@ hd <- function(settings){
   print(paste("setup_settings:", settings, sep="  "))
   print(paste("home directory:", home_directory, sep=" "))
 }
-hd(2)
