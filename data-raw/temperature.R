@@ -57,5 +57,7 @@ createTemperatureVars <- function(){
 createTemperatureVars()
 
 temperature_criteria.df <-fread("wmoSC/data-raw/temperature_criteria.csv")
+rownames(temperature_criteria.df)<-temperature_criteria.df$AWS
+
 temperature_criteria.df <- data.frame(temperature_criteria.df, row.names=unlist(temperature_criteria.df[,1]))
 rownames(temperature_criteria.df) <- gsub(" ", "", rownames(temperature_criteria.df))
