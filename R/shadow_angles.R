@@ -57,9 +57,9 @@ shadow_angles<-function(spatialpoint,
   
   return(list("st"=st,"df"=deBilt))
 }
-deBilt.df<-AWS.df[which(AWS.df$DS_NAME == "De Bilt"),]
+deBilt.df<-AWS.df[which(AWS.df$AWS == "De Bilt"),]
 deBilt.sp<-data.frame(deBilt.df)
-coordinates(deBilt.sp) <- ~DS_LON+DS_LAT
-crs(deBilt.sp)<-CRS("+init=epsg:4326")
-deBilt.rd <- spTransform(x = deBilt.sp, CRS = crs(ahn2_deBilt))
+coordinates(deBilt.sp) <- ~X+Y
+crs(deBilt.sp)<-CRS("+init=epsg:28992")
+#deBilt.rd <- spTransform(x = deBilt.sp, CRS = crs(ahn2_deBilt))
 shadow_angles(spatialpoint = deBilt.rd  , ahn2_deBilt, 10, 100)
