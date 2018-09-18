@@ -313,6 +313,7 @@ read_bgt<-function(aws_name, wfs, bgt_object_name, object_name_short){
     BGT_station.sp$AREA <-sapply(slot(BGT_station.sp, 'polygons'), function(i) slot(i, 'area')) 
     writeOGR(obj = BGT_station.sp, dsn = working_directory, layer = shp_name, driver = "ESRI Shapefile", overwrite_layer = TRUE)
     BGT_station.sf <<- st_as_sf(BGT_station.sp)
+    st_crs(BGT_station.sf, "+init=epsg:28992")
   }
 }
 
@@ -324,6 +325,11 @@ mapply(read_bgt,aws_name = aws_name, wfs = bgt_wfs, bgt_object_name = bgt_object
 #assign(paste("BGT", aws_name, sep="_"), SpatialPolygonsDataFrame(SpatialPolygons(list(BGT_station.sp)), data=BGT_station.sp), envir = .GlobalEnv)
 bgt_counter <- 0
 
+
+
+
+
+################################
 
 bgt_shp_files <- list.files(paste("data", "BGT", aws_name, "raw", sep=folder_structure), pattern = ".shp")
 

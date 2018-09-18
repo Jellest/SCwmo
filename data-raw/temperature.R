@@ -7,7 +7,7 @@ createTemperatureVars <- function(){
   V_Temp_slope_ct <- c(19, 19, NA, NA, NA) 
   V_Temp_slope <<- data.frame(class=1:5, criteria=V_Temp_slope_ct)
   
-  V_Temp_openSpace_ct <- c(100, 30, NA, NA, NA)
+  V_Temp_openSpace_ct <- c(100, 30, 10, NA, NA)
   V_Temp_openSpace <<- data.frame(class=1:5, criteria=V_Temp_openSpace_ct)
   
   V_Temp_vege_ct <- c(10, 10, 25, NA, NA)
@@ -56,8 +56,8 @@ createTemperatureVars <- function(){
 }
 createTemperatureVars()
 
-temperature_criteria.df <-fread("wmoSC/data-raw/temperature_criteria.csv")
-rownames(temperature_criteria.df)<-temperature_criteria.df$AWS
+temperature_criteria.df <- AWS.df[c(1,4)]
+temperature_criteria.df <- temperature_criteria.df[-(1:10), ]
 
-temperature_criteria.df <- data.frame(temperature_criteria.df, row.names=unlist(temperature_criteria.df[,1]))
-rownames(temperature_criteria.df) <- gsub(" ", "", rownames(temperature_criteria.df))
+#data.frame(temperature_criteria.df, row.names=unlist(temperature_criteria.df[,1]))
+#rownames(temperature_criteria.df) <- gsub(" ", "", rownames(temperature_criteria.df))
