@@ -75,31 +75,67 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
     temperature_criteria.df[selected_aws,sumObjectAreasColName] <- 0
     temperature_criteria.df[selected_aws,relAreaColName] <- 0
   } else {
-    ##Calculate Area outer buffer
-    area <- st_area(artificial_objects.sf)
-    units::set_units(area, m^2)
-    sum_area <- sum(area)
-    print(sum_area)
-    temperature_criteria.df[selected_aws,sumObjectAreasColName] <- sum_area
+    ##Calculate area objects outer buffer
+    area_objects_outer_buffer <- st_area(artificial_objects.sf)
+    units::set_units(area_objects_outer_buffer, m^2)
+    sum_area_objects_outer_buffer <- sum(area_objects_outer_buffer)
+    temperature_criteria.df[selected_aws,sumObjectAreasColName] <- sum_area_objects_outer_buffer
     
-    relArea <- sum_area / area_outer_buffer
-    temperature_criteria.df[selected_aws,relAreaColName] <- relArea 
+    relArea_outer_buffer <- sum_area_objects_outer_buffer / area_outer_buffer
+    temperature_criteria.df[selected_aws,relAreaColName] <- relArea_outer_buffer 
     if(outer_buffer_dist == 100 | outer_buffer_dist  == 30){
-      ##intersection annuulus
+      ##select annnulus region
       if(outer_buffer_dist == 100){
         region <- "10-30"
       } else if(outer_buffer_dist == 30){
         region <- "5-10"
       }
-    annulus <- createAnnulus(coords.sf, region)
-    annulus_insct.sf <- st_intersection(bgt_shape, annulus)
+      
+      #create annulus
+      annulus <- createAnnulus(coords.sf, region)
+      
+      #intersection annulus
+      annulus_insct.sf <- st_intersection(bgt_shape, annulus)
+
+      #count amount of objects annulus
+      temperature_criteria.df[selected_aws,objectCountColName] <- nrow(annulus_insct.sf)
+      
+      #calcuate area
+      area_annulus <- st_area(outer_buffer)
+      units::set_units(area_annulus, m^2)
+      
+      area_objects_annulus <- st_area(annulus_insct.sf)
+      units::set_units(area_objects_annulus, m^2)
+      sum_area_objects_annulus <- sum(area_objects_annulus)
+      relArea_annulus <- area_objects_annulus / area_annulus
+      
+      temperature_criteria.df[selected_aws,relAreaColName] <- relArea_annulus 
     }
     
-    ##create inner buffer and calculate area
+    ##create inner buffer, intersect and calculate area
+    #craete inner buffer
     inner_buffer <- createBuffer(coords.sf, inner_buffer_dist)
+    
+    #intersect inner buffer inner buffer
+    inner_buffer_insct.sf <- st_intersection(bgt_shape, inner_buffer)
+    
+    #count amount of objects
+    temperature_criteria.df[selected_aws,objectCountColName] <- nrow(inner_buffer_insct.sf)
+    
+    #calculate area
     area_inner_buffer <- st_area(inner_buffer)
     units::set_units(area_outer_buffer, m^2)
+    
+    area_objects_inner_buffer <- st_area(inner_buffer_insct.sf)
+    units::set_units(area_objects_inner_buffer, m^2)
+    sum_area_objects_inner_buffer <- sum(area_objects_inner_buffer)
+    
+    relArea_inner_buffer <- area_objects_inner_buffer / area_inner_buffer
+    temperature_criteria.df[selected_aws,relAreaColName] <- relArea_inner_buffer 
   }
+  
+  
+  
   # View(artificial_objects.sf)
   # View(temperature_criteria.df)
   
