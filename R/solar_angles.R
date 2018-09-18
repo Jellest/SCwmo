@@ -18,17 +18,26 @@ library(lubridate)
 solar_angles<-function(lon, lat, elv, julian_day){
   requireNamespace("insol")
   
-  
-  # sun_vector <- sunvector(julian_day,lat,lon,1)
-  scatterplot3d(sun_vector)
-  sun_position <- sunpos(sun_vector)
 
-  #columns LAT LON ELV JD SUNPOS SUNVECTOR
+  
+  sun_vector <- sunvector(julian_day,lat,lon,1)
+  sun_position <- sunpos(sun_vector)
+  summary(sun_position)
+  
+  
   df <- cbind(lat, lon,  elv, julian_day, sun_position)
+  #df["altitude"] <- 90 - df["zenith"]
   return(df)
 }
-juneday <- JD(seq(ISOdate(2012,6,21,0),ISOdate(2012,6,21,23,30),by='60 min'))
-angles <- solar_angles(lon = aws_debilt_rd.sp@coords[,"lon"],
-                       lat = aws_debilt_rd.sp@coords[,"lat"], elv= 42.70, julian_day = juneday)
-plot(angles)
+intervals <- JD(seq(ISOdate(2017,01,01,0),ISOdate(2017,12,31,23),by='60 min'))
+angles <- solar_angles(lon = aws_debilt_wgs.sp@coords[,"lon"],
+                       lat = aws_debilt_wgs.sp@coords[,"lat"],
+                       elv= 42.70,
+                       julian_day = intervals)
+altitudeangle <- function(sunposition){
+  altitude_angle <- 90 - sunposition["zenith"]
+  sunposition["altitude"] <- altitude_angle
+  return (sunposition)}
 
+sapply(angles, altitudeangle)
+plot()
