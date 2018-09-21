@@ -19,9 +19,21 @@ devtools::use_data(AWS_wgs.sp,overwrite=TRUE)
 devtools::use_data(AWS_rd.sp,overwrite=TRUE)
 
 #ahn2 de bilt
-ahn2_deBilt<-stack("data/AHN2/deBilt/raw/r32cn1.tif")
-proj4string(ahn2_deBilt)<-CRS("+init=epsg:28992") 
-devtools::use_data(ahn2_deBilt,overwrite = TRUE)
+#raw
+ahn2_deBilt_sheet_raw<-stack("data/AHN2/deBilt/raw/r32cn1.tif")
+proj4string(ahn2_deBilt_sheet_raw)<-CRS("+init=epsg:28992") 
+devtools::use_data(ahn2_deBilt_raw,overwrite = TRUE)
+#terrain
+ahn2_deBilt_sheet_terrain<-stack("data/AHN2/deBilt/terrain/i32cn1.tif")
+proj4string(ahn2_deBilt_sheet_terrain)<-CRS("+init=epsg:28992") 
+
+#combine layers
+ahn2_DeBilt_sheet <- stack(ahn2_deBilt_sheet_raw, ahn2_deBilt_sheet_terrain)
+
+#LGN7
+lgn7 <- stack("data/LGN7/LGN7.tif") 
+proj4string(lgn7)<-CRS("+init=epsg:28992") 
+lgn7_codes <- fread("data/LGN7/LGN7_codes.csv")
 # AWS.RD<-spTransform(AWS.sp,CRS("+init=epsg:28992"))
 
 #CBS bodemkaart
