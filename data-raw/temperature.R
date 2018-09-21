@@ -56,8 +56,6 @@ createTemperatureVars <- function(){
 }
 createTemperatureVars()
 
-temperature_criteria.df <- AWS.df[c(1,4)]
-temperature_criteria.df <- temperature_criteria.df[-(1:10), ]
 
 #data.frame(temperature_criteria.df, row.names=unlist(temperature_criteria.df[,1]))
 #rownames(temperature_criteria.df) <- gsub(" ", "", rownames(temperature_criteria.df))

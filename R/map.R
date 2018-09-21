@@ -18,7 +18,7 @@ map <- leaflet() %>%
   addMouseCoordinates  %>%
   addLayersControl(
     baseGroups = c("BRT", "BRT Gray", "Satellite"),
-    overlayGroups = c("AWS", " buildings"),
+    overlayGroups = c("AWS", "buildings"),
     options = layersControlOptions(collapsed = TRUE)) %>%
   addMeasure(
     position = "bottomleft",
@@ -29,5 +29,5 @@ map <- leaflet() %>%
 
 map %>% setView(5.177565, 52.099006, zoom = 15)
 
-
+ahn2_raw_wgs <- st_transform(ahn2_deBilt_raw, "+init=epsg:4326")
 View(buildings.sf)
