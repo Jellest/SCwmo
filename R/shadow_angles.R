@@ -39,27 +39,28 @@ shadow_angles<-function(spatialpoint,
   #   return(FALSE)
   # }  
 
-  deBilt_mask<-raster::buffer(spatialpoint,width=maxDist)
+  aws_mask<-raster::buffer(spatialpoint,width=maxDist)
   
   
-  ahn2_crop<-raster::crop(rastergrid,deBilt_mask)
-  ahn2_mask<-raster::mask(ahn2_crop,deBilt_mask)
+  ahn2_crop<-raster::crop(rastergrid,aws_mask)
+  ahn2_mask<-raster::mask(ahn2_crop,aws_mask)
   message("Masked the raster object, going to calculate horizon angles...")
-  horizon_grid<-horizon::horizonSearch(x = ahn2_mask,  
+  horizon_grid<<-horizon::horizonSearch(x = ahn2_mask,  
                                        degrees= TRUE,
                                        maxDist = maxDist, 
                                        azimuth = angle,
                                        ll=FALSE)
-  st<-raster::stack(ahn2_mask,horizon_grid)
+  st<<-raster::stack(ahn2_mask,horizon_grid)
   names(st)<-c("height","azimuth")
   ahn2<-extract(x = st, y = spatialpoint, method='bilinear')
-  deBilt<-cbind(debilt,ahn2)
+  aws<-cbind(deBilt.df,ahn2)
   
-  return(list("st"=st,"df"=deBilt))
+  return(list("st"=st,"df"=aws))
 }
-deBilt.df<-AWS.df[which(AWS.df$AWS == "De Bilt"),]
+
+deBilt.df<-AWS.df[which(AWS.df$AWS == "De Bilt" & AWS.df$Sensor == "site"),]
 deBilt.sp<-data.frame(deBilt.df)
 coordinates(deBilt.sp) <- ~X+Y
 crs(deBilt.sp)<-CRS("+init=epsg:28992")
 #deBilt.rd <- spTransform(x = deBilt.sp, CRS = crs(ahn2_deBilt))
-shadow_angles(spatialpoint = deBilt.rd  , ahn2_deBilt, 10, 100)
+ok<- shadow_angles(spatialpoint = deBilt.sp  , ahn2_deBilt_raw, angle = 0, maxDist = 300)
