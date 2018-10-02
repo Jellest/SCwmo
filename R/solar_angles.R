@@ -74,7 +74,7 @@ for (m in 2:7){
 
 above_horizon_solar_angles <- subset(all_solar_angles, elevation >0)
 
-ggplot(above_horizon_solar_angles, aes(x=azimuth, y=elevation, group.by=julian_day))+geom_line()
+ggplot(above_horizon_solar_angles, aes(x=azimuth, y=elevation), group=julian_day)+geom_line()
 
 plot(month_all_solar_angles[[1]]$azimuth, month_all_solar_angles[[1]]$elevation, type="l", xlim=c(0,360), ylim=c(0,70), xlab="azimuth", ylab="elevation")
 for (p in 2:length(month_solar_angles)){
