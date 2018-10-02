@@ -221,9 +221,20 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
   
 return(temperature_criteria.df)}
 
+
+
+selectSensor_row <- function (sensor_name, aws){
+  selectedRow <- aws[which(Sensor == sensor_name)]
+  if(nrow(selectedRow) == 0 | nrow(selectedRow) > 1){
+    selectedRow <- aws[which(Sensor == "site")]
+  }  
+return (selectedRow)}
+
+
 temperature_landuse_criteria.df <- AWS.df[c(1,4)]
-temperature_landuse_criteria.df <- temperature_landuse_criteria.df[-(1:10), ]
-temperature_landuse_criteria.df <- clip_bgt("De Bilt", aws_debilt_rd.sp, BGT_station.sf,1, temperature_landuse_criteria.df)
+temperature_landuse_criteria.df <- selectSensor_row("temp_150cm", AWS.df)[,c(1,5)]
+#temperature_landuse_criteria.df <- temperature_landuse_criteria.df[-(1:10), ]
+temperature_landuse_criteria.df <- clip_bgt("De Bilt", aws_debilt_rd.sp, BGT_station.sf,class = 1, temperature_landuse_criteria.df)
 
 
 addFeatures(map, coords_wgs.sf, group="AWS")
