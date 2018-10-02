@@ -17,7 +17,7 @@ library(ggplot2)
 #'solar_angles(jd=seq(1,20,by=0.1)) #for the first 20 days with an accuracy of approximately 2.5 hours
 #'@return dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,... 
 #'@export
-solar_angles<-function(lon, lat, altitude, julian_day){
+solar_angles<-function(aws, sensor, lon, lat, altitude, julian_day){
   requireNamespace("insol")
   
   sun_vector <- sunvector(julian_day,lat,lon,1)
@@ -27,8 +27,8 @@ solar_angles<-function(lon, lat, altitude, julian_day){
   m <- cbind(lat, lon,  altitude, julian_day, sun_position)
   df <- data.frame(m)
   df$elevation <- 90 - df$zenith
-  df_ah <- subset(df, zenith < 90)
-  
+  df$aws <- aws
+  df$sensor <- sensor
   return(list("all_angles"= df))
 }
 
@@ -51,20 +51,24 @@ julian_day_hour <- function(year,month,day, s_hour, f_hour){
 }
 
 month_all_solar_angles <- list()
-all_solar_angles <-  data.frame(lon = numeric(0), lat = numeric(0), altitude = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0))
+all_solar_angles <-  data.frame(aws = character(0), sensor = character(0), lon = numeric(0), lat = numeric(0), altitude = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0), stringsAsFactors = FALSE)
 
 
-month_all_solar_angles[[1]] <- data.frame(solar_angles(lon = aws_debilt_wgs.sp@coords[,"lon"],
-                                                   lat = aws_debilt_wgs.sp@coords[,"lat"],
-                                                   altitude = 42.70,
-                                                   julian_day = julian_day_hour(2017, 12, 21))[["all_angles"]])
+month_all_solar_angles[[1]] <- data.frame(solar_angles(aws = aws,
+                                                       sensor = "temp_150cm",
+                                                       lon = aws_debilt_wgs.sp@coords[,"lon"],
+                                                       lat = aws_debilt_wgs.sp@coords[,"lat"],
+                                                       altitude = 42.70,
+                                                       julian_day = julian_day_hour(2017, 12, 21))[["all_angles"]], stringsAsFactors = FALSE)
 
 all_solar_angles <- rbind(all_solar_angles, month_all_solar_angles[[1]])
 for (m in 2:7){
-  month_all_solar_angles[[m]] <- data.frame(solar_angles(lon = aws_debilt_wgs.sp@coords[,"lon"],
-                                                     lat = aws_debilt_wgs.sp@coords[,"lat"],
-                                                     altitude = 42.70,
-                                                     julian_day = julian_day_hour(2017, m-1, 21))[["all_angles"]]) 
+  month_all_solar_angles[[m]] <- data.frame(solar_angles(aws = aws,
+                                                         sensor = "temp_150cm",
+                                                         lon = aws_debilt_wgs.sp@coords[,"lon"],
+                                                         lat = aws_debilt_wgs.sp@coords[,"lat"],
+                                                         altitude = 42.70,
+                                                         julian_day = julian_day_hour(2017, m-1, 21))[["all_angles"]]) 
   all_solar_angles <- rbind(all_solar_angles, month_all_solar_angles[[m]])
   }
 
