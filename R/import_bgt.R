@@ -18,7 +18,8 @@ return (aws_name)}
 
 rd_new_CRS <- CRS("+init=epsg:28992")
 wgs_CRS <- CRS("+init=epsg:4326")
-aws_name <- getAWS_name("De Bilt")
+aws <- "De Bilt"
+aws_name <- getAWS_name(aws)
 
 aws_debilt_wgs.sp <- data.frame("lat"= subset(AWS.df, AWS == station & Sensor == "site")$LAT, "lon"=subset(AWS.df, AWS == station & Sensor == "site")$LON) 
 coordinates(aws_debilt_wgs.sp)<-~lon+lat
