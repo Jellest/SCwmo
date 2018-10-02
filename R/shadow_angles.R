@@ -122,7 +122,7 @@ deBilt.df<-selectSensor_row("temp_150cm", AWS.df)
 deBilt.sp<-data.frame(deBilt.df)
 coordinates(deBilt.sp) <- ~X+Y
 crs(deBilt.sp)<-CRS("+init=epsg:28992")
-ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_deBilt_raw, distance = 300)
+ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_deBilt_sheet_raw, distance = 300)
 
 ah_azimuths <- above_horizon_solar_angles$azimuth
 
