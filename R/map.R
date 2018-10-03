@@ -18,7 +18,7 @@ map <- leaflet() %>%
   addMouseCoordinates  %>%
   addLayersControl(
     baseGroups = c("BRT", "BRT Gray", "Satellite"),
-    overlayGroups = c("AWS", "buildings"),
+    #overlayGroups = c("buildings", "water", "roads"),
     options = layersControlOptions(collapsed = TRUE)) %>%
   addMeasure(
     position = "bottomleft",
@@ -28,6 +28,14 @@ map <- leaflet() %>%
     completedColor = "#7D4479")
 
 map %>% setView(5.177565, 52.099006, zoom = 15)
+# map %>% addFeatures(buildings_wgs.sf, weight = 0.7, color="black", fillColor = "red", opacity = 1, fillOpacity = 0.6) %>%
+#   addFeatures(roads_wgs.sf, weight = 0.7, color="black", fillColor = "grey", opacity = 1, fillOpacity = 0.6) %>%
+#   addFeatures(water_wgs.sf, weight = 0.7, color="black", fillColor = "blue", opacity = 1, fillOpacity = 0.6)
+map %>% addRasterImage(ahn_mask, opacity = 1)
 
 ahn2_raw_wgs <- st_transform(ahn2_deBilt_raw, "+init=epsg:4326")
 View(buildings.sf)
+
+buildings_wgs.sf <- st_transform(buildings.sf, "+init=epsg:4326")
+roads_wgs.sf <- st_transform(raods.sf, "+init=epsg:4326")
+water_wgs.sf <- st_transform(water.sf, "+init=epsg:4326") 

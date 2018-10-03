@@ -40,7 +40,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
     }
     
     #column names
-    meet_classNr <- paste("meetClass_", class, sep="") 
+    meet_classNr <- paste("meetClass_", toString(class), sep="") 
     
     outer_objectCountColName <- paste("objectCount_",as.character(outer_buffer_dist),"m", sep="")
     outer_sumObjectAreasColName <- paste("sumObjectAreas_",as.character(outer_buffer_dist),"m", sep="")
@@ -91,9 +91,12 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
       st_agr(objects_bgt) = "constant"
       st_agr(outer_buffer) = "constant"
       
-      shape_insct.sf <- st_intersection(objects_bgt, outer_buffer)
+      shape_insct.sf <<- st_intersection(objects_bgt, outer_buffer)
       st_crs(shape_insct.sf, "+init=epsg:28992")
-      artificial_objects.sf <- subset(shape_insct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
+      artificial_objects.sf <<- subset(shape_insct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
+      buildings.sf <<- subset(shape_insct.sf, object_typ == "pand")
+      water.sf <<- subset(shape_insct.sf, object_typ == "waterdeel")
+      raods.sf <<- subset(shape_insct.sf, object_typ == "wegdeel")
       #units::set_units(shape_insct.sf, m^2)
       
       selected_aws_row <- which(temperature_criteria.df == aws_name)
@@ -211,12 +214,12 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
         }
       }
     
-      if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
-        new_classNr <- class +1
-        clip_bgt("De Bilt", aws_debilt_rd.sp, BGT_station.sf,new_classNr, temperature_criteria.df)
-      } else{
-        message("BGT clip passed class criteria ", as.character(class))
-      }
+      # if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
+      #   new_classNr <- class + 1
+      #   clip_bgt("De Bilt", aws_debilt_rd.sp, BGT_station.sf,class = new_classNr, temperature_criteria.df)
+      # } else{
+      #   message("BGT clip passed class criteria ", as.character(class))
+      # }
     }
   
 return(temperature_criteria.df)}
