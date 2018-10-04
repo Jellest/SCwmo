@@ -53,7 +53,7 @@ shadow_angles<-function(spatialpoint,
                                        azimuth = angle,
                                        ll=FALSE)
   shadows<-raster::stack(ahn_mask,horizon_grid)
-  names(shadows)<-c("height","elevation")
+  names(shadows)<-c("height","elevation_angle")
   df<-extract(x = shadows, y = spatialpoint, method='bilinear')
   return(list("shadows"=shadows,"df"=df))
 }
@@ -118,10 +118,17 @@ projected_shade_class <- function(solar_shading_angles){
   df$meet_class4 <- meet_class4
 return (df)
 }
-deBilt.df<-selectSensor_row("temp_150cm", AWS.df)
-deBilt.sp<-data.frame(deBilt.df)
-coordinates(deBilt.sp) <- ~X+Y
-crs(deBilt.sp)<-CRS("+init=epsg:28992")
+deBilt.df<-selectSensor_row("De Bilt", "temp_150cm", AWS.df)
+
+tempsub <- subset(AWS.df, AWS == "De Bilt" & Sensor == "temp_150cm")
+
+deBilt_rd.sp<-data.frame(tempsub)
+coordinates(deBilt_rd.sp) <- ~X+Y
+crs(deBilt_rd.sp)<-CRS("+init=epsg:28992")
+
+deBilt_rd.sf <- st_as_sf(deBilt_rd.sp)
+deBilt_wgs.sf <- st_transform(deBilt_rd.sf, "+init=epsg:4326")
+
 ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_deBilt_sheet_raw, distance = 300)
 
 ah_azimuths <- above_horizon_solar_angles$azimuth
@@ -149,8 +156,11 @@ for (a in seq_along(ah_azimuths)){
     message(paste("shadow angle calculations finished. Elapsed Time:", elapsed_time))
   }
 }
+
 ah_solar_shadow_angles <- projected_shade_class(ah_solar_shadow_angles)
+
+ahn_deBilt_mask <- mask_raster(spatialpoint = deBilt_rd.sp  , ahn2_deBilt_sheet_raw, distance = 300)
+shadow_angles_DeBilt2 <- shadow_angles(spatialpoint = deBilt_rd.sp, ahn_mask = ahn_deBilt_mask, angle = 180, maxDist = 300)
 
 
 #shadow_angles <- horizon_grid(spatialpoint = deBilt.sp, ahn_mask, angle = 0, maxDist = 300)
-

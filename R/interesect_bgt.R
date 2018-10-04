@@ -80,8 +80,8 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
       
       #convert input data to SF
       #coordinates
-      coords.sf <- st_as_sf(coords)
-    
+      #coords.sf <- st_as_sf(coords)
+      coords.sf <- coords
       #outer buffer area
       outer_buffer <- createBuffer(coords.sf, outer_buffer_dist)
       area_outer_buffer <- st_area(outer_buffer)
@@ -91,12 +91,14 @@ clip_bgt <- function(aws_name, coords, bgt_shape, class, temperature_criteria.df
       st_agr(objects_bgt) = "constant"
       st_agr(outer_buffer) = "constant"
       
-      shape_insct.sf <<- st_intersection(objects_bgt, outer_buffer)
-      st_crs(shape_insct.sf, "+init=epsg:28992")
-      artificial_objects.sf <<- subset(shape_insct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
-      buildings.sf <<- subset(shape_insct.sf, object_typ == "pand")
-      water.sf <<- subset(shape_insct.sf, object_typ == "waterdeel")
-      raods.sf <<- subset(shape_insct.sf, object_typ == "wegdeel")
+      BGT <<- st_intersection(bgt_shape, outer_buffer)
+      st_crs(BGT, "+init=epsg:28992")
+      artificial_objects.sf <<- subset(BGT, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
+      buildings <<- subset(BGT, object_typ == "pand")
+      water <<- subset(BGT, object_typ == "waterdeel")
+      roads <<- subset(BGT, object_typ == "wegdeel")
+      barren <<- subset(BGT, object_typ == "onbegroeidterreindeel")
+      vegetation <<- subset(BGT, object_typ == "begroeidterreindeel")
       #units::set_units(shape_insct.sf, m^2)
       
       selected_aws_row <- which(temperature_criteria.df == aws_name)
@@ -226,18 +228,17 @@ return(temperature_criteria.df)}
 
 
 
-selectSensor_row <- function (aws_name,sensor_name, aws){
-  selectedRow <- aws[which( Sensor == sensor_name)]
+selectSensor_row <- function (aws_name, sensor_name, aws){
+  selectedRow <- aws[which(Sensor == sensor_name & AWS == aws_name)]
   if(nrow(selectedRow) == 0 | nrow(selectedRow) > 1){
     selectedRow <- aws[which(Sensor == "site")]
   }  
-return (selectedRow)}
+  return (selectedRow)}
 
-
-temperature_landuse_criteria.df <- AWS.df[c(1,4)]
-temperature_landuse_criteria.df <- selectSensor_row(aws_name = aws_name ,"temp_150cm", AWS.df)[,c(1,5)]
+temperature_landuse_criteria.df <- AWS.df[c(1,5)]
+temperature_landuse_criteria.df <- selectSensor_row(aws_name = "De Bilt", sensor_name = "temp_150cm", aws = temperature_landuse_criteria.df)
 #temperature_landuse_criteria.df <- temperature_landuse_criteria.df[-(1:10), ]
-temperature_landuse_criteria.df <- clip_bgt("De Bilt", aws_debilt_rd.sp, BGT_station.sf,class = 1, temperature_landuse_criteria.df)
+temperature_landuse_criteria.df <- clip_bgt("De Bilt", deBilt_rd.sf, BGT_station.sf,class = 1, temperature_landuse_criteria.df)
 
 
 addFeatures(map, coords_wgs.sf, group="AWS")

@@ -25,6 +25,7 @@ aws_debilt_wgs.sp <- data.frame("lat"= subset(AWS.df, AWS == station & Sensor ==
 coordinates(aws_debilt_wgs.sp)<-~lon+lat
 crs(aws_debilt_wgs.sp)<- CRS("+init=epsg:4326")
 
+aws_debilt_wgs.sf <- st_as_sf(aws_debilt_wgs.sp)
 aws_debilt_rd.sp <- spTransform(aws_debilt_wgs.sp, CRS= CRS("+init=epsg:28992"))
 
 #create 200 meter buffer arouond sensor
@@ -106,6 +107,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "begroeidterreindeel" 
+    shp$object <- "vegetation"
     
     drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'optalud_le', 'fysiekvoor', 'creationda', 'terminat_1', 'plus.fys_1', 'optalud', 'lv.publica', 'tijdstipre', 'kruinlijn_')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -120,6 +122,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "onbegroeidterreindeel" 
+    shp$object <- "barren"
     
     drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'optalud_le', 'fysiekvoor', 'creationda', 'terminat_1', 'plus.fys_1', 'optalud', 'lv.publica', 'tijdstipre', 'kruinlijn_')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -134,6 +137,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$plus.fys_2 <- NA
     shp$naam <- NA
     shp$object_typ <- "waterdeel" 
+    shp$object <- "water"
     
     drops<- c('type_codes', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre', 'plus.type_')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -144,6 +148,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "wegdeel" 
+    shp$object <- "road"
     
     drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'plus.fys_1', 'lv.publica', 'kruinlijn_', 'tijdstipre', 'optalud', 'creationda', 'optalud_le', 'fysiekvoor', 'terminat_1', 'functie_co')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -158,6 +163,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$plus.fys_2 <- NA
     shp$naam <- NA
     shp$object_typ <- "scheiding" 
+    shp$object <- "seperation"
     
     drops<- c('type_codes', 'status_lee', 'status_cod', 'plus.type_', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -175,6 +181,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "pand" 
+    shp$object <- "building"
     
     drops<- c('identifica', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -192,7 +199,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "overigbouwwerk" 
-    
+    shp$object <- "other construction"
     drops<- c('type_codes', 'plus.type_', 'identifica', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
     shp <- shp[,!(names(shp) %in% drops)]
     
@@ -205,6 +212,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$bgt.type <- NA
     shp$naam <- NA
     shp$object_typ <- "spoor" 
+    shp$object <- "railway"
     
     drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'functie_co', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
     shp <- shp[,!(names(shp) %in% drops)]
@@ -220,6 +228,7 @@ adjustColumns <- function(raw_data_location, object_name_short){
     shp$plus.typ_1 <- NA
     shp$plus.type <- NA
     shp$object_typ <- "functioneelgebied" 
+    shp$object_typ <- "functional area" 
     
     drops<- c('type_codes', 'status_lee', 'status_cod', 'plus.type_', 'naam', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'naam_leeg', 'lv.publica', 'plus.typ_1', 'plus.type', 'tijdstipre')
     shp <- shp[,!(names(shp) %in% drops)]
