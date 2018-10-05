@@ -45,10 +45,10 @@ roads_wgs.sf <- st_transform(raods.sf, "+init=epsg:4326")
 water_wgs.sf <- st_transform(water.sf, "+init=epsg:4326")
 
 map %>%
-  addFeatures(buildings_wgs.sf, color="red", weight=0.5, fillColor="red") %>%
-  addFeatures(roads_wgs.sf, color="grey", weight=0.5, fillColor="grey") %>%
-  addFeatures(water_wgs.sf, color="blue", weight=0.5, fillColor="blue") %>%
-  addFeatures(deBilt_wgs.sp, color="green", weight=0.5, fillColor="green") %>%
+  addFeatures(BGT, color="red", weight=0.5, fillColor="red") %>%
+  #addFeatures(roads_wgs.sf, color="grey", weight=0.5, fillColor="grey") %>%
+  #addFeatures(water_wgs.sf, color="blue", weight=0.5, fillColor="blue") %>%
+  #addFeatures(deBilt_wgs.sp, color="green", weight=0.5, fillColor="green") %>%
   setView(5.17939, 52.09886, zoom = 17)
 
 ahn_map <- shadow_angles_DeBilt2[[1]]$height

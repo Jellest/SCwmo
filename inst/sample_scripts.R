@@ -31,3 +31,8 @@
 # ogrinfo(shape_location_test,
 #         layer = "pand",
 #         where = "gml_id = 'pand.10632890'")
+
+
+# select / remove columns data frame
+# temperature_landuse_criteria.df <- AWS.df[c(1,5)]
+# temperature_landuse_criteria.df <- temperature_landuse_criteria.df[-(1:10), ]
