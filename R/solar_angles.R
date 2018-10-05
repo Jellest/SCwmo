@@ -102,7 +102,12 @@ sun_chart <- ggplot(shades, aes(x=azimuth, y=shadow_angle)) + geom_area() +
   geom_line(data = month_all_solar_angles2[[3]], aes(x=azimuth, y=elevation, colour="21 February")) +
   geom_line(data = month_all_solar_angles2[[2]], aes(x=azimuth, y=elevation, colour="21 January")) +
   geom_line(data = month_all_solar_angles2[[1]], aes(x=azimuth, y=elevation, colour="21 December")) +
-  labs(x = "azimuth (degrees)", y = "elevation (degrees)") + xlim(50,310) + ylim(0,65) + theme_bw() + scale_colour_manual("", breaks = c("21 June", "21 May", "21 April", "21 March", "21 February", "21 January", "21 December"), values = c("21 December"="black", "21 January"="purple", "21 February"="orange", "21 March"="brown", "21 April"="green", "21 May"="yellow", "21 June"="red"))
+  labs(x = "azimuth (degrees)", y = "elevation (degrees)") +
+  xlim(50,310) +
+  ylim(0,65) +
+  theme_bw() +
+  theme(text = element_text(size=24)) +
+  scale_colour_manual("", breaks = c("21 June", "21 May", "21 April", "21 March", "21 February", "21 January", "21 December"), values = c("21 December"="black", "21 January"="purple", "21 February"="orange", "21 March"="brown", "21 April"="green", "21 May"="yellow", "21 June"="red"))
 sun_chart
 ggsave("sun_chart.png")
 

@@ -118,16 +118,6 @@ projected_shade_class <- function(solar_shading_angles){
   df$meet_class4 <- meet_class4
 return (df)
 }
-deBilt.df<-selectSensor_row("De Bilt", "temp_150cm", AWS.df)
-
-tempsub <- subset(AWS.df, AWS == "De Bilt" & Sensor == "temp_150cm")
-
-deBilt_rd.sp<-data.frame(tempsub)
-coordinates(deBilt_rd.sp) <- ~X+Y
-crs(deBilt_rd.sp)<-CRS("+init=epsg:28992")
-
-deBilt_rd.sf <- st_as_sf(deBilt_rd.sp)
-deBilt_wgs.sf <- st_transform(deBilt_rd.sf, "+init=epsg:4326")
 
 ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_deBilt_sheet_raw, distance = 300)
 
