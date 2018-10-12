@@ -65,7 +65,7 @@ mapshot(elevraster_map, file = "shadows.png", url = NULL, remove_url = TRUE, rem
 
 bgt_map <- mapview(buildings, col.region="#f0495f", lwd=0.5, legend = TRUE, zcol=c("object")) + mapview(roads, col.region="#444444", lwd=0.5, legend = TRUE) + mapview(water, col.region="#25e0ed", lwd=0.5, legend = TRUE, zcol=c("object")) + mapview(vegetation, col.region="#5dcb1e", lwd=0.5, legend = TRUE,zcol=c("object")) + mapview(barren, col.region="#f1f4c7", lwd=0.5, legend = TRUE, zcol=c("object")) + mapview(deBilt_aws, col.region ="black", legend = TRUE, zcol=c("AWS"))
 
-bgt_map <- mapview(BGT, col.region=c("#f1f4c7", "#f0495f", "#444444", "#5dcb1e", "#25e0ed"), map.types = c("Esri.WorldImagery"), zcol=c("object")) + mapview(deBilt_wgs.sf, col.region ="yellow", layer.name="Temperature sensor", zcol=c("AWS"))
+bgt_map <- mapview(BGT_outerBuffer, col.region=c("#f1f4c7", "#f0495f", "#444444", "#5dcb1e", "#25e0ed"), map.types = c("Esri.WorldImagery"), zcol=c("object")) + mapview(selected_aws_temp[[3]], col.region ="yellow", layer.name="Temperature sensor", zcol=c("AWS"))
 bgt_map@map %>% setView(5.17939, 52.09886, zoom = 18)
 mapshot(bgt_map, file = "BGT.png", url = NULL, remove_url = TRUE, remove_controls = c("zoomControl", "layersControl"))
 

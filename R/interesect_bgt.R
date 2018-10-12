@@ -2,12 +2,16 @@
 library(sf)
 library(mapview)
 
-clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class){
+clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class){
   if(missing(class)){
     #start at class 1
+    print("missing")
     class <- 1
   }
   
+  if(missing(go_to_next_class)){
+    go_to_next_class <- FALSE
+  }
   ##functions
   
   createBuffer <- function(coords, distance){
@@ -28,38 +32,52 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
     st_crs(annulus, "+init=epsg:28992")
     return(annulus)}
   
-  ##select buffer areas according to class
-    if(class == 1){
-      outer_buffer_dist = 100
-      inner_buffer_dist = 10
-    } else if(class == 2){
-      outer_buffer_dist = 30
-      inner_buffer_dist = 5
-    } else if(class == 3){
-      outer_buffer_dist = 10
-      inner_buffer_dist = 5
-    } else if(class == 4){
-      outer_buffer_dist = 10
-      inner_buffer_dist = 3
-    }
+  ##select buffer areas and relative area according to class
+  if(class == 1){
+    outer_buffer_dist = 100
+    inner_buffer_dist = 10
+    outer_buffer_relArea_criteria =
+    annulus_relArea_criteria =
+    inner_buffer_relArea_criteria =
+  } else if(class == 2){
+    outer_buffer_dist = 30
+    inner_buffer_dist = 5
+    outer_buffer_relArea_criteria =
+    annulus_relArea_criteria =
+    inner_buffer_relArea_criteria =
+  } else if(class == 3){
+    outer_buffer_dist = 10
+    inner_buffer_dist = 5
+    outer_buffer_relArea_criteria =
+    inner_buffer_relArea_criteria =
+  } else if(class == 4){
+    outer_buffer_dist = 10
+    inner_buffer_dist = 3
+    outer_buffer_relArea_criteria =
+    inner_buffer_relArea_criteria =
+  }
+  
     
   ##column names
   meet_classNr <- paste("meetClass_", toString(class), sep="") 
+  meet_noObjects_outerBuffer_criteria <- paste("meet_noObjects_",as.character(outer_buffer_dist),"m_c",toString(class),"_criteria", sep="")  
   
   outer_objectCountColName <- paste("objectCount_",as.character(outer_buffer_dist),"m", sep="")
   outer_sumObjectAreasColName <- paste("sumObjectAreas_",as.character(outer_buffer_dist),"m", sep="")
   outer_relAreaColName <- paste("relAreaBuffer_",as.character(outer_buffer_dist),"m", sep="")
+  meet_outerBuffer_criteria <- paste("meet_",as.character(outer_buffer_dist),"m_c",toString(class),"_criteria", sep="") 
   
   inner_objectCountColName <- paste("objectCount_",as.character(inner_buffer_dist),"m", sep="")
   inner_sumObjectAreasColName <- paste("sumObjectAreas_",as.character(inner_buffer_dist),"m", sep="")
   inner_relAreaColName <- paste("relAreaBuffer_",as.character(inner_buffer_dist),"m", sep="")
-
-  df <- data.frame(outer_objectCount = character(nrow(artificial_objects.sf)), outer_sumAreas = character(nrow(artificial_objects.sf)), outer_relArea = character(nrow(artificial_objects.sf)),
-                   inner_objectCount = character(nrow(artificial_objects.sf)), inner_sumAreas = character(nrow(artificial_objects.sf)), inner_relArea = character(nrow(artificial_objects.sf)),
+  meet_innerBuffer_criteria <- paste("meet_",as.character(inner_buffer_dist),"m_c",toString(class),"_criteria", sep="") 
+  
+  df <- data.frame(outer_objectCount = character(nrow(artificial_objects.sf)), meet_noObjectsOuterBufer_criteria =  logical(nrow(artificial_objects.sf)), outer_sumAreas = character(nrow(artificial_objects.sf)), outer_relArea = character(nrow(artificial_objects.sf)), meet_outerBuffer_Criteria = logical(nrow(artificial_objects.sf)),
+                   inner_objectCount = character(nrow(artificial_objects.sf)), inner_sumAreas = character(nrow(artificial_objects.sf)), inner_relArea = character(nrow(artificial_objects.sf)), meet_innerBuffer_Criteria = logical(nrow(artificial_objects.sf)),
                    meetClass = logical(nrow(artificial_objects.sf)))
                   
-  colnames(df) <- c(outer_objectCountColName, outer_sumObjectAreasColName, outer_relAreaColName, 
-                    inner_objectCountColName, inner_sumObjectAreasColName, inner_relAreaColName,
+  colnames(df) <- c(outer_objectCountColName, meet_noObjects_outerBuffer_criteria, outer_sumObjectAreasColName, outer_relAreaColName, meet_outerBuffer_criteria, 
+                    inner_objectCountColName, inner_sumObjectAreasColName, inner_relAreaColName, meet_innerBuffer_criteria,
                     meet_classNr)
   
   if(class >= 5){
@@ -75,9 +93,10 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
       annulus_objectCountColName <- paste("objectCount_",as.character(region),"m", sep="")
       annulus_sumObjectAreasColName <- paste("sumObjectAreas_",as.character(region),"m", sep="")
       annulus_relAreaColName <- paste("relAreaRegion_",as.character(region),"m", sep="")
-    
-      df_annulus <- data.frame(objectCount = character(nrow(artificial_objects.sf)), sumAreas = character(nrow(artificial_objects.sf)), relArea = character(nrow(artificial_objects.sf)))
-      colnames(df_annulus) <- c( annulus_objectCountColName, annulus_sumObjectAreasColName, annulus_relAreaColName)
+      meet_annulus_criteria <- paste("meet_",as.character(region),"annulus_c",toString(class),"_criteria", sep="") 
+      
+      df_annulus <- data.frame(objectCount = character(nrow(artificial_objects.sf)), sumAreas = character(nrow(artificial_objects.sf)), relArea = character(nrow(artificial_objects.sf)), meet_annulus_Criteria = logical(nrow(artificial_objects.sf)))
+      colnames(df_annulus) <- c( annulus_objectCountColName, annulus_sumObjectAreasColName, annulus_relAreaColName, meet_annulus_criteria)
       df <- cbind(df, df_annulus)
     }
     
@@ -95,7 +114,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
     #intersection
     st_agr(bgt_shape) <- "constant"
     st_agr(outer_buffer) <- "constant"
-    BGT_outerBuffer <- st_intersection(bgt_shape, outer_buffer)
+    BGT_outerBuffer <<- st_intersection(bgt_shape, outer_buffer)
     st_crs(BGT_outerBuffer, "+init=epsg:28992")
     
     #select artifical objects within outer buffer
@@ -146,6 +165,8 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
         
         temperature_criteria.df[selected_aws_row,annulus_sumObjectAreasColName] <- sum_area_objects_annulus
         temperature_criteria.df[selected_aws_row,annulus_relAreaColName] <- relArea_annulus 
+      } else {
+        annulus_insct.sf <- NULL
       }
       
       ##create inner buffer, intersect and calculate area
@@ -187,6 +208,53 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
     #inner_buffer_feature_wgs <<- st_transform(inner_buffer_insct.sf, "+init=epsg:4326")
     #coords_wgs.sf <- st_transform(coords, "+init=epsg:4326")
     
+    #meet individual criteria
+    if(class == 1 | class == 2){
+      if(temperature_criteria.df[selected_aws_row, outer_objectCountColName] == 0){
+        temperature_criteria.df[selected_aws_row,meet_noObjectsOuterBufer_criteria] <- TRUE
+      else{
+        temperature_criteria.df[selected_aws_row,meet_noObjectsOuterBufer_criteria] <- FALSE  
+      }
+      if(temperature_criteria.df[selected_aws_row, outer_relAreaColName] < 0.1){
+        temperature_criteria.df[selected_aws_row,meet_outerBuffer_criteria] <- TRUE
+      } else {
+        temperature_criteria.df[selected_aws_row,meet_outerBuffer_criteria] <- FALSE
+      }
+      if(temperature_criteria.df[selected_aws_row, annulus_relAreaColName] < 0.05){
+        temperature_criteria.df[selected_aws_row,meet_annulus_criteria] <- TRUE
+      } else {
+        temperature_criteria.df[selected_aws_row,meet_annulus_criteria] <- FALSE
+      }
+      if(temperature_criteria.df[selected_aws_row, inner_relAreaColName] < 0.01){
+          temperature_criteria.df[selected_aws_row,meet_innerBuffer_criteria] <- TRUE
+      } else {
+        temperature_criteria.df[selected_aws_row,meet_innerBuffer_criteria] <- FALSE 
+      }
+    } else if(class == 3){
+      if(temperature_criteria.df[selected_aws_row, outer_objectCountColName] == 0){
+        temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        print(paste("No artifical objects are found within ", toString(outer_buffer_dist), "m.", sep=""))
+      } else if(temperature_criteria.df[selected_aws_row, outer_relAreaColName] < 0.1 &
+                temperature_criteria.df[selected_aws_row, inner_relAreaColName] < 0.05){
+        temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+      } else {
+        temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
+        print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but significant size in area within radii.", sep=""))
+      }
+    } else if(class == 4){
+      if(temperature_criteria.df[selected_aws_row, outer_relAreaColName] < 0.5 &
+         temperature_criteria.df[selected_aws_row, inner_relAreaColName] < 0.3){
+        temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii.", sep=""))
+      } else {
+        temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
+        print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii.", sep=""))
+      }
+    } else if(class == 5){
+      temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+      print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii.", sep=""))
+    }
+    
     #meet all class criteria
     meet_class_criteria <- temperature_criteria.df[selected_aws_row,meet_classNr]
     outer_buffer_object_count <- temperature_criteria.df[selected_aws_row, outer_objectCountColName]
@@ -198,6 +266,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
                 temperature_criteria.df[selected_aws_row, annulus_relAreaColName] < 0.05 &
                 temperature_criteria.df[selected_aws_row, inner_relAreaColName] < 0.01){
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii.", sep=""))
       } else {
         temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
@@ -223,27 +292,45 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
         temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii.", sep=""))
       }
+    } else if(class == 5){
+      temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+      print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii.", sep=""))
     }
-  
-    if(missing(class)){
-      #go through all the classes and privide output of all the relevant classes
-      if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
-        new_classNr <- class + 1
-        print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
-        clip_bgt(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df)
-      } else{
-        message("BGT clip passed class criteria ", as.character(class))
-      }
+    
+    if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
+      if(missing(class) & missing(class)){
+          #go through all the classes and privide output of all the relevant classes, starting at class 1
+          print("all")
+          if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
+            new_classNr <- class + 1
+            print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
+            go_to_next_class = TRUE
+            clip_bgt(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE)
+          } else{
+            message("BGT clip passed class criteria ", as.character(class))
+          }
+        } else if(missing(class) == FALSE & missing(go_to_next_class) == FALSE){
+          if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
+            new_classNr <- class + 1
+            print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
+            go_to_next_class = TRUE
+            clip_bgt(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE)
+          } else{
+            message("BGT clip passed class criteria ", as.character(class))
+          }
+        } else if(missing(class) == FALSE & missing(go_to_next_class)){
+          #only provide output of selected class
+          if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
+            print(paste("BGT clip did NOT pass class ", as.character(class)," criteria", sep=""))
+          } else{
+            message("BGT clip passed class criteria ", as.character(class))
+          }
+        }
     } else {
-      #only provide output of selected class
-      if(temperature_criteria.df[selected_aws_row,meet_classNr] == FALSE){
-        print(paste("BGT clip did NOT pass class ", as.character(class)," criteria", sep=""))
-      } else{
-        message("BGT clip passed class criteria ", as.character(class))
-      }
+      message("BGT clip passed class criteria ", as.character(class))
     }
   }
-return(temperature_criteria.df)}
+return(list("df" = temperature_criteria.df, "outer_buf"= BGT_outerBuffer, "annulus"=annulus_insct.sf,"inner_buf"=inner_buffer_insct.sf))}
 
 selectSensor_row <- function (aws_name, sensor_name, aws.df){
   selectedRow <- aws.df[which(aws.df$Sensor == sensor_name & aws.df$AWS == aws_name),]
@@ -266,5 +353,11 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
 selected_aws_site <- select_single_aws(AWS.df, "De Bilt", "site")
 selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
 
-temperature_landuse_criteria.df_site <- clip_bgt(selected_aws_site[[1]]$AWS, selected_aws_site[[3]], BGT_station.sf, selected_aws_site[[1]][c(1,5)]2Baud)
+BGT_station_adjust.sp <- readOGR(dsn = "data/BGT/deBilt", "BGT_De Bilt_adjustments", stringsAsFactors=FALSE)
+crs(BGT_station_adjust.sp) <- crs("+init=epsg:28992")
+BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
+temperature_landuse_criteria.df_site <- clip_bgt(selected_aws_site[[1]]$AWS, selected_aws_site[[3]], BGT_station_adjust.sf, selected_aws_site[[1]][c(1,5)])
 temperature_landuse_criteria.df_temp <- clip_bgt(selected_aws_temp[[1]]$AWS, selected_aws_temp[[3]], BGT_station.sf, selected_aws_temp[[1]][c(1,5)])
+mapview(BGT_station_adjust.sf)
+
+View(temperature_landuse_criteria.df_site[["df"]])
