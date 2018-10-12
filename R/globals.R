@@ -15,4 +15,7 @@ libs <- function(){
   library(ggplot2)
   library(leaflet)
   library(mapview)
+  library(devtools)
+  library(data.table)
+  library(dplyr)
 }

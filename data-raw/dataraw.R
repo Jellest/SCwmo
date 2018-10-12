@@ -45,3 +45,6 @@ devtools::use_data(cbs_bodem_gebruik.shp,overwrite = TRUE)
 # stop<-as.Date("2010-12-31")
 # time.seq<-seq(start,stop,by="day")
 # yday(time.seq)
+
+#guieline criteria
+guideline_criteria <- fread("wmoSC/data-raw/guideline_criteria.csv")
