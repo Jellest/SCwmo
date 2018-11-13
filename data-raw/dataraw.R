@@ -2,15 +2,13 @@ library(devtools)
 library(data.table)
 library(raster)
 # AWS coordinates
-AWS.df<-fread("data/coordinates/AWS_coordinates.csv")
+AWS.df<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
 #row.names(AWS.df) <- make.names(),TRUE)
 
 
 #AWS.df$IT_DATETIME<-as.Date(AWS.df$IT_DTETIME,format="%Y%m%d_240000_000000")
 devtools::use_data(AWS.df,overwrite=TRUE)
 AWS_wgs.sp <-AWS.df
-
-
 
 coordinates(AWS_wgs.sp) <-~LON+LAT
 crs(AWS_wgs.sp) <-CRS("+init=epsg:4326")
