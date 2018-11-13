@@ -36,3 +36,23 @@
 # select / remove columns data frame
 # temperature_landuse_criteria.df <- AWS.df[c(1,5)]
 # temperature_landuse_criteria.df <- temperature_landuse_criteria.df[-(1:10), ]
+
+
+#import bgt
+# bgt_shp_files <- list.files(paste("data", "BGT", aws_name, "raw", sep=folder_structure), pattern = ".shp")
+# 
+# names(bgt_list) <- bgt_objects_shortname_list
+# pand_shape <- bgt_list[pand]
+# crs(pand_shape)<- CRS("+init=epsg:28992")
+# crs(pand_shape)
+# crs(bgt_shape)
+# 
+# desk <- "C:/users/Jelle/Desktop"
+# mshp<- "C:/users/Jelle/Desktop/test.shp"
+# ogr2ogr(src_datasource_name = desk    , dst_datasource_name = mshp, layer = 'pand', overwrite = TRUE)
+
+
+## create individual point
+# point <- data.frame("X"=4,"Y"=6)
+# coordinates(point) <- ~Y+X
+# crs(point) <- CRS("+init=epsg:28992") 
