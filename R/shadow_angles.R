@@ -59,9 +59,20 @@ shadow_angles<-function(spatialpoint,
 }
 
 projected_shade_class <- function(solar_shading_angles){
-  class_1_shading <-subset(solar_shading_angles, elevation > 5)
-  class_2_3_shading <- subset(solar_shading_angles, elevation > 7) 
-  class_4_shading <- subset(solar_shading_angles, elevation > 20)
+  tshac <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "shading")
+  cv_colName <- Criteria
+  
+  class_1_cv <-  tshac[tshac(which(tshac, Class == 1)),cv_colName]
+  class_2_cv <-  tshac[tshac(which(tshac, Class == 2)),cv_colName]
+  class_3_cv <-  tshac[tshac(which(tshac, Class == 3)),cv_colName]
+  class_2_3_cv <-tshac[tshac(which(tshac, Class == 2)),cv_colName]
+  class_4_cv <-  tshac[tshac(which(tshac, Class == 4)),cv_colName]
+  class_5_cv <-  tshac[tshac(which(tshac, Class == 5)),cv_colName]
+  
+  
+  class_1_shading <-subset(solar_shading_angles, elevation > class_1_cv)
+  class_2_3_shading <- subset(solar_shading_angles, elevation > class_2_cv) 
+  class_4_shading <- subset(solar_shading_angles, elevation > class_4_cv)
   df <- solar_shading_angles 
   
   df$meet_class1 <- TRUE
@@ -69,14 +80,14 @@ projected_shade_class <- function(solar_shading_angles){
   df$meet_class3 <- TRUE
   df$meet_class4 <- TRUE
   
-  if(df$elevation[1] < 5){
+  if(df$elevation[1] < class_1_cv){
     meet_class1 <- TRUE
     meet_class2 <- TRUE
     meet_class3 <- TRUE
     meet_class4 <- TRUE
   }
   
-  if(df$elevation[1] >= 5 & df$elevation[1] < 7 & df$shadow_angle[1] > df$elevation[1]){
+  if(df$elevation[1] >= class_1_cv & df$elevation[1] < class_2_3_cv & df$shadow_angle[1] > df$elevation[1]){
     meet_class1 <- FALSE
     meet_class2 <- TRUE
     meet_class3 <- TRUE
@@ -88,7 +99,7 @@ projected_shade_class <- function(solar_shading_angles){
   #   meet_class4 <- TRUE
   # }
   
-  if(df$elevation[1] >= 7 & df$elevation[1] < 20 & df$shadow_angle[1] > df$elevation[1]){
+  if(df$elevation[1] >= class_2_3_cv & df$elevation[1] < class_4_cv & df$shadow_angle[1] > df$elevation[1]){
     meet_class1 <- FALSE
     meet_class2 <- FALSE
     meet_class3 <- FALSE
@@ -100,7 +111,7 @@ projected_shade_class <- function(solar_shading_angles){
   #   meet_class4 <- TRUE
   # }
   
-  if(df$elevation[1] >= 20 & df$shadow_angle[1] > df$elevation[1]){
+  if(df$elevation[1] >= class_4_cv & df$shadow_angle[1] > df$elevation[1]){
     meet_class1 <- FALSE
     meet_class2 <- FALSE
     meet_class3 <- FALSE
@@ -119,7 +130,7 @@ projected_shade_class <- function(solar_shading_angles){
 return (df)
 }
 
-ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_deBilt_sheet_raw, distance = 300)
+ahn_mask <- mask_raster(spatialpoint = deBilt.sp  , ahn2_DeBilt_sheet$r32cn1, distance = 300)
 
 ah_azimuths <- above_horizon_solar_angles$azimuth
 
