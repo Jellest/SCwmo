@@ -1,6 +1,6 @@
 import_ahn2 <- function(station_name, station_coords, distance){
   ahn2_WFS_baseUrl <- "https://geodata.nationaalgeoregister.nl/ahn2/wfs?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=ahn2:ahn2_bladindex"
-  #create 200 meter buffer arouond sensor
+  #create buffer around sensor
   surroundingBuffer <- buffer(station_coords,width=distance) #since RDcoords are in meters width is also in m
   
   #get BBOX extent of buffer area
