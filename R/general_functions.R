@@ -14,3 +14,8 @@ calculate_area <- function(sp){
   }
   return(p)
 }
+
+CleanGlobEnvir <- function(pattern){
+  rm(list = ls(envir=globalenv())[
+  grep(pattern, ls(envir=globalenv()))], envir = globalenv())
+}

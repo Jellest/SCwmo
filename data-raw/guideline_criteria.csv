@@ -39,8 +39,8 @@ temperature,land use,relative area annulus,2,0.05
 temperature,land use,relative area annulus,3,NA
 temperature,land use,relative area annulus,4,NA
 temperature,land use,relative area annulus,5,NA
-temperature,land use,projected shade,1,5
-temperature,land use,projected shade,2,7
-temperature,land use,projected shade,3,7
-temperature,land use,projected shade,4,20
-temperature,land use,projected shade,5,NA
+temperature,shading,projected shade,1,5
+temperature,shading,projected shade,2,7
+temperature,shading,projected shade,3,7
+temperature,shading,projected shade,4,20
+temperature,shading,projected shade,5,NA

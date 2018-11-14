@@ -23,13 +23,12 @@ vegetation_height <- function(aws_name, coords, height_raw, height_terrain, lgn7
   df[selected_row_number, "minHeight"] <- minValue(height)
   #df[selected_row_number, "avgheight"] <-  
   vegetation_criteria.df <- cbind(vegetation_criteria, df)
-  return_list <- list("heightDifference" = height, "criteria_table" = vegetation_criteria.df, "raw_mask" = ahn2_raw_mask, "terrain_mask" = ahn2_terrain_mask, lgn7 = lgn7_mask)
   
-return (return_list)}
+return (list("heightDifference" = height, "criteria_table" = vegetation_criteria.df, "raw_mask" = ahn2_raw_mask, "terrain_mask" = ahn2_terrain_mask, lgn7 = lgn7_mask))}
 
 vegetation_height_criteria.df <- AWS.df[c(1,4)]
 vegetation_height_criteria.df <- vegetation_height_criteria.df[-(1:10), ]
-heightDifference <- vegetation_height("De Bilt", aws_debilt_rd.sp, ahn2_deBilt_sheet_raw, ahn2_deBilt_sheet_terrain, lgn7,
+heightDifference <- vegetation_height("De Bilt", aws_debilt_rd.sp, ahn2_DeBilt_sheet$r32cn1, ahn2_DeBilt_sheet$i32cn1, lgn7,
                             5, vegetation_height_criteria.df)
 
 View(height[["criteria_table"]])
@@ -41,6 +40,3 @@ plot(heightDifference[["lgn7"]])
 
 r<-height[["raw_mask"]]
 mapview(r,layer.name="raw_mask")
-h
-h
-
