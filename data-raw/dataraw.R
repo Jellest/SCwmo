@@ -3,7 +3,7 @@ library(data.table)
 library(raster)
 # AWS coordinates
 AWS.df<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
-#row.names(AWS.df) <- make.names(),TRUE)
+T#row.names(AWS.df) <- make.names(),TRUE)
 
 
 #AWS.df$IT_DATETIME<-as.Date(AWS.df$IT_DTETIME,format="%Y%m%d_240000_000000")
