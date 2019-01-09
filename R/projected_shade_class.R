@@ -19,7 +19,7 @@ projected_shade_class <- function(solar_shading_angles){
   class_3_filter <-  filter(tshac, Class == "3")
   class_3_cv <- class_3_filter[,cv_colName][1]
   
-  class_2_3_cv <- class_2_filter[,cv_colName][1] 
+  #class_2_3_cv <- class_2_filter[,cv_colName][1] 
   
   class_4_filter <-  filter(tshac, Class == "4")
   class_4_cv <- class_4_filter[,cv_colName][1]
@@ -38,39 +38,38 @@ projected_shade_class <- function(solar_shading_angles){
   # class_2_3_shading <- subset(solar_shading_angles, elevation > class_2_cv)
   # class_2_shading <- subset(solar_shading_angles, elevation > class_2_cv)
   
-  class_1_shading <-subset(solar_shading_angles, elevation > class_1_cv)
-  class_2_shading <- subset(solar_shading_angles, elevation > class_2_cv)
-  class_3_shading <- subset(solar_shading_angles, elevation > class_3_cv)
-  class_2_3_shading <- subset(solar_shading_angles, elevation > class_2_cv) 
-  class_4_shading <- subset(solar_shading_angles, elevation > class_4_cv)
+  # class_1_shading <-subset(solar_shading_angles, elevation > class_1_cv)
+  # class_2_shading <- subset(solar_shading_angles, elevation > class_2_cv)
+  # class_3_shading <- subset(solar_shading_angles, elevation > class_3_cv)
+  # class_2_3_shading <- subset(solar_shading_angles, elevation > class_2_cv) 
+  # class_4_shading <- subset(solar_shading_angles, elevation > class_4_cv)
   
   df <- solar_shading_angles 
   
-  for(e in seq(1, nrow(df), 1)){
-    print(e)
-    df[e,"meet_class1"] <- TRUE
-    df[e,"meet_class2"] <- TRUE
-    df[e,"meet_class3"] <- TRUE
-    df[e,"meet_class4"] <- TRUE
-    df[e,"meet_class5"] <- TRUE
+  for(n in seq(1, nrow(df), 1)){
+    df[n,"meet_class1"] <- TRUE
+    df[n,"meet_class2"] <- TRUE
+    df[n,"meet_class3"] <- TRUE
+    df[n,"meet_class4"] <- TRUE
+    df[n,"meet_class5"] <- TRUE
     
     #class 1
-    if(df[e,"elevation"] < class_1_cv){
-      df[e,"meet_class1"] <- TRUE
-      df[e,"meet_class2"] <- TRUE
-      df[e,"meet_class3"] <- TRUE
-      df[e,"meet_class4"] <- TRUE
-      df[e,"meet_class5"] <- TRUE
+    if(df[n,"elevation"] < class_1_cv){
+      df[n,"meet_class1"] <- TRUE
+      df[n,"meet_class2"] <- TRUE
+      df[n,"meet_class3"] <- TRUE
+      df[n,"meet_class4"] <- TRUE
+      df[n,"meet_class5"] <- TRUE
     }
     
     #class 2
-    if(df[e,"elevation"] >= class_2_cv & df[e,"elevation"] < class_3_cv & df[e,"shadow_angle"] > df[e,"elevation"]){
-      df[e,"meet_class1"] <- FALSE
-      df[e,"meet_class2"] <- FALSE
-      df[e,"meet_class3"] <- TRUE
-      df[e,"meet_class4"] <- TRUE
-      df[e,"meet_class5"] <- TRUE
-    }# else if(df[e,"elevation"] >= 5 & df[e,"elevation"] < 7 & df[e,"shadow_angle"] < df[e,"elevation"]){
+    if(df[n,"elevation"] >= class_1_cv & df[n,"elevation"] < class_2_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+      df[n,"meet_class1"] <- FALSE
+      df[n,"meet_class2"] <- TRUE
+      df[n,"meet_class3"] <- TRUE
+      df[n,"meet_class4"] <- TRUE
+      df[n,"meet_class5"] <- TRUE
+    }# else if(df[n,"elevation"] >= 5 & df[n,"elevation"] < 7 & df[n,"shadow_angle"] < df[n,"elevation"]){
     #   meet_class1 <- TRUE
     #   meet_class2[e] <- TRUE
     #   meet_class3[e] <- TRUE
@@ -79,51 +78,59 @@ projected_shade_class <- function(solar_shading_angles){
     # }
     
     #class 3
-    if(df[e,"elevation"] >= class_3_cv & df[e,"elevation"] < class_4_cv & df[e,"shadow_angle"] > df[e,"elevation"]){
-      df[e,"meet_class1"] <- FALSE
-      df[e,"meet_class2"] <- FALSE
-      df[e,"meet_class3"] <- FALSE
-      df[e,"meet_class4"] <- TRUE
-      df[e,"meet_class5"] <- TRUE
-    }# else if(df[e,"elevation"] >= 7 & df[e,"elevation"] < 20 & df[e,"shadow_angle"] < df[e,"elevation"]){
+    if(df[n,"elevation"] >= class_2_cv & df[n,"elevation"] < class_3_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+      df[n,"meet_class1"] <- FALSE
+      df[n,"meet_class2"] <- FALSE
+      df[n,"meet_class3"] <- TRUE
+      df[n,"meet_class4"] <- TRUE
+      df[n,"meet_class5"] <- TRUE
+    }# else if(df[n,"elevation"] >= 7 & df[n,"elevation"] < 20 & df[n,"shadow_angle"] < df[n,"elevation"]){
     #   meet_class1 <- TRUE
     #   meet_class2[e] <- TRUE
     #   meet_class3[e] <- TRUE
     #   meet_class4[e] <- TRUE
     #   meet_class5[e] <- TRUE
     # }
+    if(df[n,"elevation"] >= class_3_cv & df[n,"elevation"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+      df[n,"meet_class1"] <- FALSE
+      df[n,"meet_class2"] <- FALSE
+      df[n,"meet_class3"] <- FALSE
+      df[n,"meet_class4"] <- TRUE
+      df[n,"meet_class5"] <- TRUE
+    }
     
     #class 4
-    if(df[e,"elevation"] >= class_4_cv & df[e,"shadow_angle"] > df[e,"elevation"]){
-      df[e,"meet_class1"] <- FALSE
-      df[e,"meet_class2"] <- FALSE
-      df[e,"meet_class3"] <- FALSE
-      df[e,"meet_class4"] <- FALSE
-      df[e,"meet_class5"] <- TRUE
-    }# else if(df[e,"elevation"] >= 20 & df[e,"shadow_angle"] < df[e,"elevation"]){
+    if(df[n,"elevation"] >= class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+      df[n,"meet_class1"] <- FALSE
+      df[n,"meet_class2"] <- FALSE
+      df[n,"meet_class3"] <- FALSE
+      df[n,"meet_class4"] <- FALSE
+      df[n,"meet_class5"] <- TRUE
+    }# else if(df[n,"elevation"] >= 20 & df[n,"shadow_angle"] < df[n,"elevation"]){
     #   meet_class1 <- FALSE
     #   meet_class2[e] <- FALSE
     #   meet_class3[e] <- FALSE
     #   meet_class4[e] <- TRUE
     # }
-    if(df[e,"meet_class5"] == TRUE){
-      df[e,"final_class"] <-5
+    if(df[n,"meet_class5"] == TRUE){
+      df[n,"final_class"] <-5
     }
-    if(df[e,"meet_class4"] == TRUE){
-      df[e,"final_class"] <- 4
+    if(df[n,"meet_class4"] == TRUE){
+      df[n,"final_class"] <- 4
     }
-    if(df[e,"meet_class3"] == TRUE){
-      df[e,"final_class"] <-3
+    if(df[n,"meet_class3"] == TRUE){
+      df[n,"final_class"] <-3
     }
-    if(df[e,"meet_class2"] == TRUE){
-      df[e,"final_class"] <-2
+    if(df[n,"meet_class2"] == TRUE){
+      df[n,"final_class"] <-2
     }
-    if(df[e,"meet_class1"] == TRUE){
-      df[e,"final_class"] <-1
+    if(df[n,"meet_class1"] == TRUE){
+      df[n,"final_class"] <-1
     }
   }
   View(df)
   return (df)
 }
-
-test_ssa_criteria <- projected_shade_class(test_ssa[["ssa"]])
+  
+test_ssa.csv <- fread("data/solar_shadow_angles/solar_shadow_angles.csv", data.table = FALSE)
+test_ssa_criteria <- projected_shade_class(test_ssa.csv)
