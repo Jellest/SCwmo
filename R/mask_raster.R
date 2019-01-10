@@ -1,50 +1,67 @@
 mask_raster <- function(spatialpoint, ahn, azimuth, distance){
   #angles east and west from azimuth
+  #plot(ahn)
   azimuth_west <- azimuth+5
   azimuth_east <- azimuth-5
 
   #Circle centre point
-  X0 <- deBilt_rd.sp@coords[,"X"] 
-  Y0 <- deBilt_rd.sp@coords[,"Y"]
+  X0 <- spatialpoint@coords[,"X"] 
+  Y0 <- spatialpoint@coords[,"Y"]
   
   #X points East and West from line
-  Xe <- X0 + (distance * sin(azimuth_east))
-  Xw <- X0 + (distance * sin(azimuth_west))
+  Xe <- X0 + (distance * sin((azimuth_east*(pi/180))))
+  Xw <- X0 + (distance * sin((azimuth_west*(pi/180))))
   
-  #X points East and West from line  
-  Ye <- Y0 + (distance * cos(azimuth_east))
-  Yw <- Y0 + (distance * cos(azimuth_west))
+  #Y points East and West from line  
+  Ye <- Y0 + (distance * cos((azimuth_east*(pi/180))))
+  Yw <- Y0 + (distance * cos((azimuth_west*(pi/180))))
     
-  #coodinates
+  #coordinates
   x_coords <- c(X0, Xe, Xw, X0)
   y_coords <- c(Y0, Ye, Yw, Y0)
 
   #create Polygon
-  XYm <- cbind(x_coords, y_coords)
-  print(XYm)
-  p <- Polygon(XYm)
-  ps <-Polygons(list(p),1)
-  sps <- SpatialPolygons(list(ps))
-  proj4string(sps) <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs")
-  sps
-  plot(sps)
+  #XYm <- cbind(x_coords, y_coords)
+  #print(XYm)
+  # p <- Polygon(XYm)
+  # ps <-Polygons(list(p),1)
+  # sps <- SpatialPolygons(list(ps))
+  # proj4string(sps) <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs")
+  # sps
+  # plot(sps)
   
   # aws_buffer <-raster::buffer(spatialpoint,width=distance)
   
   # 
-  # coords <- matrix(c(X0, Y0,
-  #                   Xw, Yw,
-  #                   Xe, Ye,
-  #                   X0, Y0), 
-  #                 ncol = 2, byrow = TRUE)
-  # 
-  # P1 <- Polygon(coords)
-  # Ps1 <- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs"))
-  # plot(Ps1)
+  coords <- matrix(c(X0, Y0,
+                    Xe, Ye,
+                    Xw, Yw,
+                    X0, Y0),
+                  ncol = 2, byrow = TRUE)
+  print(coords)
+  P1 <- Polygon(coords)
   
-  # 
-  # ahn_crop<-raster::crop(ahn,aws_buffer)
-  # 
-  # ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  # message("Masked the raster object.")
-  return(ahn_mask)}
+  #"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+  Ps1 <<- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"))
+  #P1sdf <<- SpatialPolygonsDataFrame(Ps1, data = as.data.frame(ID = "test"))
+  
+  aws_mask <<- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
+  writeOGR(obj = aws_mask, dsn = "test/" , layer = "ahn_mask", driver = "ESRI Shapefile", overwrite_layer = TRUE)
+  
+  #plot(Ps1, axes = TRUE)
+  #plot(ahn, Ps1)
+  
+  plot(ahn, aws_mask, axes = TRUE)
+  ahn_mask <- raster::mask(ahn, aws_mask)
+  message("Masked the raster object.")
+  print(summary(ahn_mask))
+    #returns
+    #  Min.       NA
+    #  1st Qu.    NA
+    #  Median     NA
+    #  3rd Qu.    NA
+    #  Max.       NA
+    #  NA's    4e+06
+  return(ahn_mask)
+}
+ahn_deBilt_mask <- mask_raster(spatialpoint = deBilt_rd.sp  , ahn_deBilt[["raw"]], azimuth = 120, distance = 300)
