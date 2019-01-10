@@ -1,10 +1,22 @@
 #select single AWS coordinates and select aws single row
+select_single_aws(AWS.df, "Schiphol", "temp_150cm")
 select_single_aws <- function(aws.df, aws_name, sensor_name){
+  first_sensor_name <- sensor_name
   if(missing(sensor_name)){
     sensor_name = "site"
   }
   single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+  print(nrow(single_aws.df))
+  #select site if other sensor name is selected.
+  if(is.null(single_aws.df) == TRUE){
+    
+    sensor_name = "site"
+    single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+    message(paste0(first_sensor_name, " sensor is not found. 'site' is selected as sensor name."))
+  }
+  
   if(nrow(single_aws.df) > 0){
+    print(paste0("Getting AWS coordinate of ", aws_name, " with '", sensor_name, "' as sensor name."))
     single_aws_rd.sp<-data.frame(single_aws.df)
     coordinates(single_aws_rd.sp) <- ~X+Y
     crs(single_aws_rd.sp)<-CRS("+init=epsg:28992")
@@ -20,20 +32,23 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
                 )
           )
   } else {
-    warning("No AWS found with this name.")
+    warning("No AWS found with this AWS name.")
   }
 }
 
 selectSensor_row <- function (aws.df, aws_name, sensor_name){
-  check_presence <- aws.df[which(aws.df$AWS == aws_name),] 
+  check_presence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),] 
+  print(aws_name)
+  print(sensor_name)
   if(nrow(check_presence) == 0){
-    warning("No AWS found with this name.")
+    message("No AWS found with this name and/or sensor name.")
     return (NULL)
   } else {
     if(missing(sensor_name)){
       sensor_name = "site"
     }
     selectedRow <- aws.df[which(aws.df$Sensor == sensor_name & aws.df$AWS == aws_name),]
+    
     if(nrow(selectedRow) == 0 | nrow(selectedRow) > 1){
       selectedRow <- aws.df[which(aws.df$Sensor == "site" & aws.df$AWS == aws_name),]
     }
@@ -44,7 +59,7 @@ selectSensor_row <- function (aws.df, aws_name, sensor_name){
 getAWS_name_trim <- function (aws_name){
   aws_name_untrimmed <- AWS.df$AWS[which(AWS.df$AWS == aws_name)][1]
   if(is.na(aws_name_untrimmed) == TRUE) {
-    aws_name_trim <- stop(paste("No aws station found with the following name:", aws))
+    aws_name_trim <- stop(paste("No AWS station found with the following name:", aws))
   } else{
     aws_name_trim <- gsub(" ", "", aws_name_untrimmed)
   }
