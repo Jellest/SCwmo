@@ -1,6 +1,3 @@
-aws_list <- dplyr::filter(AWS.df, DS_DESC == "AWS" & Aparatuur == "site")[,1]
-
-
 multiple_bgt <- function(aws_list, delete_raw_gmls){
   start_time <- Sys.time()
   if(missing(delete_raw_gmls)){
