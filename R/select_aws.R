@@ -1,5 +1,5 @@
 #select single AWS coordinates and select aws single row
-select_single_aws(AWS.df, "Schiphol", "temp_150cm")
+
 select_single_aws <- function(aws.df, aws_name, sensor_name){
   first_sensor_name <- sensor_name
   if(missing(sensor_name)){
