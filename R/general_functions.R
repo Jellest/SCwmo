@@ -40,3 +40,17 @@ awsNameCheck <- function(aws_name, sensor_name){
   }
   return(list("aws_name" = aws_name, "aws_name_trim" = aws_name_trim, "sensor_name" = sensor_name))
 }
+
+create_SpatialPoint <- function(X, Y, LONLAT){
+  if(missing(LONLAT)){
+    LONLAT = FALSE
+  }
+  point.sp<-data.frame(data.frame(c("X","Y")))
+  coordinates(point.sp) <- ~X+Y
+  if(LONLAT == FALSE){
+    crs(point.sp)<-CRS(epsg_rd)
+  } else {
+    crs(point.sp)<-CRS("+init=epsg:4326")
+  }
+  return (point.sp)
+}
