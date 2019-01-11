@@ -9,7 +9,6 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
   print(nrow(single_aws.df))
   #select site if other sensor name is selected.
   if(is.null(single_aws.df) == TRUE){
-    
     sensor_name = "site"
     single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
     message(paste0(first_sensor_name, " sensor is not found. 'site' is selected as sensor name."))
@@ -19,8 +18,8 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
     print(paste0("Getting AWS coordinate of ", aws_name, " with '", sensor_name, "' as sensor name."))
     single_aws_rd.sp<-data.frame(single_aws.df)
     coordinates(single_aws_rd.sp) <- ~X+Y
-    crs(single_aws_rd.sp)<-CRS("+init=epsg:28992")
-    
+    crs(single_aws_rd.sp)<-CRS(epsg_rd)
+
     single_aws_rd.sf <- sf::st_as_sf(single_aws_rd.sp)
     single_aws_wgs.sf <- sf::st_transform(single_aws_rd.sf, "+init=epsg:4326")
     single_aws_wgs.sp <- sf::as_Spatial(single_aws_wgs.sf)
@@ -38,8 +37,6 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
 
 selectSensor_row <- function (aws.df, aws_name, sensor_name){
   check_presence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),] 
-  print(aws_name)
-  print(sensor_name)
   if(nrow(check_presence) == 0){
     message("No AWS found with this name and/or sensor name.")
     return (NULL)
