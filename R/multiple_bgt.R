@@ -26,4 +26,4 @@ multiple_bgt <- function(aws_list, delete_raw_gmls){
   return(list("all_objects_count" = all_objects_count, "all_bgt_objects"=all_bgt_objects))
 }
 
-multiple_bgt(aws_list = aws_list, delete_raw_gmls = FALSE)
+multiple_bgt(aws_list = aws_list, delete_raw_gmls = TRUE)

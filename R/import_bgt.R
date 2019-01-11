@@ -321,7 +321,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls){
           
           print(e)
           #enter that object has no features
-          entry_f <- data.frame(aws_name_trim, "sensor_name", "radius", object_name_short, FALSE, 0, stringsAsFactors=FALSE)
+          entry_f <- data.frame(aws_name_trim, sensor_name, radius, object_name_short, FALSE, 0, stringsAsFactors=FALSE)
           names(entry_f) <- c("AWS", "sensor_name", "radius", "object_type", "has_features", "feature_count")
           rownames(entry_f) <- rowname
           tmp.all_bgt_objects <<- rbind(tmp.all_bgt_objects, entry_f, stringsAsFactors=FALSE)
