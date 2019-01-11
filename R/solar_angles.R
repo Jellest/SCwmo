@@ -30,15 +30,15 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
   if(LONLAT == FALSE){
     point.sp <- data.frame("X"=X,"Y"=Y)
     coordinates(point.sp) <- ~X+Y
-    crs(point.sp) <- CRS("+init=epsg:28992")
+    crs(point.sp) <- CRS(epsg_rd)
     point.sf <- st_as_sf(point.sp)
     wgs_point.sp <- spTransform(point.sp, CRS = CRS("+init=epsg:4238"))
     View(wgs_point.sp)
-    lon = wgs_point.sp@coords[,"lon"]
-    lat = wgs_point.sp@coords[,"lat"]
+    LON = wgs_point.sp@coords[,"LON"]
+    LAT = wgs_point.sp@coords[,"LAT"]
   } else if(LONLAT == TRUE){
-    lon = X
-    lat = Y
+    LON = X
+    LAT = Y
   }
   
   if(missing(minutes_interval)){
@@ -52,14 +52,14 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     requireNamespace("insol")
     
     sun_vector <- sunvector(jd = julian_day,
-                            latitude = lat,
-                            longitude = lon,
+                            latitude = LAT,
+                            longitude = LON,
                             timezone = 1)
     
     sun_position <- sunpos(sun_vector)
     summary(sun_position)
     
-    m <- cbind(lat, lon, julian_day, sun_position)
+    m <- cbind(X, Y, LON, LAT, julian_day, sun_position)
     df <- data.frame(m)
     df$elevation <- 90 - df$zenith
     # if(!missing(aws_name)){
@@ -91,8 +91,8 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
   }
   
   
-  all_solar_angles <- data.frame(get_solar_angles(lon = lon,
-                                              lat = lat,
+  all_solar_angles <- data.frame(get_solar_angles(lon = LON,
+                                              lat = LAT,
                                               julian_day = julian_day_hour(year = year, month = month, day = day, minutes_interval = minutes_interval)), stringsAsFactors = FALSE)
   
   #select only above horizon elevation anngles

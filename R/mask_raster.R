@@ -38,29 +38,23 @@ mask_raster <- function(spatialpoint, ahn, azimuth, distance){
                     Xw, Yw,
                     X0, Y0),
                   ncol = 2, byrow = TRUE)
-  print(coords)
+  #print(coords)
   P1 <- Polygon(coords)
   
-  Ps1 <<- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(epsg_rd))
-  #P1sdf <<- SpatialPolygonsDataFrame(Ps1, data = as.data.frame(ID = "test"))
+  Ps1 <- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(epsg_rd))
+  #P1sdf <- SpatialPolygonsDataFrame(Ps1, data = as.data.frame(ID = "test"))
   
-  aws_mask <<- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
-  writeOGR(obj = aws_mask, dsn = "test" , layer = "ahn_mask", driver = "ESRI Shapefile", overwrite_layer = TRUE)
+  aws_mask <- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
+  #writeOGR(obj = aws_mask, dsn = "test" , layer = "ahn_mask", driver = "ESRI Shapefile", overwrite_layer = TRUE)
   
   #plot(Ps1, axes = TRUE)
   #plot(ahn, Ps1)
   
-  plot(ahn, aws_mask, axes = TRUE)
+  #plot(ahn, aws_mask, axes = TRUE)
   ahn_mask <- raster::mask(ahn, aws_mask)
   message("Masked the raster object.")
   print(summary(ahn_mask))
-    #returns
-    #  Min.       NA
-    #  1st Qu.    NA
-    #  Median     NA
-    #  3rd Qu.    NA
-    #  Max.       NA
-    #  NA's    4e+06
   return(ahn_mask)
 }
-ahn_deBilt_mask <- mask_raster(spatialpoint = deBilt_rd.sp  , ahn_deBilt[["raw"]], azimuth = 120, distance = 300)
+ahn_deBilt_mask <- mask_raster(spatialpoint = deBilt_rd.sp  , cropped_ahn_DeBilt, azimuth = 120, distance = 300)
+cropped_ahn_DeBilt <- raster("data/AHN2/DeBilt/raw/DeBilt_raw_ahn.tif")

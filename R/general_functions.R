@@ -20,12 +20,12 @@ CleanGlobEnvir <- function(pattern){
   grep(pattern, ls(envir=globalenv()))], envir = globalenv())
 }
 
-mask_raster <- function(spatialpoint, ahn, distance){
-  aws_mask<-raster::buffer(spatialpoint,width=distance)
-  ahn_crop<-raster::crop(ahn,aws_mask)
-  ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  message("Masked the raster object.")
-return(ahn_mask)}
+# mask_raster <- function(spatialpoint, ahn, distance){
+#   aws_mask<-raster::buffer(spatialpoint,width=distance)
+#   ahn_crop<-raster::crop(ahn,aws_mask)
+#   ahn_mask<-raster::mask(ahn_crop,aws_mask)
+#   message("Masked the raster object.")
+# return(ahn_mask)}
 
 awsNameCheck <- function(aws_name, sensor_name){
   if(missing(aws_name)){
@@ -49,8 +49,12 @@ create_SpatialPoint <- function(X, Y, LONLAT){
   coordinates(point.sp) <- ~X+Y
   if(LONLAT == FALSE){
     crs(point.sp)<-CRS(epsg_rd)
+    point_rd.sp <- point.sp
+    point_wgs.sp <- spTransform(point.sp, "+init=epsg:4326") 
   } else {
     crs(point.sp)<-CRS("+init=epsg:4326")
+    point_rd.sp <- spTransform(point.sp, epsg_rd)
+    point_wgs.sp <- point.sp
   }
-  return (point.sp)
+  return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
 }
