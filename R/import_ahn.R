@@ -45,18 +45,18 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
     if(LONLAT == TRUE){
       crs(station_coords) <- CRS("+init=epsg:4326")
     } else {
-      crs(station_coords) <- CRS("+init=epsg:28992")
+      crs(station_coords) <- CRS(epsg_rd)
     }
   }
   
   if(LONLAT == TRUE){
-    station_coords <- spTransform(station_coords, CRS = CRS("init:espg28992"))
+    station_coords <- spTransform(station_coords, CRS = CRS(epsg_rd))
   }
   
   point.sf <- st_as_sf(station_coords)
   surroundingBuffer <- st_buffer(point.sf,dist=radius) #since RDcoords are in meters width is also in m
   #get BBOX extent of buffer area
-  surroundingExtent <- extent(surroundingBuffer)
+  #surroundingExtent <- extent(surroundingBuffer)
   my_EPSG <- "EPSG:28992"
   #my_bbox <- paste(toString(surroundingExtent@xmin), toString(surroundingExtent@ymin), toString(surroundingExtent@xmax), toString(surroundingExtent@ymax), sep=",")
   
@@ -66,7 +66,7 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
     dir.create(ahn_directory)
   }
   bladIndex_shape_filepath <- paste(ahn_directory , sep="/")
-  bladIndex_shape_file <- paste( bladIndex_shape_filepath, "/", "bladIndex", ".shp", sep="")
+  bladIndex_shape_file <- paste(bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".shp", sep="")
   print(bladIndex_shape_file)
   if(!file.exists(bladIndex_shape_file)){
     print("Download ahn wfs blad Index")
@@ -76,16 +76,15 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
     ogr2ogr(src_datasource_name = ahn_wfs , dst_datasource_name = bladIndex_shape_file, layer = paste0(tolower(AHN),":", tolower(AHN), "_bladindex"), overwrite = TRUE)
   }
   #load intersected blad indexes
-  bladIndex.shp <- readOGR(dsn = ahn_directory, layer = "bladIndex", stringsAsFactors=FALSE)
-  p4s <- "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
-  bladIndex.shp <- spTransform(bladIndex.shp, p4s)
+  bladIndex.shp <- readOGR(dsn = ahn_directory, layer = paste0(AHN, "_bladIndex"), stringsAsFactors=FALSE)
+  bladIndex.shp <- spTransform(bladIndex.shp, epsg_rd)
   bladIndex.sf <- st_as_sf(bladIndex.shp)
 
   st_agr(bladIndex.sf) <- "constant"
   st_agr(surroundingBuffer) <- "constant"
   bladIndex_buffer_intsct.sf <- st_intersection(bladIndex.sf, surroundingBuffer)
   
-  bladnrs <<- bladIndex_buffer_intsct.sf$bladnr
+  bladnrs <- bladIndex_buffer_intsct.sf$bladnr
   
   dir.create(paste(ahn_directory, aws_name_trim, sep="/"), showWarnings = FALSE)
   aws_working_directory <- paste(ahn_directory, aws_name_trim, sep="/")
@@ -100,7 +99,7 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
       print(ahn_raw_directory)
       # rawXList <<- c()
       # rawYList <<- c()
-      paste("Amount of sheets found:", length(bladnrs), sep=" ")
+      print(paste("Amount of sheets found:", length(bladnrs), sep=" "))
       ahn_raw_file_paths <- c()
       for(r in 1:length(bladnrs)){
         #ahn2: https://geodata.nationaalgeoregister.nl/ahn2/extract/ahn2_05m_ruw/r32cn1.tif.zip
@@ -155,15 +154,14 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
         writeRaster(ahn_raw_raster, ahn_raw_raster_filename, overwrite = TRUE)
         message("Download of raw rasters complete.")
       }
+      if(delete_sheets == TRUE){
+        for(fr in 1:length(ahn_raw_file_paths)){
+          file.remove(ahn_raw_file_paths[fr])
+        }
+      }
     } else {
       print(paste("Cropped raw raster for", aws_name, "already exists and will be stored to this variable.",sep =" "))
       ahn_raw_raster <- raster(paste(ahn_raw_directory, "/", aws_name_trim, "_raw_ahn", '.tif', sep=""))
-    }
-    
-    if(delete_sheets == TRUE){
-      for(fr in 1:length(ahn_raw_file_paths)){
-        file.remove(ahn_raw_file_paths[fr])
-      }
     }
   }
   
@@ -253,11 +251,11 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
     ahn_rasters <- NULL
   }
   
-  if(delete_sheets == TRUE){
-    file.remove(bladIndex_shape_file)
-    file.remove(paste( bladIndex_shape_filepath, "/", "bladIndex", ".shx", sep=""))
-    file.remove(paste( bladIndex_shape_filepath, "/", "bladIndex", ".dbf", sep=""))
-    file.remove(paste( bladIndex_shape_filepath, "/", "bladIndex", ".prj", sep=""))
-  }
+  # if(delete_sheets == TRUE){
+  #   file.remove(bladIndex_shape_file)
+  #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".shx", sep=""))
+  #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".dbf", sep=""))
+  #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".prj", sep=""))
+  # }
 
 return (ahn_rasters)}

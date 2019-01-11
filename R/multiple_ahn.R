@@ -10,11 +10,11 @@ multiple_ahn <- function(list){
                resolution = 0.5, radius = 500,
                raw_ahn = TRUE, terrain_ahn = TRUE,
                AHN3 = FALSE,
-               delete_sheets = FALSE)
+               delete_sheets = TRUE)
   }
   end_time <- Sys.time()
   elapsed_time <- ceiling(end_time - start_time)
   message(paste("Finished importing multiple AHN data sets. Elapsed Time:", elapsed_time, "seconds."))
 }
 
-multiple_ahn(aws_list)
+multiple_ahn(c("De Bilt"))
