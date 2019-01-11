@@ -26,7 +26,7 @@ mask_raster <- function(spatialpoint, ahn, azimuth, distance){
   # p <- Polygon(XYm)
   # ps <-Polygons(list(p),1)
   # sps <- SpatialPolygons(list(ps))
-  # proj4string(sps) <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs")
+  # proj4string(sps) <- CRS("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs")
   # sps
   # plot(sps)
   
@@ -41,12 +41,11 @@ mask_raster <- function(spatialpoint, ahn, azimuth, distance){
   print(coords)
   P1 <- Polygon(coords)
   
-  #"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
-  Ps1 <<- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"))
+  Ps1 <<- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(epsg_rd))
   #P1sdf <<- SpatialPolygonsDataFrame(Ps1, data = as.data.frame(ID = "test"))
   
   aws_mask <<- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
-  writeOGR(obj = aws_mask, dsn = "test/" , layer = "ahn_mask", driver = "ESRI Shapefile", overwrite_layer = TRUE)
+  writeOGR(obj = aws_mask, dsn = "test" , layer = "ahn_mask", driver = "ESRI Shapefile", overwrite_layer = TRUE)
   
   #plot(Ps1, axes = TRUE)
   #plot(ahn, Ps1)

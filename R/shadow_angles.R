@@ -52,11 +52,11 @@ shadow_angles <- function(spatialpoint,
     if(LONLAT == TRUE){
       crs(spatialpoint) <- CRS("+init=epsg:4326")
     } else {
-      crs(spatialpoint) <- CRS("+init=epsg:28992")
+      crs(spatialpoint) <- CRS(epsg_rd)
     }
   }
   if(LONLAT == TRUE){
-    spatialpoint <- spTransform(spatialpoint, CRS = CRS("init:espg28992"))
+    spatialpoint <- spTransform(spatialpoint, CRS = CRS(epsg_rd))
     LONLAT = FALSE
   }
   

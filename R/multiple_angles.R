@@ -1,23 +1,78 @@
-##multiple anges
-multiplemonthsolarAnges <- function(aws_name, sensor_name, start_month , final_month, printChart){
+##multiple angles
+multiple_Moments_solarAnges <- function(aws_name, sensor_name, years, months, days, exportCSV, printChart){
   month_angles <- list()
+  
+  aws <- select_single_aws(AWS.df, aws_name = aws_name, sensor_name = sensor_name)
+  print(aws[["aws_wgs.sp"]]@data$LAT)
+  
   all_solar_angles <-  data.frame(lat = numeric(0), lon = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0), stringsAsFactors = FALSE)
-  for(m in seq(start_month, final_month, 1)){
-    month_angles[[m]] <- solar_angles(X = 5.17939,
-                                      Y = 52.09886,
-                                      day = 21,
-                                      month = m,
-                                      year = 2018,
-                                      minutes_interval = 30,
-                                      LONLAT = TRUE)
-    all_solar_angles <- rbind(all_solar_angles, month_angles[[m]][["all angles"]])
+  for(y in 1:length(years)){   
+    for(m in 1:length(months)){ 
+      if(months[m] == 1){
+        month_name = "jan"
+      }
+      if(months[m] == 2){
+        month_name = "feb"
+      }
+      if(months[m] == 3){
+        month_name = "mar"
+      }
+      if(months[m] == 4){
+        month_name = "apr"
+      }
+      if(months[m] == 5){
+        month_name = "may"
+      }
+      if(months[m] == 6){
+        month_name = "jun"
+      }
+      if(months[m] == 7){
+        month_name = "jul"
+      }
+      if(months[m] == 8){
+        month_name = "aug"
+      }
+      if(months[m] == 9){
+        month_name = "sep"
+      }
+      if(months[m] == 10){
+        month_name = "oct"
+      }
+      if(months[m] == 11){
+        month_name = "nov"
+      }
+      if(months[m] == 12){
+        month_name = "dec"
+      }
+      
+      for(d in 1:length(days)){
+        month_angles[[month_name]] <- solar_angles(X = aws[["aws_wgs.sp"]]@data$LON,
+                                          Y = aws[["aws_wgs.sp"]]@data$LAT,
+                                          year = y,
+                                          month = months[m],
+                                          day = d,
+                                          minutes_interval = 30,
+                                          LONLAT = TRUE)
+        all_solar_angles <- rbind(all_solar_angles, month_angles[[month_name]][["all angles"]])
+      }
+    }
   }
   all_ah_angles <- subset(all_solar_angles, elevation > 0)
   if(nrow(all_ah_angles) == 0){
-    warning("No elevation angles found.")
+    warning(paste0("No elevation angles found for ", aws_name, "."))
   }
+  if(missing(exportCSV)){
+    exportCSV = FALSE
+  }
+  
+  if(exportCSV == TRUE){
+    #dir.create("output/solar_shadow_angles", getAWS_name_trim(aws_name))
+    export_csv_path <- fwrite(x = all_solar_angles, file = paste0("output/solar_shadow_angles/", getAWS_name_trim(aws_name), "_solar_angles.csv"))
+    message("Ëxported solar angles to output folder.")
+  }
+  
   #all_ah_solar_angles_melt <- reshape::melt(all_ah_angles, id = "julian_day")
-  shadow_angles <- fread("data/solar_shadow_angles/DeBilt_shadow_angles.csv", data.table = FALSE)
+  #shadow_angles <- fread("data/solar_shadow_angles/DeBilt_shadow_angles.csv", data.table = FALSE)
   
   if(missing(printChart)){
     printChart = FALSE
@@ -27,6 +82,13 @@ multiplemonthsolarAnges <- function(aws_name, sensor_name, start_month , final_m
   }
   return(list("all angles" = all_solar_angles, "all ah angles" = all_ah_angles, "all month angles" = month_angles))
 }
+test_sa <- multiple_Moments_solarAnges(aws_name = "De Bilt",
+                                       sensor_name = "temp_150cm",
+                                       years = c(2018),
+                                       months = c(12,1:6),
+                                       days = c(21),
+                                       exportCSV = TRUE,
+                                       printChart = FALSE)
 
 multipleShadowAngles <- function(solar_angles){
   ah_solar_shadow_angles <- data.frame(lat = character(0), lon = character(0), altitude = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0), shadow_height = numeric(0), shadow_angle = numeric(0), stringsAsFactors = FALSE)
@@ -35,11 +97,13 @@ multipleShadowAngles <- function(solar_angles){
   
   azimuths <- solar_angles$azimuth
   start_time <- Sys.time()
-  ahn_mask <- mask_raster(spatialpoint = deBilt_rd.sp, ahn_deBilt$raw, distance = 100)
   
   for (a in seq_along(azimuths)){
+    spatialpoint <- createpoint(solar_angles[a,"lon"], Y = solar_angles[a,"lat"], LONLAT = TRUE)
+    aws_ahn <- raster("data/AHN2/DeBilt/raw/DeBilt_raw_ahn.tif")
     message(paste("Calculating shadow angle for azimuth angle: ", azimuths[a],". ", a, " out of ", length(azimuths),"...", sep=""))
-    shadow_angles_DeBilt <- shadow_angles(spatialpoint = deBilt_rd.sp, ahn_mask = ahn_mask, angle = azimuths[a], maxDist = 100)
+    ahn_mask <- mask_raster(spatialpoint = , ahn = aws_ahn, azimuth = azimuths[a],distance = 100)
+    shadow_angles_DeBilt <- shadow_angles(X = solar_angles[a, "LON"], Y = solar_angles[a, "LAT"], ahn_mask = ahn_mask, angle = azimuths[a], maxDist = 300)
     shadow_ha <-data.frame(shadow_angles_DeBilt$df)
     #heightShadow <- shadow_ha$height[1]
     #shad_angle <- shadow_ha$elevation[1]
@@ -60,18 +124,28 @@ multipleShadowAngles <- function(solar_angles){
   return(list("shadow rasters" = ah_shadow_rasters, "ssa" = ah_solar_shadow_angles))
 }
 
-multipleSolar_shadow_angles <- function(start_month, final_month, printChart, exportCSV){
-  solar_angles <- multiplemonthsolarAnges(start_month = start_month, final_month = final_month, printChart = printChart)
-  solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]])
-  if(missing(exportCSV)){
-    exportCSV = FALSE
+multipleSolar_shadow_angles <- function(aws_list, printChart, exportCSV){
+  years <- c(2018)
+  months <- c(12, 1:6)
+  days <- c(21)
+  for(a in 1:length(aws_list)){
+    solar_angles <- multiplemonthsolarAnges(aws_name, sensor_name, years, months, days, printChart)
+    solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]])
+    solar_shadow_angles[["df"]][,"AWS"] <- aws_name
+    solar_shadow_angles[["df"]][,"sensor_name"] <- sensor_name
+    
+    if(missing(exportCSV)){
+      exportCSV = FALSE
+    }
+    
+    if(exportCSV == TRUE){
+      #dir.create("output/solar_shadow_angles", getAWS_name_trim(aws_name))
+      export_csv_path <-   
+      fwrite(x = solar_shadow_angles[["ssa"]], file = paste0("output/solar_shadow_angles/", getAWS_name_trim(aws_name), "_solar_shadow_angles.csv"))
+      message("Ëxported solar and shadow angles to output folder.")
+    }
   }
-  if(exportCSV == TRUE){
-    dir.create("data/solar_shadow_angles", "AWS")
-    export_csv_path <- "data/solar_shadow_angles/AWS"
-    fwrite(x = solar_shadow_angles[["ssa"]], file = paste0(export_csv_path, "test.csv"))
-    message("Ëxported data to output folder.")
-  }
+ 
   return(solar_shadow_angles)
 }
 
