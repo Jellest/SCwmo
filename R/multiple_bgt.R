@@ -7,6 +7,7 @@ multiple_bgt <- function(aws_list, delete_raw_gmls){
   all_objects_counts_names <- c("AWS", "sensor_name", "radius", "object_name", "object_count")
   names(all_objects_count) <- all_objects_counts_names
   all_bgt_objects <- data.frame(AWS = character(0), sensor_name = character(0), radius = numeric(0), feature_type = character(0), has_features = logical(0), features_count = numeric(0), stringsAsFactors = FALSE)
+  
   #loading all AWS on land takes 10 minutes.
   for (a in 1:length(aws_list)){
     print(aws_list[a])

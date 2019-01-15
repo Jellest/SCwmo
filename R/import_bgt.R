@@ -5,7 +5,10 @@ library(gdalUtils)
 library(gdata)
 library(sf)
 
-import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls){
+import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, redownload){
+  if(missing(redownload)){
+    redownload = FALSE
+  }
   tryCatch({
     
     if(missing(delete_raw_gmls)){
@@ -14,7 +17,11 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls){
     
     aws_name_trim <- getAWS_name_trim(aws_name) 
     if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/"))){  
-      warning("BGT shapefile for this aws is already found. Please remove it if you want to recreate it.")
+      message("BGT shapefile for this aws is already found. Please remove it if you want to recreate it.")
+      answer <- menu(c("Y", "N"), title="Do you want to redowload this BGT?")
+      if(answer == "Y"){
+        import_single_bgt(aws_name, sensor_name, radius, delete_raw_gmls, redownload = TRUE)
+      }
     } else {
       if(missing(radius)){
         radius <- 150
