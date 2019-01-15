@@ -1,12 +1,13 @@
 #select single AWS coordinates and select aws single row
-
 select_single_aws <- function(aws.df, aws_name, sensor_name){
-  first_sensor_name <- sensor_name
+  
   if(missing(sensor_name)){
-    sensor_name = "site"
+    sensor_name <- "site"
+    first_sensor_name <- "site"
+  } else {
+    first_sensor_name <- sensor_name
   }
   single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
-  print(nrow(single_aws.df))
   #select site if other sensor name is selected.
   if(is.null(single_aws.df) == TRUE){
     sensor_name = "site"
@@ -56,7 +57,7 @@ selectSensor_row <- function (aws.df, aws_name, sensor_name){
 getAWS_name_trim <- function (aws_name){
   aws_name_untrimmed <- AWS.df$AWS[which(AWS.df$AWS == aws_name)][1]
   if(is.na(aws_name_untrimmed) == TRUE) {
-    aws_name_trim <- stop(paste("No AWS station found with the following name:", aws))
+    aws_name_trim <- stop(paste("No AWS station found with the following name:", aws_name))
   } else{
     aws_name_trim <- gsub(" ", "", aws_name_untrimmed)
   }

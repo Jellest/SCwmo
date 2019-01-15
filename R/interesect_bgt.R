@@ -319,7 +319,7 @@ selected_aws_site <- select_single_aws(AWS.df, "De Bilt", "site")
 selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
 
 BGT_station_adjust.sp <- readOGR(dsn = "data/BGT/deBilt", "BGT_DeBilt_adjustments", stringsAsFactors=FALSE)
-crs(BGT_station_adjust.sp) <- crs("+init=epsg:28992")
+crs(BGT_station_adjust.sp) <- crs(epsg_rd)
 BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
 temperature_landuse_criteria.df_site <- clip_bgt(aws_name = selected_aws_site[[1]]$AWS, coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
 temperature_landuse_criteria.df_temp <- clip_bgt(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
