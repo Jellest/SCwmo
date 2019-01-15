@@ -26,13 +26,14 @@
 #' maxDist=100)
 #'@export
 
-shadow_angles <- function(spatialpoint,
+shadow_angles <- function(aws_name, spatialpoint,
                           X,
                           Y,
                           LONLAT,
                           ahn_mask,
                           angle,
-                          maxDist){
+                          maxDist,
+                          sensor_height){
   requireNamespace("sp")
   requireNamespace("raster")
   requireNamespace("horizon")
@@ -55,11 +56,23 @@ shadow_angles <- function(spatialpoint,
       crs(spatialpoint) <- CRS(epsg_rd)
     }
   }
-  if(LONLAT == TRUE){
-    spatialpoint <- spTransform(spatialpoint, CRS = CRS(epsg_rd))
-    LONLAT = FALSE
+  if(missing(aws_name)){
+    aws_name <- ""
+    aws_name_trim <- ""
+  } else {
+    aws_name_trim <- getAWS_name_trim(aws_name)
+  }
+
+  if(missing(sensor_height)){
+    sensor_height = 0
+    if_height_instrument = FALSE
+  } else {
+    if_height_instrument = TRUE
   }
   
+  if(if_height_instrument == TRUE & sensor_height > 0){
+    
+  }
   
   horizon_grid<-horizon::horizonSearch(x = ahn_mask,  
                                        degrees= TRUE,
@@ -68,7 +81,11 @@ shadow_angles <- function(spatialpoint,
                                        ll=LONLAT)
   shadows<-raster::stack(ahn_mask,horizon_grid)
   names(shadows)<-c("height","shadow_angle")
+  #print(str(shadows[["shadow_angle"]]))
+  #plot(shadows)
+  writeRaster(shadows[["shadow_angle"]], paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", aws_name_trim, "_sa_", angle, ".tif"), overwrite = TRUE)
   df<-extract(x = shadows, y = spatialpoint, method='bilinear')
+  #View(df)
   #df<- as.data.frame(matrix)
   return(list("shadows"=shadows,"df"=df))
 }

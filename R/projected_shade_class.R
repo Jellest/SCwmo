@@ -89,21 +89,30 @@ projected_shade_class <- function(solar_shading_angles, cv_colName){
     }
     
     if(df[n,"meet_class5"] == TRUE){
-      df[n,"final_class"] <- 5
+      df[n,"final_indiv_class"] <- 5
     }
     if(df[n,"meet_class4"] == TRUE){
-      df[n,"final_class"] <- 4
+      df[n,"final_indiv_class"] <- 4
     }
     if(df[n,"meet_class3"] == TRUE){
-      df[n,"final_class"] <- 3
+      df[n,"final_indiv_class"] <- 3
     }
     if(df[n,"meet_class2"] == TRUE){
-      df[n,"final_class"] <- 2
+      df[n,"final_indiv_class"] <- 2
     }
     if(df[n,"meet_class1"] == TRUE){
-      df[n,"final_class"] <- 1
+      df[n,"final_indiv_class"] <- 1
     }
+
   }
-  View(filter(select(df, elevation, shadow_angle, final_class), final_class > 1))
+  final_class <- max(df[,"final_indiv_class"]) 
+  print(final_class)
+  df$final_Class <- final_class 
+  
   return (df)
 }
+
+ah_ssa_deBilt <- fread("output/solar_shadow_angles/DeBilt_ah_solar_shadow_angles.csv")
+
+ah_ssa_deBilt_classes <- projected_shade_class(ah_ssa_deBilt)
+fwrite(ah_ssa_deBilt_classes, "output/solar_shadow_angles/DeBilt_ah_solar_shadow_angles_classes.csv")

@@ -59,7 +59,7 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     sun_position <- sunpos(sun_vector)
     summary(sun_position)
     
-    m <- cbind(X, Y, LON, LAT, julian_day, sun_position)
+    m <- cbind(LON, LAT, julian_day, sun_position)
     df <- data.frame(m)
     df$elevation <- 90 - df$zenith
     # if(!missing(aws_name)){
@@ -100,14 +100,6 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
   
 return(list("all angles"= all_solar_angles, "ah angles" = ah_solar_angles))
 }
-
-testangles <- solar_angles(X = 5.17939,
-                               Y = 52.09886,
-                               day = 21,
-                               month = 12,
-                               year = 2018,
-                           minutes_interval = 30,
-                               LONLAT = TRUE)
 
 #all_solar_angles <- rbind(all_solar_angles2, month_all_solar_angles2[[1]])
   
