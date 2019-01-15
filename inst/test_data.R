@@ -27,3 +27,22 @@ test_point.sf <- st_as_sf(test_point.sp)
 select_single_aws(AWS.df, "Schiphol", "temp_150cm")
 
 aws_list <- dplyr::filter(AWS.df, DS_DESC == "AWS" & Aparatuur == "site")[,1]
+
+
+testangles <- solar_angles(X = 5.17939,
+                           Y = 52.09886,
+                           day = 21,
+                           month = 12,
+                           year = 2018,
+                           minutes_interval = 30,
+                           LONLAT = TRUE)
+
+test_sa <- multiple_Moments_solarAngles(aws_name = "De Bilt",
+                                        sensor_name = "temp_150cm",
+                                        years = c(2018),
+                                        months = c(12,1:6),
+                                        days = c(21),
+                                        exportCSV = TRUE,
+                                        printChart = FALSE)
+
+test_so_sh_angles <- multipleShadowAngles(test_sa[["all ah angles"]], radius = 300) 

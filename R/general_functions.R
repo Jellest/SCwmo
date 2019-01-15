@@ -45,7 +45,7 @@ create_SpatialPoint <- function(X, Y, LONLAT){
   if(missing(LONLAT)){
     LONLAT = FALSE
   }
-  point.sp<-data.frame(data.frame(c("X","Y")))
+  point.sp<-data.frame(X = X, Y = Y, stringsAsFactors=FALSE)
   coordinates(point.sp) <- ~X+Y
   if(LONLAT == FALSE){
     crs(point.sp)<-CRS(epsg_rd)
@@ -56,5 +56,6 @@ create_SpatialPoint <- function(X, Y, LONLAT){
     point_rd.sp <- spTransform(point.sp, epsg_rd)
     point_wgs.sp <- point.sp
   }
+
   return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
 }
