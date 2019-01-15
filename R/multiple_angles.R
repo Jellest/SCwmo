@@ -160,12 +160,12 @@ multipleSolar_shadow_angles <- function(aws_list, years, months, days, radius, p
                                                  days = days,
                                                  exportCSV = exportCSV,
                                                  printChart = printChart)
-    solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]][1,],
+    solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]],
                                                 radius = radius)
     print(paste("Completed angle calculations for", aws_name))
-    print(" ")
+    print("")
     print("=====================")
-    print(" ")
+    print("")
   }
   end_time <- Sys.time()
   elapsed_time <- end_time - start_time
