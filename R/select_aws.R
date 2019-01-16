@@ -22,7 +22,8 @@ select_single_aws <- function(aws.df, aws_name, sensor_name){
     crs(single_aws_rd.sp)<-CRS(epsg_rd)
 
     single_aws_rd.sf <- sf::st_as_sf(single_aws_rd.sp)
-    single_aws_wgs.sf <- sf::st_transform(single_aws_rd.sf, "+init=epsg:4326")
+    single_aws_rd_copy.sf <- single_aws_rd.sf
+    single_aws_wgs.sf <- sf::st_transform(single_aws_rd_copy.sf, "+init=epsg:4326")
     single_aws_wgs.sp <- sf::as_Spatial(single_aws_wgs.sf)
     return(list("aws.df" = single_aws.df,
                 "aws_rd.sp" = single_aws_rd.sp,

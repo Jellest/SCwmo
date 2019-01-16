@@ -29,13 +29,15 @@ select_single_aws(AWS.df, "Schiphol", "temp_150cm")
 aws_list <- dplyr::filter(AWS.df, DS_DESC == "AWS" & Aparatuur == "site")[,1]
 
 
+##solar amnd shadow angles
 testangles <- solar_angles(X = 5.17939,
                            Y = 52.09886,
                            day = 21,
                            month = 12,
                            year = 2018,
-                           minutes_interval = 30,
+                           minutes_interval = 15,
                            LONLAT = TRUE)
+fwrite(testangles[["all angles"]], "testangles.csv")
 
 test_sa <- multiple_Moments_solarAngles(aws_name = "De Bilt",
                                         sensor_name = "temp_150cm",
@@ -45,4 +47,11 @@ test_sa <- multiple_Moments_solarAngles(aws_name = "De Bilt",
                                         exportCSV = TRUE,
                                         printChart = FALSE)
 
-test_so_sh_angles <- multipleShadowAngles(test_sa[["all ah angles"]], radius = 300) 
+test_so_sh_angles <- multipleShadowAngles(test_sa[["all ah angles"]], radius = 300)
+
+#solar and shadow angles chart
+sun_shade_angles_chart("output/solar_shadow_angles/DeBilt/DeBilt_ah_solar_shadow_angles.csv", "De Bilt")
+
+#shadow classifcation
+projected_shade_class(data_path = "output/solar_shadow_angles/DeBilt/DeBilt_ah_solar_shadow_angles.csv", aws_name = "De Bilt")
+

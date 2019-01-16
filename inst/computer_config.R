@@ -35,8 +35,10 @@ start <- function(settings){
   guideline_criteria <<- fread("wmoSC/data-raw/guideline_criteria.csv")
   epsg_rd <<- "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
   sAWS_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
+  temp_names <<- c("Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
   sAWS_list.df <<- filter(AWS.df, AWS %in% sAWS_names)
   sAWStemperature_list.df <<- filter(AWS.df, AWS %in% sAWS_names & Sensor == "temp_150cm")
+  temp_list.df <<- filter(AWS.df, AWS %in% temp_names & Sensor == "temp_150cm")
 }
 
 #installl Perl

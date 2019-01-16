@@ -15,10 +15,6 @@ calculate_area <- function(sp){
   return(p)
 }
 
-CleanGlobEnvir <- function(pattern){
-  rm(list = ls(envir=globalenv())[
-  grep(pattern, ls(envir=globalenv()))], envir = globalenv())
-}
 
 # mask_raster <- function(spatialpoint, ahn, distance){
 #   aws_mask<-raster::buffer(spatialpoint,width=distance)
@@ -59,3 +55,6 @@ create_SpatialPoint <- function(X, Y, LONLAT){
 
   return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
 }
+
+
+
