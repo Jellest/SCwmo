@@ -6,6 +6,11 @@ library(gdata)
 library(sf)
 
 import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, redownload){
+  CleanGlobEnvir <- function(pattern){
+    rm(list = ls(envir=globalenv())[
+      grep(pattern, ls(envir=globalenv()))], envir = globalenv())
+  }
+  
   if(missing(redownload)){
     redownload = FALSE
   }
@@ -87,7 +92,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
       
       #bgt_shape <- assign(paste("BGT", station, sep="_"), st_sfc(st_polygon(list())))
       
-      #crs(BGT_deBilt) <- crs("+init=epsg:28992")
+      #crs(BGT_deBilt) <- crs(epsg_rd)
       
       
       #adjust columns
@@ -267,7 +272,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
           
           object_name <- readOGR(dsn = raw_data_location, layer = object_name_short, stringsAsFactors=FALSE)
           #object_name@data$object_type<- c(object_name_short)
-          crs(object_name) <- crs("+init=epsg:28992")
+          crs(object_name) <- crs(epsg_rd)
           if(class(object_name) == "SpatialLinesDataFrame"){
             lines.sf <- st_as_sf(object_name)
             polygons.sf <- st_polygonize(lines.sf)
@@ -277,7 +282,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
           object_name <- adjustColumns(raw_data_location, object_name_short)
           print(paste("field count object name: ", length(names(object_name@data))))
       
-          crs(object_name) <- crs("+init=epsg:28992")
+          crs(object_name) <- crs(epsg_rd)
           
           tmp.bgt_counter <<- tmp.bgt_counter + 1
           print(paste("counter pos. 1:", tmp.bgt_counter))
@@ -285,6 +290,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
           if((tmp.bgt_counter == 1 & tmp.create_sp_atNext == FALSE) | (tmp.bgt_counter > 1 & tmp.create_sp_atNext == TRUE)){
             print("creating BGT_station.sp...")
             tmp.BGT_station.sp <<- object_name
+            CRS(tmp.BGT_station.sp) <- epsg_rd
             print(paste("length object:",length(object_name), sep=" "))
             print(paste("length BGT:",length(tmp.BGT_station.sp), sep=" "))
             tmp.create_sp_atNext <<- FALSE
@@ -342,15 +348,16 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
         if(tmp.bgt_counter == length(bgt_objects_name_list)){
           shp_name <- paste("BGT", aws_name_trim, sep="_")
           tmp.BGT_station.sp$AREA <-sapply(slot(tmp.BGT_station.sp, 'polygons'), function(i) slot(i, 'area')) 
+          proj4string(tmp.BGT_station.sp) <- epsg_rd
           writeOGR(obj = tmp.BGT_station.sp, dsn = working_directory, layer = shp_name, driver = "ESRI Shapefile", overwrite_layer = TRUE)
           tmp.BGT_station.sf <<- st_as_sf(tmp.BGT_station.sp)
-          st_crs(tmp.BGT_station.sf, "+init=epsg:28992")
+          st_crs(tmp.BGT_station.sf, epsg_rd)
           tmp.bgt_counter <<- 0
           return(tmp.BGT_station.sf)
         }
       }
       tmp.bgt_counter <<- 0
-      #read BGt and create one BGT shp for the aws.
+      #read BGT and create one BGT shp for the aws.
       tmp.objects_count_aws <<- data.frame(aws_name = as.character(), sensor_name = as.character(), radius = as.numeric(), objectname = as.character(), count = as.numeric(), stringsAsFactors=FALSE)
       objects_counts_names <- c("AWS", "sensor_name", "radius", "object_name", "object_count")
       names(tmp.objects_count_aws) <- objects_counts_names
@@ -360,6 +367,7 @@ import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, re
       mapply(read_bgt,aws_name = aws_name, wfs = bgt_wfs, bgt_object_name = bgt_objects_name_list, object_name_short = bgt_objects_shortname_list)
       
       BGT_aws.sf <- tmp.BGT_station.sf
+      st_crs(BGT_aws.sf, epsg_rd)
       objects_count <- tmp.objects_count_aws 
       all_bgt_objects <- tmp.all_bgt_objects 
       CleanGlobEnvir(pattern = "tmp")

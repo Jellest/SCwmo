@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, cv_colName){
+presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, cv_colName, exportCSV, exportShp){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -16,14 +16,21 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
   if(missing(cv_colName)){
     cv_colName <- "Criteria_Value"
   }
+  if(missing(exportCSV)){
+    exportCSV = TRUE
+  }
   
+  if(missing(exportShp)){
+    exportShp <- TRUE
+  }
+  aws_name_trim <- getAWS_name_trim(aws_name)
   ##load criteria
   tluc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "land use" & Class == class)
   selected_aws_row <- which(temperature_criteria.df == aws_name)
   ##functions
   createBuffer <- function(coords, distance){
     buffer <- st_buffer(coords, dist=distance)
-    st_crs(buffer, "+init=epsg:28992")
+    st_crs(buffer, epsg_rd)
     return (buffer)}
   
   createAnnulus <- function(coords, region){
@@ -33,7 +40,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
     inner_ring <- createBuffer(coords, as.numeric(split_values[[1]][1]))
     annulus <- st_difference(outer_ring, inner_ring)
     
-    st_crs(annulus, "+init=epsg:28992")
+    st_crs(annulus, epsg_rd)
     return(annulus)}
   
   ##select criteria for buffers and relative area according to class
@@ -47,27 +54,29 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
   if(class >= 5){
     temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
     annulus_insct.sf <- NULL
-    BGT_outerBuffer_intsct.sf <- NULL
+    outerBuffer_intsct.sf <- NULL
     inner_buffer_insct.sf <- NULL
   } else {
     #create outer buffer
     outer_buffer <- createBuffer(coords, outer_buffer_dist)
     area_outer_buffer <- st_area(outer_buffer)
     units::set_units(area_outer_buffer, m^2)
+    #print(st_crs(bgt_shape))
+    #print(st_crs(outer_buffer))
     
     #intersection outer buffer
     st_agr(bgt_shape) <- "constant"
     st_agr(outer_buffer) <- "constant"
-    BGT_outerBuffer_intsct.sf <- st_intersection(bgt_shape, outer_buffer)
-    st_crs(BGT_outerBuffer_intsct.sf, "+init=epsg:28992")
+    outerBuffer_intsct.sf <- st_intersection(bgt_shape, outer_buffer)
+    st_crs(outerBuffer_intsct.sf, epsg_rd)
     
     #select artifical objects within outer buffer
-    artificial_objects.sf <- subset(BGT_outerBuffer_intsct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
-    buildings <- subset(BGT_outerBuffer_intsct.sf, object_typ == "pand")
-    water <- subset(BGT_outerBuffer_intsct.sf, object_typ == "waterdeel")
-    roads <- subset(BGT_outerBuffer_intsct.sf, object_typ == "wegdeel")
-    barren <- subset(BGT_outerBuffer_intsct.sf, object_typ == "onbegroeidterreindeel")
-    vegetation <- subset(BGT_outerBuffer_intsct.sf, object_typ == "begroeidterreindeel")
+    artificial_objects.sf <- subset(outerBuffer_intsct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
+    buildings <- subset(outerBuffer_intsct.sf, object_typ == "pand")
+    water <- subset(outerBuffer_intsct.sf, object_typ == "waterdeel")
+    roads <- subset(outerBuffer_intsct.sf, object_typ == "wegdeel")
+    barren <- subset(outerBuffer_intsct.sf, object_typ == "onbegroeidterreindeel")
+    vegetation <- subset(outerBuffer_intsct.sf, object_typ == "begroeidterreindeel")
     
     
     ##column names
@@ -251,10 +260,30 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
       if(temperature_criteria.df[selected_aws_row, outer_objectCountColName] == 0){
         print(paste("No artifical objects are found within ", toString(outer_buffer_dist), "m.", "Class ", class, " is met.", sep=""))
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        if(class == 1){
+          temperature_criteria.df[selected_aws_row,"meet_class2"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class3"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
+        } else if(class == 2){
+          temperature_criteria.df[selected_aws_row,"meet_class3"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
+        }
       } else if(temperature_criteria.df[selected_aws_row, meet_outerBuffer_criteria] == TRUE &
                 temperature_criteria.df[selected_aws_row, meet_annulus_criteria] == TRUE &
                 temperature_criteria.df[selected_aws_row, meet_innerBuffer_criteria] == TRUE){
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        if(class == 1){
+          temperature_criteria.df[selected_aws_row,"meet_class2"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class3"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
+        } else if(class == 2){
+          temperature_criteria.df[selected_aws_row,"meet_class3"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+          temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
+        }
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii. Class ", class, " is met.", sep=""))
       } else {
         temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
@@ -264,9 +293,13 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
       if(temperature_criteria.df[selected_aws_row, outer_objectCountColName] == 0){
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
         print(paste("No artifical objects are found within ", toString(outer_buffer_dist), "m.", "Class ", class, " is met.", sep=""))
+        temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+        temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
       } else if(temperature_criteria.df[selected_aws_row, meet_outerBuffer_criteria] == TRUE &
                 temperature_criteria.df[selected_aws_row, meet_innerBuffer_criteria] == TRUE){
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        temperature_criteria.df[selected_aws_row,"meet_class4"] <- NA
+        temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
       } else {
         temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but significant size in area within radii. Class ", class, " is not met.", sep=""))
@@ -275,10 +308,12 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
       if(temperature_criteria.df[selected_aws_row, meet_outerBuffer_criteria] == TRUE &
         temperature_criteria.df[selected_aws_row, meet_innerBuffer_criteria] == TRUE){
         temperature_criteria.df[selected_aws_row,meet_classNr] <- TRUE
+        temperature_criteria.df[selected_aws_row,"meet_class5"] <- NA
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii. Class ", class, " is met.", sep=""))
       } else {
         temperature_criteria.df[selected_aws_row,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii. Class ", class, " is not met.", sep=""))
+        temperature_criteria.df[selected_aws_row,"meet_class5"] <- TRUE
       }
     }
   }
@@ -289,7 +324,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          clip_bgt(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE)
+          presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("BGT clip passed class criteria ", class)
         }
@@ -298,7 +333,7 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          clip_bgt(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE)
+          presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("BGT clip passed class criteria ", class)
         }
@@ -311,9 +346,32 @@ clip_bgt <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class
         }
       }
   } else {
+    temperature_criteria.df[selected_aws_row,"final_classNr"] <- class
     message("BGT clip passed criteria for class ", class, ".")
   }
-  return(list("df" = temperature_criteria.df, "outer_buf"= BGT_outerBuffer_intsct.sf, "annulus"=annulus_insct.sf,"inner_buf"=inner_buffer_insct.sf))}
+  
+  #export
+  if(exportCSV == TRUE | exportShp == TRUE){
+    if(!dir.exists("output/objects")){
+      dir.create("output/objects")
+    }
+    if(!dir.exists(paste0("output/objects/",aws_name_trim))){
+      dir.create(paste0("output/objects/", aws_name_trim))
+    }
+    output_path <- paste0("output/objects/", aws_name_trim, "/")
+  }
+  if(exportCSV == TRUE){
+    fwrite(temperature_criteria.df, paste0(output_path, "objects_classes.csv"))
+  }
+  if(exportShp == TRUE){
+    st_write(obj = outerBuffer_intsct.sf, dsn = paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile", overwrite_layer = TRUE)
+    st_write(obj = inner_buffer_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", inner_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile", overwrite_layer = TRUE)
+    if(class == 1 | class == 2){
+      st_write(obj = annulus_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", region, "m_annulus.shp"), driver = "ESRI Shapefile", overwrite_layer = TRUE)
+    }
+  }
+  return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+}
 
 selected_aws_site <- select_single_aws(AWS.df, "De Bilt", "site")
 selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
@@ -321,7 +379,8 @@ selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
 BGT_station_adjust.sp <- readOGR(dsn = "data/BGT/deBilt", "BGT_DeBilt_adjustments", stringsAsFactors=FALSE)
 crs(BGT_station_adjust.sp) <- crs(epsg_rd)
 BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
-temperature_landuse_criteria.df_site <- clip_bgt(aws_name = selected_aws_site[[1]]$AWS, coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
-temperature_landuse_criteria.df_temp <- clip_bgt(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
+
+temperature_landuse_criteria.df_site <- presence_objects(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
+temperature_landuse_criteria.df_temp <- presence_objects(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
 mapview(BGT_station_adjust.sf)
 View(temperature_landuse_criteria.df_site[["df"]])

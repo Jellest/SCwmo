@@ -1,4 +1,4 @@
-multiple_bgt <- function(aws_list, delete_raw_gmls){
+multiple_import_bgt <- function(aws_list, delete_raw_gmls){
   start_time <- Sys.time()
   if(missing(delete_raw_gmls)){
     delete_raw_gmls <- FALSE
@@ -24,4 +24,4 @@ multiple_bgt <- function(aws_list, delete_raw_gmls){
   return(list("all_objects_count" = all_objects_count, "all_bgt_objects"=all_bgt_objects))
 }
 
-multiple_bgt(aws_list = aws_list, delete_raw_gmls = TRUE)
+multiple_import_bgt(aws_list = sAWS_names, delete_raw_gmls = FALSE)
