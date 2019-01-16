@@ -1,4 +1,11 @@
-projected_shade_class <- function(solar_shading_angles, cv_colName){
+projected_shade_class <- function(data_path, cv_colName, aws_name){
+  if(missing(aws_name)){
+    aws_name <- ""
+  }
+  aws_name_trim <- getAWS_name_trim(aws_name)
+  
+  data <- fread(data_path)
+  
   tshac <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "shading")
   
   if(missing(cv_colName)){
@@ -34,85 +41,83 @@ projected_shade_class <- function(solar_shading_angles, cv_colName){
   # class_2_3_shading <- subset(solar_shading_angles, elevation > class_2_cv) 
   # class_4_shading <- subset(solar_shading_angles, elevation > class_4_cv)
   
-  df <- solar_shading_angles 
-  
-  for(n in seq(1, nrow(df), 1)){
-    df[n,"meet_class1"] <- TRUE
-    df[n,"meet_class2"] <- TRUE
-    df[n,"meet_class3"] <- TRUE
-    df[n,"meet_class4"] <- TRUE
-    df[n,"meet_class5"] <- TRUE
+  for(n in seq(1, nrow(data), 1)){
+    data[n,"meet_class1"] <- TRUE
+    data[n,"meet_class2"] <- TRUE
+    data[n,"meet_class3"] <- TRUE
+    data[n,"meet_class4"] <- TRUE
+    data[n,"meet_class5"] <- TRUE
     
     #class 1
-    if(df[n,"shadow_angle"] < class_1_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-      df[n,"meet_class1"] <- TRUE
-      df[n,"meet_class2"] <- TRUE
-      df[n,"meet_class3"] <- TRUE
-      df[n,"meet_class4"] <- TRUE
-      df[n,"meet_class5"] <- TRUE
+    if(data[n,"shadow_angle"] < class_1_cv & data[n,"shadow_angle"] > data[n,"elevation"]){
+      data[n,"meet_class1"] <- TRUE
+      data[n,"meet_class2"] <- TRUE
+      data[n,"meet_class3"] <- TRUE
+      data[n,"meet_class4"] <- TRUE
+      data[n,"meet_class5"] <- TRUE
     }
     
     #class 2 / 3
-    if(df[n,"shadow_angle"] >= class_1_cv & df[n,"shadow_angle"] < class_2_3_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-      df[n,"meet_class1"] <- FALSE
-      df[n,"meet_class2"] <- TRUE
-      df[n,"meet_class3"] <- TRUE
-      df[n,"meet_class4"] <- TRUE
-      df[n,"meet_class5"] <- TRUE
+    if(data[n,"shadow_angle"] >= class_1_cv & data[n,"shadow_angle"] < class_2_3_cv & data[n,"shadow_angle"] > data[n,"elevation"]){
+      data[n,"meet_class1"] <- FALSE
+      data[n,"meet_class2"] <- TRUE
+      data[n,"meet_class3"] <- TRUE
+      data[n,"meet_class4"] <- TRUE
+      data[n,"meet_class5"] <- TRUE
     }
     
     #class 4
-    if(df[n,"shadow_angle"] >= class_2_3_cv & df[n,"shadow_angle"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-      df[n,"meet_class1"] <- FALSE
-      df[n,"meet_class2"] <- FALSE
-      df[n,"meet_class3"] <- FALSE
-      df[n,"meet_class4"] <- TRUE
-      df[n,"meet_class5"] <- TRUE
+    if(data[n,"shadow_angle"] >= class_2_3_cv & data[n,"shadow_angle"] < class_4_cv & data[n,"shadow_angle"] > data[n,"elevation"]){
+      data[n,"meet_class1"] <- FALSE
+      data[n,"meet_class2"] <- FALSE
+      data[n,"meet_class3"] <- FALSE
+      data[n,"meet_class4"] <- TRUE
+      data[n,"meet_class5"] <- TRUE
     }
     
     ##class 4
-    # if(df[n,"shadow_angle"] >= class_3_cv & df[n,"shadow_angle"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-    #   df[n,"meet_class1"] <- FALSE
-    #   df[n,"meet_class2"] <- FALSE
-    #   df[n,"meet_class3"] <- FALSE
-    #   df[n,"meet_class4"] <- TRUE
-    #   df[n,"meet_class5"] <- TRUE
+    # if(data[n,"shadow_angle"] >= class_3_cv & data[n,"shadow_angle"] < class_4_cv & data[n,"shadow_angle"] > data[n,"elevation"]){
+    #   data[n,"meet_class1"] <- FALSE
+    #   data[n,"meet_class2"] <- FALSE
+    #   data[n,"meet_class3"] <- FALSE
+    #   data[n,"meet_class4"] <- TRUE
+    #   data[n,"meet_class5"] <- TRUE
     # }
     
     #class 5
-    if(df[n,"shadow_angle"] >= class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-      df[n,"meet_class1"] <- FALSE
-      df[n,"meet_class2"] <- FALSE
-      df[n,"meet_class3"] <- FALSE
-      df[n,"meet_class4"] <- FALSE
-      df[n,"meet_class5"] <- TRUE
+    if(data[n,"shadow_angle"] >= class_4_cv & data[n,"shadow_angle"] > data[n,"elevation"]){
+      data[n,"meet_class1"] <- FALSE
+      data[n,"meet_class2"] <- FALSE
+      data[n,"meet_class3"] <- FALSE
+      data[n,"meet_class4"] <- FALSE
+      data[n,"meet_class5"] <- TRUE
     }
     
-    if(df[n,"meet_class5"] == TRUE){
-      df[n,"final_indiv_class"] <- 5
+    if(data[n,"meet_class5"] == TRUE){
+      data[n,"final_indiv_class"] <- 5
     }
-    if(df[n,"meet_class4"] == TRUE){
-      df[n,"final_indiv_class"] <- 4
+    if(data[n,"meet_class4"] == TRUE){
+      data[n,"final_indiv_class"] <- 4
     }
-    if(df[n,"meet_class3"] == TRUE){
-      df[n,"final_indiv_class"] <- 3
+    if(data[n,"meet_class3"] == TRUE){
+      data[n,"final_indiv_class"] <- 3
     }
-    if(df[n,"meet_class2"] == TRUE){
-      df[n,"final_indiv_class"] <- 2
+    if(data[n,"meet_class2"] == TRUE){
+      data[n,"final_indiv_class"] <- 2
     }
-    if(df[n,"meet_class1"] == TRUE){
-      df[n,"final_indiv_class"] <- 1
+    if(data[n,"meet_class1"] == TRUE){
+      data[n,"final_indiv_class"] <- 1
     }
 
   }
-  final_class <- max(df[,"final_indiv_class"]) 
-  print(final_class)
-  df$final_Class <- final_class 
+  final_class <- max(data[,"final_indiv_class"]) 
+  #print(final_class)
+  data$final_Class <- final_class 
   
-  return (df)
+  if(aws_name != ""){
+    fwrite(data, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_ah_solar_shadow_angles_classes.csv"))
+  } else {
+    fwrite(data, "output/solar_shadow_angles/ah_solar_shadow_angles_classes.csv")
+  }
+  return (data)
 }
-
-ah_ssa_deBilt <- fread("output/solar_shadow_angles/DeBilt_ah_solar_shadow_angles.csv")
-
-ah_ssa_deBilt_classes <- projected_shade_class(ah_ssa_deBilt)
-fwrite(ah_ssa_deBilt_classes, "output/solar_shadow_angles/DeBilt_ah_solar_shadow_angles_classes.csv")

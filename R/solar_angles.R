@@ -86,18 +86,60 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
       f_hour <- 23
     }
     
-    jd <- JD(seq(ISOdate(year,month,day,s_hour, 0),ISOdate(year,month,day,f_hour, 59),by=minutes_int))
+    jd <- JD(seq(ISOdate(year,month,day,s_hour, 0),ISOdate(year,month,day,f_hour, 59),by=minutes_interval))
     return(jd)
+  }
+  
+  julian_day <- julian_day_hour(year = year, month = month, day = day, minutes_interval = minutes_int)
+  
+  getDate <- function(day, month){
+    if(month == 1){
+      month_name = "Jan"
+    }
+    if(month == 2){
+      month_name = "Feb"
+    }
+    if(month == 3){
+      month_name = "Mar"
+    }
+    if(month == 4){
+      month_name = "Apr"
+    }
+    if(month == 5){
+      month_name = "May"
+    }
+    if(month == 6){
+      month_name = "Jun"
+    }
+    if(month == 7){
+      month_name = "Jul"
+    }
+    if(month == 8){
+      month_name = "Aug"
+    }
+    if(month == 9){
+      month_name = "Sep"
+    }
+    if(month == 10){
+      month_name = "Oct"
+    }
+    if(month == 11){
+      month_name = "Nov"
+    }
+    if(month == 12){
+      month_name = "Dec"
+    }
+    date <- paste(day, month_name, sep="-")
+    return (date)
   }
   
   
   all_solar_angles <- data.frame(get_solar_angles(lon = LON,
                                               lat = LAT,
-                                              julian_day = julian_day_hour(year = year, month = month, day = day, minutes_interval = minutes_interval)), stringsAsFactors = FALSE)
-  
+                                              julian_day = julian_day), day = getDate(day, month), stringsAsFactors = FALSE)
+                                              
   #select only above horizon elevation anngles
   ah_solar_angles <- subset(all_solar_angles, elevation > 0)
-  
 return(list("all angles"= all_solar_angles, "ah angles" = ah_solar_angles))
 }
 

@@ -136,10 +136,10 @@ multipleShadowAngles <- function(solar_angles, radius){
       #ah_solar_shadow_angles <- ah_solar_shadow_angles[,c("lat", "lon", "altitude", "julian_day", "azimuth", "zenith", "elevation", "shadow_height", "shadow_angle")]
       fwrite(ah_solar_shadow_angles, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_ah_solar_shadow_angles_complete.csv"))
     }
-    end_time <- Sys.time()
-    elapsed_time <- ceiling(end_time - start_time)
-    message(paste("Finished angle calculations finished. Elapsed Time:", elapsed_time, "seconds."))
   }
+  end_time <- Sys.time()
+  elapsed_time <- ceiling(end_time - start_time)
+  message(paste("Finished angle calculations for", solar_angles$AWS[1], ". Elapsed Time:", elapsed_time, "seconds."))
 }
 
 multipleSolar_shadow_angles <- function(aws_list, years, months, days, radius, printChart, exportCSV){
@@ -172,7 +172,7 @@ multipleSolar_shadow_angles <- function(aws_list, years, months, days, radius, p
   print(paste("Elapsed time:", ceiling(elapsed_time), "seconds."))
 }
 
-multipleSolar_shadow_angles(aws_list = sAWStemperature_list.df,
+multipleSolar_shadow_angles(aws_list = temp_list.df,
                             years = 2018,
                             months = c(12, 1:6),
                             days = 21,
