@@ -1,46 +1,46 @@
-Variable,Criteria_Type,Name,Class,Criteria_Value
-temperature,slope,slope,1,19
-temperature,slope,slope,2,19
-temperature,slope,slope,3,NA
-temperature,slope,slope,4,NA
-temperature,slope,slope,5,NA
-temperature,vegetation height,vegetation height,1,10
-temperature,vegetation height,vegetation height,2,10
-temperature,vegetation height,vegetation height,3,25
-temperature,vegetation height,vegetation height,4,NA
-temperature,vegetation height,vegetation height,5,NA
-temperature,land use,outer buffer distance,1,100
-temperature,land use,outer buffer distance,2,30
-temperature,land use,outer buffer distance,3,10
-temperature,land use,outer buffer distance,4,10
-temperature,land use,outer buffer distance,5,NA
-temperature,land use,inner buffer distance,1,10
-temperature,land use,inner buffer distance,2,5
-temperature,land use,inner buffer distance,3,5
-temperature,land use,inner buffer distance,4,3
-temperature,land use,inner buffer distance,5,NA
-temperature,land use,annulus distance,1,10_30
-temperature,land use,annulus distance,2,5_10
-temperature,land use,annulus distance,3,NA
-temperature,land use,annulus distance,4,NA
-temperature,land use,annulus distance,5,NA
-temperature,land use,relative area outer buffer,1,0.1
-temperature,land use,relative area outer buffer,2,0.1
-temperature,land use,relative area outer buffer,3,0.1
-temperature,land use,relative area outer buffer,4,0.5
-temperature,land use,relative area outer buffer,5,NA
-temperature,land use,relative area inner buffer,1,0.01
-temperature,land use,relative area inner buffer,2,0.01
-temperature,land use,relative area inner buffer,3,0.05
-temperature,land use,relative area inner buffer,4,0.3
-temperature,land use,relative area inner buffer,5,NA
-temperature,land use,relative area annulus,1,0.05
-temperature,land use,relative area annulus,2,0.05
-temperature,land use,relative area annulus,3,NA
-temperature,land use,relative area annulus,4,NA
-temperature,land use,relative area annulus,5,NA
-temperature,shading,projected shade,1,5
-temperature,shading,projected shade,2,7
-temperature,shading,projected shade,3,7
-temperature,shading,projected shade,4,20
-temperature,shading,projected shade,5,NA
+Variable;Criteria_Type;Name;Class;Criteria_Value
+temperature;slope;slope;1;19
+temperature;slope;slope;2;19
+temperature;slope;slope;3;NA
+temperature;slope;slope;4;NA
+temperature;slope;slope;5;NA
+temperature;vegetation height;vegetation height;1;0.1
+temperature;vegetation height;vegetation height;2;0.1
+temperature;vegetation height;vegetation height;3;0.25
+temperature;vegetation height;vegetation height;4;NA
+temperature;vegetation height;vegetation height;5;NA
+temperature;land use;outer buffer distance;1;100
+temperature;land use;outer buffer distance;2;30
+temperature;land use;outer buffer distance;3;10
+temperature;land use;outer buffer distance;4;10
+temperature;land use;outer buffer distance;5;NA
+temperature;land use;inner buffer distance;1;10
+temperature;land use;inner buffer distance;2;5
+temperature;land use;inner buffer distance;3;5
+temperature;land use;inner buffer distance;4;3
+temperature;land use;inner buffer distance;5;NA
+temperature;land use;annulus distance;1;10_30
+temperature;land use;annulus distance;2;5_10
+temperature;land use;annulus distance;3;NA
+temperature;land use;annulus distance;4;NA
+temperature;land use;annulus distance;5;NA
+temperature;land use;relative area outer buffer;1;0,1
+temperature;land use;relative area outer buffer;2;0,1
+temperature;land use;relative area outer buffer;3;0,1
+temperature;land use;relative area outer buffer;4;0,5
+temperature;land use;relative area outer buffer;5;NA
+temperature;land use;relative area inner buffer;1;0,01
+temperature;land use;relative area inner buffer;2;0,01
+temperature;land use;relative area inner buffer;3;0,05
+temperature;land use;relative area inner buffer;4;0,3
+temperature;land use;relative area inner buffer;5;NA
+temperature;land use;relative area annulus;1;0,05
+temperature;land use;relative area annulus;2;0,05
+temperature;land use;relative area annulus;3;NA
+temperature;land use;relative area annulus;4;NA
+temperature;land use;relative area annulus;5;NA
+temperature;shading;projected shade;1;5
+temperature;shading;projected shade;2;7
+temperature;shading;projected shade;3;7
+temperature;shading;projected shade;4;20
+temperature;shading;projected shade;5;NA

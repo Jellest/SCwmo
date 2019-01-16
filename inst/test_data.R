@@ -55,3 +55,7 @@ sun_shade_angles_chart("output/solar_shadow_angles/DeBilt/DeBilt_ah_solar_shadow
 #shadow classifcation
 projected_shade_class(data_path = "output/solar_shadow_angles/DeBilt/DeBilt_ah_solar_shadow_angles.csv", aws_name = "De Bilt")
 
+#vegetation height
+vegetation_height_criteria.df <- AWS.df[c(1,4)]
+vegetation_height_criteria.df <- vegetation_height_criteria.df[-(1:10), ]
+heightDifference <- vegetation_height(aws_name = "De Bilt", radius = 100)
