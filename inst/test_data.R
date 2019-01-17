@@ -59,3 +59,8 @@ projected_shade_class(data_path = "output/solar_shadow_angles/DeBilt/DeBilt_ah_s
 vegetation_height_criteria.df <- AWS.df[c(1,4)]
 vegetation_height_criteria.df <- vegetation_height_criteria.df[-(1:10), ]
 heightDifference <- vegetation_height(aws_name = "De Bilt", radius = 100)
+vegetation_classes(df = heightDifference[[2]],aws_name = "De Bilt", exportCSV = TRUE)
+
+# land use
+presence_objects(aws_name = "De Bilt", )
+
