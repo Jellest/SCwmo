@@ -12,6 +12,8 @@ projected_shade_class <- function(data_path, cv_colName, aws_name){
     cv_colName <- "Criteria_Value"
   }
   
+  tshac <- check_criteria(df = tshac, cv_colName = cv_colName)
+  
   class_1_filter <-  filter(tshac, Class == "1")
   class_1_cv <- as.numeric(class_1_filter[,cv_colName][1])
   
@@ -112,7 +114,7 @@ projected_shade_class <- function(data_path, cv_colName, aws_name){
   }
   final_class <- max(data[,"final_indiv_class"]) 
   #print(final_class)
-  data$final_Class <- final_class 
+  data$final_class <- final_class 
   
   if(aws_name != ""){
     fwrite(data, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_ah_solar_shadow_angles_classes.csv"))
