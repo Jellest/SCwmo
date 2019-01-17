@@ -1,6 +1,19 @@
-vegetation_classes <- function (df, cv_colName){
+vegetation_classes <- function (df, cv_colName, aws_name, exportCSV){
   if(missing(cv_colName)){
     cv_colName <- "Criteria_Value"
+  }
+  
+  df <- check_criteria(df = df, cv_colName = cv_colName)
+  
+  if(missing(aws_name)){
+    aws_name <- ""
+    aws_name_trim <- ""
+  } else {
+    aws_name_trim <- getAWS_name_trim(aws_name)
+  }
+  
+  if(missing(exportCSV)){
+    exportCSV = TRUE
   }
   vhc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "vegetation height")
   
@@ -64,7 +77,21 @@ vegetation_classes <- function (df, cv_colName){
   if(df[1,"meet_class1"] == TRUE){
     df[1,"final_class"] <- 1
   }
-
-  View(df)
+  
+    if(!dir.exists("output/vegetation_height")){
+      dir.create("output/vegetation_height")
+    }
+    
+  if(exportCSV == TRUE){
+    if(!dir.exists(paste0("output/vegetation_height/", aws_name_trim)) & aws_name_trim != ""){
+      dir.create(paste0("output/vegetation_height/", aws_name_trim))
+    }
+    
+    if(aws_name != ""){
+      fwrite(df, paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_vegetation_height_classes.csv"))
+    } else {
+      fwrite(df, "output/vegetation height/vegetation_height_classes.csv")
+    }
+  }
   return(df)
 }
