@@ -4,9 +4,9 @@ temperature;slope;slope;2;19
 temperature;slope;slope;3;NA
 temperature;slope;slope;4;NA
 temperature;slope;slope;5;NA
-temperature;vegetation height;vegetation height;1;0.1
-temperature;vegetation height;vegetation height;2;0.1
-temperature;vegetation height;vegetation height;3;0.25
+temperature;vegetation height;vegetation height;1;0,1
+temperature;vegetation height;vegetation height;2;0,1
+temperature;vegetation height;vegetation height;3;0,25
 temperature;vegetation height;vegetation height;4;NA
 temperature;vegetation height;vegetation height;5;NA
 temperature;land use;outer buffer distance;1;100

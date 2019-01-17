@@ -56,5 +56,18 @@ create_SpatialPoint <- function(X, Y, LONLAT){
   return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
 }
 
-
+check_criteria <- function(df, cv_colName){
+  if(missing(cv_colName)){
+    cv_colName <- "Criteria_Value"
+  }
+  for(a in 1:nrow(df)){
+    str <- df[a,cv_colName]
+    if(grepl(",", str) == TRUE){
+      str_adj <- gsub(",", ".", str, fixed = TRUE)
+      nr <- as.numeric(str_adj)
+      df[a,cv_colName] <- nr
+    }
+  }
+  return (df)
+}
 
