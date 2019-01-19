@@ -1,8 +1,5 @@
-multiple_import_bgt <- function(aws_list, delete_raw_gmls){
+multiple_import_bgt <- function(aws_list, radius = 150, delete_raw_gmls = TRUE){
   start_time <- Sys.time()
-  if(missing(delete_raw_gmls)){
-    delete_raw_gmls <- FALSE
-  }
   all_objects_count <- data.frame(aws_name = as.character(), sensor_name = as.character(), radius = as.numeric(), objectname = as.character(), count = as.numeric(), stringsAsFactors=FALSE)
   all_objects_counts_names <- c("AWS", "sensor_name", "radius", "object_name", "object_count")
   names(all_objects_count) <- all_objects_counts_names
@@ -11,7 +8,7 @@ multiple_import_bgt <- function(aws_list, delete_raw_gmls){
   #loading all AWS on land takes 10 minutes.
   for (a in 1:length(aws_list)){
     print(aws_list[a])
-    BGT_single_aws <- import_single_bgt(aws_name =  aws_list[a], sensor_name = "temp_150cm", delete_raw_gmls = delete_raw_gmls)
+    BGT_single_aws <- import_single_bgt(aws_name =  aws_list[a], sensor_name = temperature_sensor_name, radius = radius, delete_raw_gmls = delete_raw_gmls)
     all_objects_count <- rbind(all_objects_count, BGT_single_aws[["objects_count"]], stringsAsFactors=FALSE) 
     all_bgt_objects <- rbind(all_bgt_objects, BGT_single_aws[["bgt_objects"]], stringsAsFactors=FALSE)
     print(" ")
@@ -23,5 +20,3 @@ multiple_import_bgt <- function(aws_list, delete_raw_gmls){
   elapsed_time <- ceiling(end_time - start_time)
   return(list("all_objects_count" = all_objects_count, "all_bgt_objects"=all_bgt_objects))
 }
-
-multiple_import_bgt(aws_list = sAWS_names, delete_raw_gmls = FALSE)

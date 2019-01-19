@@ -5,35 +5,27 @@ library(gdalUtils)
 library(gdata)
 library(sf)
 
-import_single_bgt <- function(aws_name, sensor_name, radius, delete_raw_gmls, redownload){
+import_single_bgt <- function(aws_name, sensor_name, radius = 150, delete_raw_gmls = TRUE, redownload = FALSE){
   CleanGlobEnvir <- function(pattern){
     rm(list = ls(envir=globalenv())[
       grep(pattern, ls(envir=globalenv()))], envir = globalenv())
   }
-  
-  if(missing(redownload)){
-    redownload = FALSE
-  }
+
   tryCatch({
-    
-    if(missing(delete_raw_gmls)){
-      delete_raw_gmls <- FALSE
-    }
-    
     aws_name_trim <- getAWS_name_trim(aws_name) 
-    if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/"))){  
-      message("BGT shapefile for this aws is already found. Please remove it if you want to recreate it.")
-      answer <- menu(c("Y", "N"), title="Do you want to redowload this BGT?")
-      if(answer == "Y"){
-        import_single_bgt(aws_name, sensor_name, radius, delete_raw_gmls, redownload = TRUE)
-      }
-    } else {
-      if(missing(radius)){
-        radius <- 150
-      }
-    
-      #aws station
+    if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/")) & redownload == TRUE){  
+      file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/"))
+      file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shx"), sep="/"))
+      file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".prj"), sep="/"))
+      file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".dbf"), sep="/"))
+      warning("BGT shapefile for this aws is already found. They were removed and redownloaded.")
       
+      import_single_bgt(aws_name = aws_name, sensor_name = sensor_name, radius = radius, delete_raw_gmls = delete_raw_gmls, redownload = TRUE)
+    } else if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/")) & redownload == FALSE){
+      warning("BGT shapefile for this aws is already found and will used. Please remove it if you want to redownlolad it, or set redownload to TRUE..")
+    } else {
+      
+      #aws station
       selected_aws <- select_single_aws(aws.df = AWS.df, aws_name = aws_name, sensor_name = sensor_name) 
     
       #create 200 meter buffer arouond sensor
