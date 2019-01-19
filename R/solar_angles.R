@@ -19,10 +19,7 @@ library(reshape)
 #'@return dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,... 
 #'@export
 
-solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interval, LONLAT){
-  if(missing(LONLAT)){
-    LONLAT = FALSE
-  }
+solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interval, LONLAT = FALSE){
   if(LONLAT != FALSE & LONLAT != TRUE){
    stop("set LONLAT to TRUE or FALSE only. Set LATLON to TRUE if X and Y are longitude and lattitde coordinates.")
   }
@@ -90,7 +87,7 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     return(jd)
   }
   
-  julian_day <- julian_day_hour(year = year, month = month, day = day, minutes_interval = minutes_int)
+  julian_day <- julian_day_hour(year = year, month = month, day = day, s_hour, f_hour, minutes_interval = minutes_int)
   
   getDate <- function(day, month){
     if(month == 1){

@@ -1,18 +1,42 @@
-simple_mask_raster <- function(spatialpoint, ahn, distance){
-  aws_mask<-raster::buffer(spatialpoint,width=distance)
+simple_mask_raster <- function(spatialpoint, ahn, radius, AHN3, aws_name){
+  if(missing(AHN3)){
+    AHN3 <- FALSE
+    AHN <- "AHN2"
+  }
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
+  } else{
+    AHN <- "AHN2"
+  }
+  
+  print("Masking the raster object...")
+  aws_name_trim <- getAWS_name_trim(aws_name)
+  aws_mask<-raster::buffer(spatialpoint,width=radius)
   ahn_crop<-raster::crop(ahn,aws_mask)
   ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  message("Masked the raster object.")
+  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/",aws_name_trim,"/rasters/", AHN, " /", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE)
+  
+  print("Masked the raster object.")
   return(ahn_mask)
 }
 
-mask_raster <- function(aws_name, spatialpoint, ahn, azimuth, radius){
+mask_raster <- function(aws_name, spatialpoint, ahn_raster, AHN3, azimuth, radius){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
   } else {
     aws_name_trim <- getAWS_name_trim(aws_name)
   }
+  if(missing(AHN3)){
+    AHN3 <- FALSE
+    AHN <- "AHN2"
+  }
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
+  } else{
+    AHN <- "AHN2"
+  }
+  
   #angles east and west from azimuth
   azimuth_west <- azimuth+5
   azimuth_east <- azimuth-5
@@ -64,8 +88,8 @@ mask_raster <- function(aws_name, spatialpoint, ahn, azimuth, radius){
   Ps1 <- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(epsg_rd))
   aws_mask <- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
   #plot(aws_mask, axes = TRUE)
-  ahn_mask <- raster::mask(ahn, aws_mask)
-  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/",aws_name_trim,"/rasters/", aws_name_trim, "_ahnMask_", azimuth, ".tif"), overwrite = TRUE)
+  ahn_mask <- raster::mask(ahn_raster, aws_mask)
+  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/",aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
   print("Masked the raster object.")
   #print(summary(ahn_mask))
   return(ahn_mask)

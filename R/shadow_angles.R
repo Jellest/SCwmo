@@ -33,7 +33,8 @@ shadow_angles <- function(aws_name, spatialpoint,
                           ahn_mask,
                           angle,
                           maxDist,
-                          sensor_height){
+                          sensor_height,
+                          AHN3 = FALSE){
   requireNamespace("sp")
   requireNamespace("raster")
   requireNamespace("horizon")
@@ -70,6 +71,13 @@ shadow_angles <- function(aws_name, spatialpoint,
     if_height_instrument = TRUE
   }
   
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
+  } else{
+    AHN <- "AHN2"
+  }
+  
+  
   if(if_height_instrument == TRUE & sensor_height > 0){
     
   }
@@ -83,7 +91,7 @@ shadow_angles <- function(aws_name, spatialpoint,
   names(shadows)<-c("height","shadow_angle")
   #print(str(shadows[["shadow_angle"]]))
   #plot(shadows)
-  writeRaster(shadows[["shadow_angle"]], paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", aws_name_trim, "_sa_", angle, ".tif"), overwrite = TRUE)
+  writeRaster(shadows[["shadow_angle"]], paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
   df<-extract(x = shadows, y = spatialpoint, method='bilinear')
   #View(df)
   #df<- as.data.frame(matrix)

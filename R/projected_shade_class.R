@@ -1,17 +1,18 @@
-projected_shade_class <- function(data_path, cv_colName, aws_name){
+projected_shade_class <- function(data_path, cv_colName = "Criteria_Value", aws_name, AHN3 = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
   }
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
+  } else {
+    AHN <- "AHN2"
+  }
+  
   aws_name_trim <- getAWS_name_trim(aws_name)
   
   data <- fread(data_path)
   
   tshac <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "shading")
-  
-  if(missing(cv_colName)){
-    cv_colName <- "Criteria_Value"
-  }
-  
   tshac <- check_criteria(df = tshac, cv_colName = cv_colName)
   
   class_1_filter <-  filter(tshac, Class == "1")
@@ -117,9 +118,9 @@ projected_shade_class <- function(data_path, cv_colName, aws_name){
   data$final_class <- final_class 
   
   if(aws_name != ""){
-    fwrite(data, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_ah_solar_shadow_angles_classes.csv"))
+    fwrite(data, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"))
   } else {
-    fwrite(data, "output/solar_shadow_angles/ah_solar_shadow_angles_classes.csv")
+    fwrite(data, paste0("output/solar_shadow_angles/",AHN, "_ah_solar_shadow_angles_classes.csv"))
   }
   return (data)
 }
