@@ -139,15 +139,3 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
   ah_solar_angles <- subset(all_solar_angles, elevation > 0)
 return(list("all angles"= all_solar_angles, "ah angles" = ah_solar_angles))
 }
-
-#all_solar_angles <- rbind(all_solar_angles2, month_all_solar_angles2[[1]])
-  
-# for (m in 2:7){
-#   month_all_solar_angles[[m]] <- data.frame(solar_angles(aws = "De Bilt",
-#                                                          sensor = "temp_150cm",
-#                                                          lon = aws_debilt_wgs.sp@coords[,"lon"],
-#                                                          lat = aws_debilt_wgs.sp@coords[,"lat"],
-#                                                          julian_day = julian_day_hour(2017, m-1, 21))[["all_angles"]]) 
-#   all_solar_angles <- rbind(all_solar_angles2, month_all_solar_angles2[[m]])
-# }
-

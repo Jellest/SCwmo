@@ -89,7 +89,7 @@ mask_raster <- function(aws_name, spatialpoint, ahn_raster, AHN3, azimuth, radiu
   aws_mask <- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
   #plot(aws_mask, axes = TRUE)
   ahn_mask <- raster::mask(ahn_raster, aws_mask)
-  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/",aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
+  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
   print("Masked the raster object.")
   #print(summary(ahn_mask))
   return(ahn_mask)

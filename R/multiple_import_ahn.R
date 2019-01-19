@@ -17,5 +17,4 @@ multiple_import_ahn <- function(aws_list, sensor_name, LONLAT = FALSE, radius, r
   message(paste("Finished importing multiple AHN data sets. Elapsed Time:", elapsed_time, "seconds."))
 }
 
-multiple_import_ahn(aws_list = c("Vlissingen"), sensor_name = temperature_sensor_name, LONLAT = FALSE, radius = 500, resolution = 0.5, AHN3 = TRUE, raw_ahn = TRUE, terrain_ahn = TRUE, delete_sheets = TRUE, redownload_ahn = FALSE)
-#import Rotterdam later.
+multiple_import_ahn(aws_list = c("Rotterdam"), sensor_name = temperature_sensor_name, LONLAT = FALSE, radius = 500, resolution = 0.5, AHN3 = TRUE, raw_ahn = TRUE, terrain_ahn = TRUE, delete_sheets = TRUE, redownload_ahn = FALSE)

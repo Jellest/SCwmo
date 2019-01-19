@@ -112,6 +112,7 @@ multipleShadowAngles <- function(solar_angles, radius, AHN3 = FALSE, full_circle
   aws_path <- paste0("data/", AHN, "/", aws_name_trim, "/raw/", aws_name_trim, "_", AHN,"_raw_ahn.tif")
   #print(aws_path)
   aws_ahn <- raster(aws_path)
+  
   if(full_circle_mask == TRUE){
     ahn_mask <- simple_mask_raster(spatialpoint = spatialpoint[["point_rd.sp"]], ahn = aws_ahn, radius = radius, aws_name = aws_name)
   }
@@ -152,26 +153,30 @@ multipleShadowAngles <- function(solar_angles, radius, AHN3 = FALSE, full_circle
   message(paste("Finished angle calculations for", aws_name, ". Elapsed Time:", elapsed_time, "seconds."))
 }
 
-multipleSolar_shadow_angles <- function(aws_list, sensor_name, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE){
+multipleSolar_shadow_angles <- function(aws_list, sensor_name, solar_angles = TRUE, shadow_angles = TRUE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE){
   start_time <- Sys.time()
   for(a in 1:length(aws_list)){
     single_aws.df <- dplyr::filter(AWS.df, AWS %in% aws_list[a] & Sensor == sensor_name)
     aws_name <- single_aws.df[1,"AWS"]
     message(paste("Starting angle calcuations for", aws_name))
-    solar_angles <- multiple_Moments_solarAngles(aws_name = aws_name,
-                                                 sensor_name = sensor_name,
-                                                 years = years,
-                                                 months = months,
-                                                 days = days,
-                                                 s_hour = s_hour,
-                                                 f_hour = f_hour,
-                                                 minutes_interval = minutes_interval,
-                                                 exportCSV = exportCSV,
-                                                 printChart = printChart)
-    solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]],
-                                                radius = radius,
-                                                AHN3 = AHN3,
-                                                full_circle_mask = full_circle_mask)
+    if(solar_angles == TRUE){
+      solar_angles <- multiple_Moments_solarAngles(aws_name = aws_name,
+                                                   sensor_name = sensor_name,
+                                                   years = years,
+                                                   months = months,
+                                                   days = days,
+                                                   s_hour = s_hour,
+                                                   f_hour = f_hour,
+                                                   minutes_interval = minutes_interval,
+                                                   exportCSV = exportCSV,
+                                                   printChart = printChart)
+    }
+    if(shadow_angles == TRUE){
+      solar_shadow_angles <- multipleShadowAngles(solar_angles[["all ah angles"]],
+                                                  radius = radius,
+                                                  AHN3 = AHN3,
+                                                  full_circle_mask = full_circle_mask)
+    }
     print(paste("Completed angle calculations for", aws_name))
     print("")
     print("=====================")
@@ -182,8 +187,10 @@ multipleSolar_shadow_angles <- function(aws_list, sensor_name, years, months, da
   print(paste("Elapsed time:", ceiling(elapsed_time), "seconds."))
 }
 
-multipleSolar_shadow_angles(aws_list = c("Arcen"),
+multipleSolar_shadow_angles(aws_list = c("Rotterdam"),
                             sensor_name = temperature_sensor_name,
+                            solar_angles = TRUE,
+                            shadow_angles = FALSE,
                             years = c(2018),
                             months = c(12, 1:6),
                             days = c(21),
@@ -191,7 +198,7 @@ multipleSolar_shadow_angles(aws_list = c("Arcen"),
                             f_hour = 23,
                             minutes_interval = 15,
                             radius = 300,
-                            AHN3 = FALSE,
+                            AHN3 = TRUE,
                             full_circle_mask = FALSE,
                             printChart = FALSE,
-                            exportCSV = FALSE)
+                            exportCSV = TRUE)

@@ -26,6 +26,7 @@ start <- function(settings){
     library(data.table)
     library(dplyr)
     library(horizon)
+    library(xtable)
   }
   hd(settings)
   libs()

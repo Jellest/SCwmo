@@ -1,4 +1,5 @@
 multiple_intersect_bgt <- function(aws_list, sensor_name, exportCSV = FALSE, exportShp = FALSE){
+  presence_objects_list <- list()
   for(b in 1:length(aws_list)){
     aws_name <- aws_list[b]
     aws_name_trim <- getAWS_name_trim(aws_name)
@@ -9,8 +10,5 @@ multiple_intersect_bgt <- function(aws_list, sensor_name, exportCSV = FALSE, exp
     #bgt.sf <- st_as_sf(bgt.shp)
     presence_objects <- presence_objects(aws_name = aws_name, coords = single_aws[["aws_rd.sf"]], bgt_shape = bgt.sf, temperature_criteria.df = single_aws[["aws.df"]][,c(1,5)], exportCSV = exportCSV, exportShp = exportShp)
   }
-  #return (presence_objects)
+  return (presence_objects)
 }
-
-
-test_intsct <- multiple_intersect_bgt(aws_list = c("Vlissingen"), temperature_sensor_name, exportCSV = TRUE)

@@ -1,5 +1,4 @@
-
-#sun chart
+#sun shadow chart
 sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
@@ -13,7 +12,7 @@ sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
   aws_name_trim <- getAWS_name_trim(aws_name)
   
   data <- fread(data_path, data.table = FALSE)
-  
+  print(nrow(data))
   # plot(month_all_solar_angles[[1]]$azimuth, month_all_solar_angles[[1]]$elevation, type="l", xlim=c(0,360), ylim=c(0,70), xlab="azimuth", ylab="elevation")
   # for (p in 2:length(month_solar_angles)){
   #   par(new=T)
@@ -36,7 +35,7 @@ sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
   if("shadow_angle" %in% colnames(data)){
     shadow_angles <- TRUE
   } else {
-    shadow_angles = FALSE
+    shadow_angles <- FALSE
   }
   
   if(solar_angles == TRUE & shadow_angles == TRUE){

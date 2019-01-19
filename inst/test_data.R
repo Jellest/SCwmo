@@ -65,9 +65,12 @@ vegetation_classes(df = vegetation_height(aws_name = "De Bilt", radius = 10, exp
 
 # land use
 presence_objects(aws_name = "De Bilt")
+aaDe_Bilt_intsct <- multiple_intersect_bgt(aws_list = c("De Bilt"), temperature_sensor_name, exportCSV = FALSE, exportShp = FALSE)
 
 #create classifcation
 create_classifications("De Bilt", sensor_name = "temp_150cm")
 #summary classifcation
 summary_classifcation(aws_name = "De Bilt", sensor_name = "temp_150cm")
+
+
 

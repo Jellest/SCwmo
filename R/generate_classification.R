@@ -135,9 +135,9 @@ multiple_classifications <- function(aws_list, sensor_name, import_ahn = FALSE, 
   View(summary_classifcations)
 }
 
-multiple_classifications(aws_list = c("De Bilt"),#, "Vlissingen", "Wijk aan zee", "Voorschoten"),
+multiple_classifications(aws_list = c(ahn3_temp_names), #, "Vlissingen", "Wijk aan zee", "Voorschoten"),
                          sensor_name = temperature_sensor_name,
-                         AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
+                         AHN3 = TRUE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
                          import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
                          solar_angles = FALSE, years = c(2018), months = c(12, 1:6), days = c(21),
                          s_hour = 0, f_hour = 23, minutes_interval = 15,

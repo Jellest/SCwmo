@@ -91,6 +91,6 @@ vegetation_classes <- function (df, cv_colName = "Criteria_Value", aws_name, AHN
       fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
     }
   }
-  View(df)
+  #View(df)
   return(df)
 }
