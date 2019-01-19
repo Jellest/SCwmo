@@ -1,10 +1,4 @@
-vegetation_classes <- function (df, cv_colName, aws_name, exportCSV){
-  if(missing(cv_colName)){
-    cv_colName <- "Criteria_Value"
-  }
-  
-  df <- check_criteria(df = df, cv_colName = cv_colName)
-  
+vegetation_classes <- function (df, cv_colName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
@@ -12,10 +6,14 @@ vegetation_classes <- function (df, cv_colName, aws_name, exportCSV){
     aws_name_trim <- getAWS_name_trim(aws_name)
   }
   
-  if(missing(exportCSV)){
-    exportCSV = TRUE
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
+  } else {
+    AHN <- "AHN2"
   }
+  
   vhc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "vegetation height")
+  vhc <- check_criteria(df = vhc, cv_colName = cv_colName)
   
   class_1_filter <-  filter(vhc, Class == "1")
   class_1_cv <- as.numeric(class_1_filter[,cv_colName][1])
@@ -78,20 +76,21 @@ vegetation_classes <- function (df, cv_colName, aws_name, exportCSV){
     df[1,"final_class"] <- 1
   }
   
-    if(!dir.exists("output/vegetation_height")){
-      dir.create("output/vegetation_height")
-    }
-    
+
   if(exportCSV == TRUE){
-    if(!dir.exists(paste0("output/vegetation_height/", aws_name_trim)) & aws_name_trim != ""){
-      dir.create(paste0("output/vegetation_height/", aws_name_trim))
+    if(!dir.exists("output/vegetation_height")){
+      dir.create("output/vegetation_height", showWarnings = FALSE)
+    }
+    if(dir.exists(paste0("output/vegetation_height/", aws_name_trim)) == FALSE & aws_name_trim != ""){
+      dir.create(paste0("output/vegetation_height/", aws_name_trim), showWarnings = FALSE)
     }
     
     if(aws_name != ""){
-      fwrite(df, paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_vegetation_height_classes.csv"))
+      fwrite(df, paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"))
     } else {
-      fwrite(df, "output/vegetation height/vegetation_height_classes.csv")
+      fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
     }
   }
+  View(df)
   return(df)
 }
