@@ -359,18 +359,22 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
           presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("BGT clip passed class criteria ", class)
+          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
         }
       } else if(missing(class) == FALSE & missing(go_to_next_class)){
         #only provide output of selected class
         if(temperature_criteria.df[1,meet_classNr] == FALSE){
           print(paste("BGT clip did NOT pass class ", class," criteria", sep=""))
+          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
         } else{
           message("BGT clip passed class criteria ", class)
+          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+          
         }
       }
   } else {
     temperature_criteria.df[1,"final_class"] <- class
-    message("BGT clip passed criteria for class ", class, ".")
+    message("Pass. BGT clip passed criteria for class ", class, ".")
     return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
   }
 }
