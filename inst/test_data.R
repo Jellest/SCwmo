@@ -61,6 +61,13 @@ vegetation_height_criteria.df <- vegetation_height_criteria.df[-(1:10), ]
 heightDifference <- vegetation_height(aws_name = "De Bilt", radius = 100)
 vegetation_classes(df = heightDifference[[2]],aws_name = "De Bilt", exportCSV = TRUE)
 
+vegetation_classes(df = vegetation_height(aws_name = "De Bilt", radius = 10, exportCSV = TRUE)[["df"]], aws_name = "De Bilt", exportCSV = TRUE)
+
 # land use
-presence_objects(aws_name = "De Bilt", )
+presence_objects(aws_name = "De Bilt")
+
+#create classifcation
+create_classifications("De Bilt", sensor_name = "temp_150cm")
+#summary classifcation
+summary_classifcation(aws_name = "De Bilt", sensor_name = "temp_150cm")
 
