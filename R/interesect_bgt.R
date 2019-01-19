@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, cv_colName, exportCSV, exportShp){
+presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, cv_colName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -13,16 +13,6 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
     go_to_next_class <- FALSE
   }
   
-  if(missing(cv_colName)){
-    cv_colName <- "Criteria_Value"
-  }
-  if(missing(exportCSV)){
-    exportCSV = TRUE
-  }
-  
-  if(missing(exportShp)){
-    exportShp <- TRUE
-  }
   aws_name_trim <- getAWS_name_trim(aws_name)
   ##load criteria
   tluc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "land use" & Class == class)
@@ -321,6 +311,33 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
       }
     }
   }
+  #export
+  if(exportCSV == TRUE | exportShp == TRUE){
+    if(!dir.exists("output/objects")){
+      dir.create("output/objects")
+    }
+    if(!dir.exists(paste0("output/objects/",aws_name_trim))){
+      dir.create(paste0("output/objects/", aws_name_trim))
+    }
+    output_path <- paste0("output/objects/", aws_name_trim, "/")
+  }
+  if(exportCSV == TRUE){
+    if(temperature_criteria.df[1,meet_classNr] == TRUE){
+      temperature_criteria.df[1,"final_class"] <- class
+    }
+    fwrite(temperature_criteria.df, paste0(output_path, aws_name_trim, "_objects_classes.csv"))
+  }
+  if(exportShp == TRUE){
+    check_shpExists(paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"))
+    check_shpExists(paste0(output_path, aws_name_trim, "_", inner_buffer_dist, "m_buffer.shp"))
+    
+    st_write(obj = outerBuffer_intsct.sf, dsn = paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile")
+    st_write(obj = inner_buffer_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", inner_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile")
+    if(class == 1 | class == 2){
+      check_shpExists(paste0(output_path, aws_name_trim, "_", region, "m_annulus.shp"))
+      st_write(obj = annulus_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", region, "m_annulus.shp"), driver = "ESRI Shapefile")
+    }
+  }
   
   #finalize class
   if(temperature_criteria.df[1,meet_classNr] == FALSE){
@@ -354,39 +371,20 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
   } else {
     temperature_criteria.df[1,"final_class"] <- class
     message("BGT clip passed criteria for class ", class, ".")
+    return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
   }
-  
-  #export
-  if(exportCSV == TRUE | exportShp == TRUE){
-    if(!dir.exists("output/objects")){
-      dir.create("output/objects")
-    }
-    if(!dir.exists(paste0("output/objects/",aws_name_trim))){
-      dir.create(paste0("output/objects/", aws_name_trim))
-    }
-    output_path <- paste0("output/objects/", aws_name_trim, "/")
-  }
-  if(exportCSV == TRUE){
-    fwrite(temperature_criteria.df, paste0(output_path, aws_name_trim, "_objects_classes.csv"))
-  }
-  if(exportShp == TRUE){
-    st_write(obj = outerBuffer_intsct.sf, dsn = paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile", delete_dsn = TRUE)
-    st_write(obj = inner_buffer_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", inner_buffer_dist, "m_buffer.shp"), driver = "ESRI Shapefile", delete_dsn = TRUE)
-    if(class == 1 | class == 2){
-      st_write(obj = annulus_insct.sf, dsn = paste0(output_path, aws_name_trim, "_", region, "m_annulus.shp"), driver = "ESRI Shapefile", delete_dsn = TRUE)
-    }
-  }
-  return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
 }
 
-selected_aws_site <- select_single_aws(AWS.df, "De Bilt", "site")
-selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
 
-BGT_station_adjust.sp <- readOGR(dsn = "data/BGT/deBilt", "BGT_DeBilt_adjustments", stringsAsFactors=FALSE)
-crs(BGT_station_adjust.sp) <- crs(epsg_rd)
-BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
-
-temperature_landuse_criteria.df_site <- presence_objects(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
-temperature_landuse_criteria.df_temp <- presence_objects(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
-mapview(BGT_station_adjust.sf)
-View(temperature_landuse_criteria.df_site[["df"]])
+## test scripts
+# selected_aws_site <- select_single_aws(AWS.df, "De Bilt", "site")
+# selected_aws_temp <- select_single_aws(AWS.df, "De Bilt", "temp_150cm")
+# 
+# BGT_station_adjust.sp <- readOGR(dsn = "data/BGT/deBilt", "BGT_DeBilt_adjustments", stringsAsFactors=FALSE)
+# crs(BGT_station_adjust.sp) <- crs(epsg_rd)
+# BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
+# 
+# temperature_landuse_criteria.df_site <- presence_objects(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
+# temperature_landuse_criteria.df_temp <- presence_objects(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
+# mapview(BGT_station_adjust.sf)
+# View(temperature_landuse_criteria.df_site[["df"]])
