@@ -37,37 +37,5 @@ awsNameCheck <- function(aws_name, sensor_name){
   return(list("aws_name" = aws_name, "aws_name_trim" = aws_name_trim, "sensor_name" = sensor_name))
 }
 
-create_SpatialPoint <- function(X, Y, LONLAT){
-  if(missing(LONLAT)){
-    LONLAT = FALSE
-  }
-  point.sp<-data.frame(X = X, Y = Y, stringsAsFactors=FALSE)
-  coordinates(point.sp) <- ~X+Y
-  if(LONLAT == FALSE){
-    crs(point.sp)<-CRS(epsg_rd)
-    point_rd.sp <- point.sp
-    point_wgs.sp <- spTransform(point.sp, "+init=epsg:4326") 
-  } else {
-    crs(point.sp)<-CRS("+init=epsg:4326")
-    point_rd.sp <- spTransform(point.sp, epsg_rd)
-    point_wgs.sp <- point.sp
-  }
 
-  return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
-}
-
-check_criteria <- function(df, cv_colName){
-  if(missing(cv_colName)){
-    cv_colName <- "Criteria_Value"
-  }
-  for(a in 1:nrow(df)){
-    str <- df[a,cv_colName]
-    if(grepl(",", str) == TRUE){
-      str_adj <- gsub(",", ".", str, fixed = TRUE)
-      nr <- as.numeric(str_adj)
-      df[a,cv_colName] <- nr
-    }
-  }
-  return (df)
-}
 

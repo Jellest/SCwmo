@@ -30,15 +30,130 @@ start <- function(settings){
   hd(settings)
   libs()
   
-  #globals
+  #global variables
   AWS.df<<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
+  manual_SC_values <<- fread("data/classifcations/manual_classification_values.csv", data.table = FALSE) 
   guideline_criteria <<- fread("wmoSC/data-raw/guideline_criteria.csv", data.table = FALSE)
   epsg_rd <<- "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+  temperature_sensor_name <<- "temp_150cm"
   sAWS_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
-  temp_names <<- c("Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
-  sAWS_list.df <<- filter(AWS.df, AWS %in% sAWS_names)
-  sAWStemperature_list.df <<- filter(AWS.df, AWS %in% sAWS_names & Sensor == "temp_150cm")
-  temp_list.df <<- filter(AWS.df, AWS %in% temp_names & Sensor == "temp_150cm")
+  ahn3_temp_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Rotterdam")
+  sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
+  sAWStemperature_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names & Sensor == temperature_sensor_name)
+  ahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% ahn3_temp_names & Sensor == temperature_sensor_name)
+  ahn3_temp1 <<- c("Voorschoten", "Wijk aan zee")
+  ahn3_temp2 <<- c("Vlissingen", "Rotterdam")
+  #global  functions
+  create_SpatialPoint <<- function(X, Y, LONLAT){
+    if(missing(LONLAT)){
+      LONLAT = FALSE
+    }
+    point.sp<-data.frame(X = X, Y = Y, stringsAsFactors=FALSE)
+    coordinates(point.sp) <- ~X+Y
+    if(LONLAT == FALSE){
+      crs(point.sp)<-CRS(epsg_rd)
+      point_rd.sp <- point.sp
+      point_wgs.sp <- spTransform(point.sp, "+init=epsg:4326") 
+    } else {
+      crs(point.sp)<-CRS("+init=epsg:4326")
+      point_rd.sp <- spTransform(point.sp, epsg_rd)
+      point_wgs.sp <- point.sp
+    }
+    
+    return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
+  }
+  
+  check_criteria <<- function(df, cv_colName){
+    if(missing(cv_colName)){
+      cv_colName <- "Criteria_Value"
+    }
+    for(a in 1:nrow(df)){
+      str <- df[a,cv_colName]
+      if(grepl(",", str) == TRUE){
+        str_adj <- gsub(",", ".", str, fixed = TRUE)
+        nr <- as.numeric(str_adj)
+        df[a,cv_colName] <- nr
+      }
+    }
+    return (df)
+  }
+  
+  select_single_aws <<- function(aws.df, aws_name, sensor_name){
+    
+    if(missing(sensor_name)){
+      sensor_name <- "site"
+      first_sensor_name <- "site"
+    } else {
+      first_sensor_name <- sensor_name
+    }
+    single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+    #select site if other sensor name is selected.
+    if(is.null(single_aws.df) == TRUE){
+      sensor_name = "site"
+      single_aws.df<- selectSensor_row(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+      message(paste0(first_sensor_name, " sensor is not found. 'site' is selected as sensor name."))
+    }
+    
+    if(nrow(single_aws.df) > 0){
+      print(paste0("Getting AWS coordinate of ", aws_name, " with '", sensor_name, "' as sensor name."))
+      single_aws_rd.sp<-data.frame(single_aws.df)
+      coordinates(single_aws_rd.sp) <- ~X+Y
+      crs(single_aws_rd.sp)<-CRS(epsg_rd)
+      
+      single_aws_rd.sf <- sf::st_as_sf(single_aws_rd.sp)
+      single_aws_rd_copy.sf <- single_aws_rd.sf
+      single_aws_wgs.sf <- sf::st_transform(single_aws_rd_copy.sf, "+init=epsg:4326")
+      single_aws_wgs.sp <- sf::as_Spatial(single_aws_wgs.sf)
+      return(list("aws.df" = single_aws.df,
+                  "aws_rd.sp" = single_aws_rd.sp,
+                  "aws_rd.sf" = single_aws_rd.sf,
+                  "aws_wgs.sp" = single_aws_wgs.sp,
+                  "aws_wgs.sf" = single_aws_wgs.sf
+      )
+      )
+    } else {
+      warning("No AWS found with this AWS name.")
+    }
+  }
+  
+  selectSensor_row <<- function (aws.df, aws_name, sensor_name){
+    check_presence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),] 
+    if(nrow(check_presence) == 0){
+      message("No AWS found with this name and/or sensor name.")
+      return (NULL)
+    } else {
+      if(missing(sensor_name)){
+        sensor_name = "site"
+      }
+      selectedRow <- aws.df[which(aws.df$Sensor == sensor_name & aws.df$AWS == aws_name),]
+      
+      if(nrow(selectedRow) == 0 | nrow(selectedRow) > 1){
+        selectedRow <- aws.df[which(aws.df$Sensor == "site" & aws.df$AWS == aws_name),]
+      }
+      return (selectedRow)
+    }
+  }
+  
+  getAWS_name_trim <<- function (aws_name){
+    aws_name_untrimmed <- AWS.df$AWS[which(AWS.df$AWS == aws_name)][1]
+    if(is.na(aws_name_untrimmed) == TRUE) {
+      aws_name_trim <- stop(paste("No AWS station found with the following name:", aws_name))
+    } else{
+      aws_name_trim <- gsub(" ", "", aws_name_untrimmed)
+    }
+    return (aws_name_trim)
+  }
+  
+  check_shpExists <<- function (shape_path){
+    first_part_path <-  substr(shape_path, 1, nchar(shape_path)-4) 
+    if(file.exists(shape_path) == TRUE){
+      print(first_part_path)
+      file.remove(shape_path)
+      file.remove(paste0(first_part_path, ".shx"))
+      file.remove(paste0(first_part_path, ".prj"))
+      file.remove(paste0(first_part_path, ".dbf"))
+    }
+  }
 }
 
 #installl Perl
