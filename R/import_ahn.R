@@ -1,7 +1,8 @@
-import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radius, raw_ahn, terrain_ahn, AHN3, delete_sheets){
+import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, resolution, radius, raw_ahn = TRUE, terrain_ahn =- TRUE, AHN3 = FALSE, delete_sheets = TRUE, redownload = FALSE){
+  redownload_files <- FALSE
   aws_name_trim <- getAWS_name_trim(aws_name)
   if(missing(resolution)){
-    message("No correct resolution is found. Resolution of 0.5 m will be used.")
+    warning("No correct resolution was found for importing AHN. Resolution of 0.5 m was used.")
     resolution_name <- "05m"
   } else {
     if(resolution == 0.5){
@@ -9,35 +10,21 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
     } else if(resolution == 5){
       resolution_name <- "5"
     } else {
-      warning("No correct resolution is found. Resolution of 0.5 m will be used.")
+      warning("No correct resolution was found for importing AHN. Resolution of 0.5 m was used.")
+      resolution_name <- "05m"
       resolution_name <- "05m"
     }
   }
-  
-  if(missing(raw_ahn)){
-    raw_ahn <- TRUE
-  }
-  if(missing(terrain_ahn)){
-    terrain_ahn <- FALSE
-  }
-  
-  if(missing(AHN3)){
-    AHN <- "AHN2"
-  } else if(AHN3 == TRUE){
-    AHN  <- "AHN3"
+
+  if(AHN3 == TRUE){
+    AHN <- "AHN3"
   } else {
     AHN <- "AHN2"
   }
   
-  if(missing(delete_sheets)){
-    delete_sheets = FALSE
-  }
   
   ##create radius buffer around sensor
   #check provided point or coordinates
-  if(missing(LONLAT)){
-    LONLAT = FALSE
-  }
   
   if(missing(station_coords)){
     station_coords <- data.frame("X"=X,"Y"=Y)
@@ -94,6 +81,7 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
   indiv_raw_rasters <- list()
   if(raw_ahn == TRUE){  
     ahn_raw_directory <- paste(aws_working_directory, "raw", sep="/")
+    ahn_raw_raster_filename <- paste(ahn_raw_directory, "/", aws_name_trim, "_", AHN, "_raw_ahn", '.tif', sep="")
     if(!file.exists(paste(ahn_raw_directory, "/", aws_name_trim, "_raw_ahn", '.tif', sep=""))){
       dir.create(paste(aws_working_directory, "raw", sep="/"), showWarnings = FALSE)
       print(ahn_raw_directory)
@@ -138,16 +126,15 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
         indiv_raw_rasters[[r]] <- ahn_raw_crop
       }
       
-      ahn_raw_raster_filename <- paste(ahn_raw_directory, "/", aws_name_trim, "_raw_ahn", '.tif', sep="")
       print(ahn_raw_raster_filename)
-      indiv_raw_rasters$filename <- paste(aws_name_trim, "_raw_ahn", '.tif', sep="")
+      indiv_raw_rasters$filename <- paste(aws_name_trim, "_", AHN ,"_raw_ahn", '.tif', sep="")
       if(length(bladnrs) > 1){
         indiv_raw_rasters$overwrite <- TRUE
         print("Merging all raw rasters...")
         print(ahn_raw_raster_filename)
         ahn_raw_raster <- do.call(merge, indiv_raw_rasters)
         writeRaster(ahn_raw_raster, filename = ahn_raw_raster_filename, overwrite = TRUE)
-        file.remove(paste(aws_name_trim, "_terrain_ahn", '.tif', sep=""))
+        file.remove(paste(aws_name_trim, "_", AHN , "_raw_ahn.tif", sep=""))
         message("Download and merge of raw rasters complete.")
       } else if(length(bladnrs) == 1){
         ahn_raw_raster <- indiv_raw_rasters[[1]]
@@ -160,8 +147,13 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
         }
       }
     } else {
-      print(paste("Cropped raw raster for", aws_name, "already exists and will be stored to this variable.",sep =" "))
-      ahn_raw_raster <- raster(paste(ahn_raw_directory, "/", aws_name_trim, "_raw_ahn", '.tif', sep=""))
+      if(redownload == TRUE){
+        redownload_files <- TRUE
+        file.remove(ahn_raw_raster_filename)
+      } else {
+        warning(paste("Cropped raw raster for", aws_name, "already exists and was returned. Please remove it if you want to download it again or set redownload to TRUE.",sep =" "))
+        ahn_raw_raster <- raster(paste(ahn_raw_directory, "/", aws_name_trim, "_", AHN ,"_raw_ahn", '.tif', sep=""))
+      }
     }
   }
   
@@ -169,11 +161,13 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
   indiv_terrain_rasters <- list()
   if(terrain_ahn == TRUE){
     ahn_terrain_directory <- paste(aws_working_directory, "terrain", sep="/")
+    ahn_terrain_raster_filename <- paste(ahn_terrain_directory, "/", aws_name_trim, "_", AHN ,"_terrain_ahn", '.tif', sep="")
     # terrainXList <<- c()
     # terrainYList <<- c()
-    if(!file.exists(paste(ahn_terrain_directory, "/", aws_name_trim, "_terrain_ahn", '.tif', sep=""))){
+    if(!file.exists(paste(ahn_terrain_directory, "/", aws_name_trim, "_", AHN ,"_terrain_ahn", '.tif', sep=""))){
       dir.create(paste(aws_working_directory, "terrain", sep="/"), showWarnings = FALSE)
       print(ahn_terrain_directory)
+      print(paste("Amount of sheets found:", length(bladnrs), sep=" "))
       ahn_terrain_file_paths <- c()
       for(t in 1:length(bladnrs)){
         #AHN2: https://geodata.nationaalgeoregister.nl/ahn2/extract/ahn2_05m_int/i32cn1.tif.zip
@@ -211,15 +205,14 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
         indiv_terrain_rasters[[t]] <- ahn_terrain_crop
       }
       
-      ahn_terrain_raster_filename <- paste(ahn_terrain_directory, "/", aws_name_trim, "_terrain_ahn", '.tif', sep="")
-      indiv_terrain_rasters$filename <- paste(aws_name_trim, "_terrain_ahn", '.tif', sep="")
+      indiv_terrain_rasters$filename <- paste(aws_name_trim, "_", AHN , "_terrain_ahn", '.tif', sep="")
       if(length(bladnrs) > 1){
         indiv_terrain_rasters$overwrite <- TRUE
         print("Merging all terrain rasters...")
         print(ahn_terrain_raster_filename)
         ahn_terrain_raster <- do.call(merge, indiv_terrain_rasters, envir = )
         writeRaster(ahn_terrain_raster, filename = ahn_terrain_raster_filename, overwrite = TRUE)
-        file.remove(paste(aws_name_trim, "_terrain_ahn", '.tif', sep=""))
+        file.remove(paste(aws_name_trim, "_", AHN , "_terrain_ahn.tif", sep=""))
         message("Download and merge of terrain rasters complete.")
       } else if(length(bladnrs) == 1){
         ahn_terrain_raster <- indiv_terrain_rasters[[1]]
@@ -233,29 +226,38 @@ import_ahn <- function(aws_name, station_coords, X, Y, LONLAT, resolution, radiu
         }
       }
     } else {
-      print(paste("Cropped terrain raster for", aws_name, "already exists and will be stored to this variable.",sep =" "))
-      ahn_terrain_raster <- raster(paste(ahn_terrain_directory, "/", aws_name_trim, "_terrain_ahn", '.tif', sep=""))
+      if(redownload == TRUE){
+        redownload_files <- TRUE
+        file.remove(ahn_terrain_raster_filename)
+      } else {
+        warning(paste("Cropped terrain raster for", aws_name, "already exists and was returned. Please remove it if you want to download it again or set redownload to TRUE.",sep =" "))
+        ahn_terrain_raster <- raster(paste(ahn_terrain_directory, "/", aws_name_trim, "_", AHN ,"_terrain_ahn", '.tif', sep=""))
+      }
     }
   }
   
-  if(raw_ahn == TRUE & terrain_ahn == TRUE){
-    ahn_rasters <- stack(ahn_raw_raster, ahn_terrain_raster)
-    names(ahn_rasters) <- c("raw", "terrain")
-  } else if(raw_ahn == TRUE & terrain_ahn == FALSE){
-    ahn_rasters <- stack(ahn_raw_raster)
-    names(ahn_rasters) <- c("raw")
-  } else if(raw_ahn == FALSE & terrain_ahn == TRUE){
-    ahn_rasters <- stack(ahn_terrain_raster)
-    names(ahn_rasters) <- c("terrain")
+  if(redownload_files == TRUE){
+    warning("AHN files already exsitsed and were redownloaded")
+    import_single_ahn(aws_name = aws_name, station_coords = station_coords, X = X, Y = Y, LONLAT = LONLAT, resolution = resolution, radius = radius, raw_ahn = raw_ahn, terrain_ahn = terrain_ahn, AHN3 = AHN3, delete_sheets = delete_sheets, redownload = TRUE)
   } else {
-    ahn_rasters <- NULL
+    if(raw_ahn == TRUE & terrain_ahn == TRUE){
+      ahn_rasters <- stack(ahn_raw_raster, ahn_terrain_raster)
+      names(ahn_rasters) <- c("raw", "terrain")
+    } else if(raw_ahn == TRUE & terrain_ahn == FALSE){
+      ahn_rasters <- stack(ahn_raw_raster)
+      names(ahn_rasters) <- c("raw")
+    } else if(raw_ahn == FALSE & terrain_ahn == TRUE){
+      ahn_rasters <- stack(ahn_terrain_raster)
+      names(ahn_rasters) <- c("terrain")
+    } else {
+      ahn_rasters <- NULL
+    }
+    return (ahn_rasters)
   }
-  
   # if(delete_sheets == TRUE){
   #   file.remove(bladIndex_shape_file)
   #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".shx", sep=""))
   #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".dbf", sep=""))
   #   file.remove(paste( bladIndex_shape_filepath, "/", AHN, "_bladIndex", ".prj", sep=""))
   # }
-
-return (ahn_rasters)}
+}
