@@ -1,4 +1,4 @@
-generate_classifications <- function(aws_name, sensor_name, import_ahn = FALSE, import_bgt = FALSE, redownload_ahn = FALSE, redownload_bgt= FALSE, AHN3 = FALSE, solar_angles = FALSE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, shadow_angles = FALSE, shadow_radius = 300, full_circle_mask = FALSE, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE){
+generate_classifications <- function(aws_name, sensor_name, criteria_columnName = "Criteria_Value", import_ahn = FALSE, import_bgt = FALSE, redownload_ahn = FALSE, redownload_bgt= FALSE, AHN3 = FALSE, solar_angles = FALSE, angle_selection_byIndexNr = "all", years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, calculate_shadow_angles = FALSE, shadow_radius = 300, read_only_shadow_values = FALSE, extract_method = ' bilinear', full_circle_mask = FALSE, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE){
   aws_name_trim <- getAWS_name_trim(aws_name)
   
   if(AHN3 == TRUE){
@@ -11,22 +11,22 @@ generate_classifications <- function(aws_name, sensor_name, import_ahn = FALSE, 
   #import AHN
   if(import_ahn == TRUE){
     multiple_import_ahn(aws_list = c(aws_name),
-                      sensor_name = sensor_name,
-                      radius = ahn_radius,
-                      resolution = ahn_resolution,
-                      AHN3 = AHN3,
-                      raw_ahn = TRUE, terrain_ahn = TRUE, 
-                      delete_sheets = delete_ahn_sheets,
-                      redownload_ahn = redownload_ahn)
+                        sensor_name = sensor_name,
+                        radius = ahn_radius,
+                        resolution = ahn_resolution,
+                        AHN3 = AHN3,
+                        raw_ahn = TRUE, terrain_ahn = TRUE, 
+                        delete_sheets = delete_ahn_sheets,
+                        redownload_ahn = redownload_ahn)
   }
   #calculate solar angles
   if(solar_angles == TRUE){
     
   }
   #calculate solar and shadow angles
-  if(shadow_angles == TRUE){
+  if(calculate_shadow_angles == TRUE){
     multipleSolar_shadow_angles(aws_list = c(aws_name),
-                                sensor_name = sensor_name,
+                                sensor_name = sensor_name, angle_selection_byIndexNr = angle_selection_byIndexNr,
                                 years = years,
                                 months = months,
                                 days = days,
@@ -35,17 +35,19 @@ generate_classifications <- function(aws_name, sensor_name, import_ahn = FALSE, 
                                 minutes_interval = minutes_interval,
                                 radius = shadow_radius,
                                 AHN3 = AHN3,
+                                read_only_shadow_values = read_only_shadow_values,
+                                extract_method = extract_method,
                                 full_circle_mask = full_circle_mask,
                                 printChart = printChart,
                                 exportCSV = exportCSV)
   }
   #calcluate classes
   sa_sha_csv_path <- paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv")
-  projected_shade_class(data_path = sa_sha_csv_path, aws_name = aws_name, AHN3 = AHN3)
+  shading_table <- projected_shade_class(data_path = sa_sha_csv_path, aws_name = aws_name, criteria_columnName = criteria_columnName, AHN3 = AHN3)
   
   # create chart
   angles_csv_path <- paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN,"_ah_solar_shadow_angles_complete.csv") 
-  sun_shade_angles_chart(data_path = angles_csv_path, aws_name = aws_name, AHN3 = AHN3)
+  chart <- sun_shade_angles_chart(data_path = angles_csv_path, aws_name = aws_name, AHN3 = AHN3, extract_method = extract_method)
   
   
   ##land use
@@ -54,7 +56,7 @@ generate_classifications <- function(aws_name, sensor_name, import_ahn = FALSE, 
     import_single_bgt(aws_name = aws_name, sensor_name = sensor_name, radius = bgt_radius, delete_raw_gmls = delete_bgt_gmls, redownload = redownload_bgt)
   }
   #find objects and calculate classifications
-  presence_objects <- multiple_intersect_bgt(aws_list = c(aws_name), sensor_name = sensor_name, exportCSV = exportCSV, exportShp = exportShp)
+  presence_objects <- multiple_intersect_bgt(aws_list = c(aws_name), sensor_name = sensor_name, criteria_columnName = criteria_columnName, exportCSV = exportCSV, exportShp = exportShp)
   
   
   ##vegetation
@@ -62,13 +64,13 @@ generate_classifications <- function(aws_name, sensor_name, import_ahn = FALSE, 
   vegetation_height <- vegetation_height(aws_name = aws_name, radius = vegetation_radius, AHN3 = AHN3, exportCSV = exportCSV)
   
   #calculalte classes
-  vegetation_classes(df = vegetation_height[["df"]], aws_name = aws_name, AHN3 = AHN3, exportCSV = exportCSV)
+  vegetation_classes(df = vegetation_height[["df"]], aws_name = aws_name, criteria_columnName = criteria_columnName, AHN3 = AHN3, exportCSV = exportCSV)
   
   #create summary classification
   summary <- summary_classifcation(aws_name = aws_name, sensor_name = sensor_name, AHN3 = AHN3)
   
   #View(summary)
-  return (list("summary" = summary))
+  return (list("summary" = summary, "ssc"=chart))#, "sst"= shading_tables))
 }
 
 summary_classifcation <- function(aws_name, sensor_name, class_selection = "final_class", AHN3 = FALSE){
@@ -102,7 +104,7 @@ summary_classifcation <- function(aws_name, sensor_name, class_selection = "fina
   return(df)
 }
 
-multiple_classifications <- function(aws_list, sensor_name, import_ahn = FALSE, import_bgt = FALSE, redownload_bgt = FALSE, redownload_ahn = FALSE, AHN3 = FALSE, solar_angles = FALSE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, shadow_angles = FALSE, shadow_radius = 300, full_circle_mask = FALSE, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE){
+create_temperature_SC <- function(aws_list, sensor_name, criteria_columnName = "Criteria_Value", import_ahn = FALSE, import_bgt = FALSE, redownload_bgt = FALSE, redownload_ahn = FALSE, AHN3 = FALSE, solar_angles = FALSE, angle_selection_byIndexNr = "all", years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE, extract_method = ' bilinear', shadow_radius = 300, full_circle_mask = FALSE, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE){
   if(AHN3 == TRUE){
     AHN <- "AHN3"
   } else {
@@ -119,11 +121,19 @@ multiple_classifications <- function(aws_list, sensor_name, import_ahn = FALSE, 
   for (c in 1:length(aws_list)){
     print(" ")
     print(paste0("Creating classifcations for ", aws_list[c], " with sensor ", sensor_name,"..."))
-    classifcations <- generate_classifications(aws_name = aws_list[c], sensor_name = sensor_name, import_ahn = import_ahn, import_bgt = import_bgt, redownload_bgt = redownload_bgt, redownload_ahn = redownload_ahn, AHN3 = AHN3, solar_angles = solar_angles, years = years, months = months, days = days, s_hour = s_hour, f_hour = f_hour, minutes_interval = minutes_interval, ahn_resolution = ahn_resolution, ahn_radius = ahn_radius, bgt_radius = bgt_radius, shadow_angles = shadow_angles, shadow_radius = shadow_radius, full_circle_mask = full_circle_mask, vegetation_radius = vegetation_radius, exportShp = exportShp, exportCSV = exportCSV, printChart = printChart, delete_ahn_sheets = delete_ahn_sheets, delete_bgt_gmls = delete_bgt_gmls)
+    classifications <- generate_classifications(aws_name = aws_list[c], sensor_name = sensor_name, criteria_columnName = criteria_columnName, import_ahn = import_ahn, import_bgt = import_bgt, redownload_bgt = redownload_bgt, redownload_ahn = redownload_ahn, AHN3 = AHN3, solar_angles = solar_angles, angle_selection_byIndexNr  = angle_selection_byIndexNr, years = years, months = months, days = days, s_hour = s_hour, f_hour = f_hour, minutes_interval = minutes_interval, ahn_resolution = ahn_resolution, ahn_radius = ahn_radius, bgt_radius = bgt_radius, calculate_shadow_angles = calculate_shadow_angles, shadow_radius = shadow_radius, read_only_shadow_values = read_only_shadow_values, extract_method = extract_method,full_circle_mask = full_circle_mask, vegetation_radius = vegetation_radius, exportShp = exportShp, exportCSV = exportCSV, printChart = printChart, delete_ahn_sheets = delete_ahn_sheets, delete_bgt_gmls = delete_bgt_gmls)
+    #View(classifcations)
     manual_class <- get_manualValue(aws_list[c])
     AHN_selected <- AHN
-    entry <- classifcations[["summary"]][1,] 
-    entry <- cbind(entry, manual_class, AHN_selected)
+    extract_methodology <- extract_method
+    if(criteria_columnName == "Criteria_Value"){
+      criteria_values <- "WM0 Guidelines"
+    } else {
+      criteria_values <- criteria_columnName
+    }
+ 
+    entry <- classifications[["summary"]][1,] 
+    entry <- cbind(entry, manual_class, AHN_selected, extract_methodology, criteria_values)
     summary_classifcations <- rbind(summary_classifcations, entry)
     print("Created classifications successfully.")
     print(" ")
@@ -133,15 +143,18 @@ multiple_classifications <- function(aws_list, sensor_name, import_ahn = FALSE, 
     }  
   }
   View(summary_classifcations)
+  return (list("sc"=summary_classifcations))#, "ssa"=classifcations[["ssc"]]))
 }
 
-multiple_classifications(aws_list = c(ahn3_temp_names), #, "Vlissingen", "Wijk aan zee", "Voorschoten"),
-                         sensor_name = temperature_sensor_name,
-                         AHN3 = TRUE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
-                         import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
-                         solar_angles = FALSE, years = c(2018), months = c(12, 1:6), days = c(21),
-                         s_hour = 0, f_hour = 23, minutes_interval = 15,
-                         shadow_angles = FALSE, shadow_radius = 300, full_circle_mask = FALSE,
-                         vegetation_radius = 10,
-                         exportShp = TRUE, exportCSV = TRUE, printChart = TRUE)
+DeBilt_temperature_SC <-create_temperature_SC (aws_list = c("De Bilt"),
+                                      sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value",
+                                      AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
+                                      import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
+                                      solar_angles = FALSE, angle_selection_byIndexNr = "all",
+                                      years = c(2018), months = c(12, 1:6), days = c(21),
+                                      s_hour = 0, f_hour = 23, minutes_interval = 15,
+                                      calculate_shadow_angles = FALSE, read_only_shadow_values = TRUE,
+                                      shadow_radius = 300, full_circle_mask = FALSE, extract_method = 'bilinear',
+                                      vegetation_radius = 10,
+                                      exportShp = FALSE, exportCSV = TRUE, printChart = FALSE)
 

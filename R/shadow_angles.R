@@ -34,7 +34,9 @@ shadow_angles <- function(aws_name, spatialpoint,
                           angle,
                           maxDist,
                           sensor_height,
-                          AHN3 = FALSE){
+                          AHN3 = FALSE,
+                          read_only = FALSE,
+                          extract_method = 'bilinear'){
   requireNamespace("sp")
   requireNamespace("raster")
   requireNamespace("horizon")
@@ -82,20 +84,30 @@ shadow_angles <- function(aws_name, spatialpoint,
     
   }
   
-  horizon_grid<-horizon::horizonSearch(x = ahn_mask,  
-                                       degrees= TRUE,
-                                       maxDist = maxDist, 
-                                       azimuth = angle,
-                                       ll=LONLAT)
-  shadows<-raster::stack(ahn_mask,horizon_grid)
-  names(shadows)<-c("height","shadow_angle")
-  #print(str(shadows[["shadow_angle"]]))
-  #plot(shadows)
-  writeRaster(shadows[["shadow_angle"]], paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
-  df<-extract(x = shadows, y = spatialpoint, method='bilinear')
+  if(read_only == FALSE){
+    print(paste0("Calculating shadow angles using the ", extract_method, " method..."))
+    horizon_grid<-horizon::horizonSearch(x = ahn_mask,  
+                                         degrees= TRUE,
+                                         maxDist = maxDist, 
+                                         azimuth = angle,
+                                         ll=LONLAT)
+    
+    shadows<-raster::stack(ahn_mask,horizon_grid)
+    names(shadows)<-c("height","shadow_angle")
+    #print(str(shadows[["shadow_angle"]]))
+    #plot(shadows)
+    writeRaster(shadows[["shadow_angle"]], paste0(x = "output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
+  } else {
+    print(paste0("Only reading exisiting values using the ", extract_method, " method..."))
+    sa_values <- raster(paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
+    shadows<-raster::stack(ahn_mask,sa_values)
+    names(shadows)<-c("height","shadow_angle")
+  }
+  
+  df<-extract(x = shadows, y = spatialpoint, method=extract_method)
   #View(df)
   #df<- as.data.frame(matrix)
-  return(list("shadows"=shadows,"df"=df))
+  return(list("df"=df)) #,"shadows"=shadows,))
 }
 
 #test

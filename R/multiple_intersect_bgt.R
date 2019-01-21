@@ -1,4 +1,4 @@
-multiple_intersect_bgt <- function(aws_list, sensor_name, exportCSV = FALSE, exportShp = FALSE){
+multiple_intersect_bgt <- function(aws_list, sensor_name, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   presence_objects_list <- list()
   for(b in 1:length(aws_list)){
     aws_name <- aws_list[b]
@@ -8,7 +8,10 @@ multiple_intersect_bgt <- function(aws_list, sensor_name, exportCSV = FALSE, exp
     bgt.sf <- st_transform(bgt.shp, epsg_rd)
     #View(single_aws[["aws_rd.sf"]])
     #bgt.sf <- st_as_sf(bgt.shp)
-    presence_objects <- presence_objects(aws_name = aws_name, coords = single_aws[["aws_rd.sf"]], bgt_shape = bgt.sf, temperature_criteria.df = single_aws[["aws.df"]][,c(1,5)], exportCSV = exportCSV, exportShp = exportShp)
+    presence_objects <- presence_objects(aws_name = aws_name, coords = single_aws[["aws_rd.sf"]], bgt_shape = bgt.sf, temperature_criteria.df = single_aws[["aws.df"]][,c(1,5)], criteria_columnName = criteria_columnName, exportCSV = exportCSV, exportShp = exportShp)
   }
   return (presence_objects)
 }
+
+intersection <- multiple_intersect_bgt(aws_list = c("De Bilt"), sensor_name = temperature_sensor_name, exportCSV = TRUE, exportShp = FALSE)
+View(intersection[["df"]])

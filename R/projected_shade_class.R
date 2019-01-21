@@ -1,4 +1,4 @@
-projected_shade_class <- function(data_path, cv_colName = "Criteria_Value", aws_name, AHN3 = FALSE){
+projected_shade_class <- function(data_path, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
   }
@@ -10,27 +10,27 @@ projected_shade_class <- function(data_path, cv_colName = "Criteria_Value", aws_
   
   aws_name_trim <- getAWS_name_trim(aws_name)
   
-  data <- fread(data_path)
+  data <- fread(data_path, data.table = FALSE)
   
   tshac <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "shading")
-  tshac <- check_criteria(df = tshac, cv_colName = cv_colName)
+  tshac <- check_criteria(df = tshac, criteria_columnName = criteria_columnName)
   
   class_1_filter <-  filter(tshac, Class == "1")
-  class_1_cv <- as.numeric(class_1_filter[,cv_colName][1])
+  class_1_cv <- as.numeric(class_1_filter[,criteria_columnName][1])
   
   class_2_filter <-  filter(tshac, Class == "2")
-  class_2_cv <- as.numeric(class_2_filter[,cv_colName][1])
+  class_2_cv <- as.numeric(class_2_filter[,criteria_columnName][1])
   
   class_3_filter <-  filter(tshac, Class == "3")
-  class_3_cv <- as.numeric(class_3_filter[,cv_colName][1])
+  class_3_cv <- as.numeric(class_3_filter[,criteria_columnName][1])
   
-  class_2_3_cv <- as.numeric(class_2_filter[,cv_colName][1]) 
+  class_2_3_cv <- as.numeric(class_2_filter[,criteria_columnName][1]) 
   
   class_4_filter <-  filter(tshac, Class == "4")
-  class_4_cv <- as.numeric(class_4_filter[,cv_colName][1])
+  class_4_cv <- as.numeric(class_4_filter[,criteria_columnName][1])
   
   class_5_filter <-  filter(tshac, Class == "5")
-  class_5_cv <- as.numeric(class_5_filter[,cv_colName][1])
+  class_5_cv <- as.numeric(class_5_filter[,criteria_columnName][1])
   
   # class_1_cv <- 2
   # class_2_cv <- 2.2
@@ -113,6 +113,21 @@ projected_shade_class <- function(data_path, cv_colName = "Criteria_Value", aws_
     }
 
   }
+
+  class1_count <- sum(1 == data[,"final_indiv_class"])
+  class2_count <- sum(2 == data[,"final_indiv_class"])
+  class3_count <- sum(3 == data[,"final_indiv_class"])  
+  class4_count <- sum(4 == data[,"final_indiv_class"])
+  class5_count <- sum(5 == data[,"final_indiv_class"])
+  
+  for(c in seq(1, nrow(data), 1)){
+    data[c,"class1_count"] <- class1_count
+    data[c,"class2_count"] <- class2_count
+    data[c,"class3_count"] <- class3_count  
+    data[c,"class4_count"] <- class4_count
+    data[c,"class5_count"] <- class5_count
+  }
+  
   final_class <- max(data[,"final_indiv_class"]) 
   #print(final_class)
   data$final_class <- final_class 
@@ -122,5 +137,11 @@ projected_shade_class <- function(data_path, cv_colName = "Criteria_Value", aws_
   } else {
     fwrite(data, paste0("output/solar_shadow_angles/",AHN, "_ah_solar_shadow_angles_classes.csv"))
   }
+  #View(data)
+  message(paste0("Shading passed criteria for class ", final_class, "."))
   return (data)
 }
+
+projected_shade_class(data_path = "output/solar_shadow_angles/Voorschoten/Voorschoten_AHN2_ah_solar_shadow_angles.csv",
+                      aws_name = "De Bilt")
+
