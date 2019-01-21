@@ -64,17 +64,22 @@ start <- function(settings){
     return (list("point_rd.sp" = point_rd.sp, "point_wgs.sp" = point_wgs.sp))
   }
   
-  check_criteria <<- function(df, cv_colName){
-    if(missing(cv_colName)){
-      cv_colName <- "Criteria_Value"
+  check_criteria <<- function(df, criteria_columnName){
+    if(missing(criteria_columnName)){
+      criteria_columnName <- "Criteria_Value"
     }
     for(a in 1:nrow(df)){
-      str <- df[a,cv_colName]
-      if(grepl(",", str) == TRUE){
-        str_adj <- gsub(",", ".", str, fixed = TRUE)
-        nr <- as.numeric(str_adj)
-        df[a,cv_colName] <- nr
-      }
+      str <- df[a,criteria_columnName]
+      tryCatch({  
+        if(grepl(",", str) == TRUE){
+          str_adj <- gsub(",", ".", str, fixed = TRUE)
+          nr <- as.numeric(str_adj)
+          df[a,criteria_columnName] <- nr
+        }
+      }, error=function(e){
+            message(e)
+            stop("No correct Criteria value column name is selected. Change it or leave it out for default WMO Crteria gudeline values.")
+      })
     }
     return (df)
   }
