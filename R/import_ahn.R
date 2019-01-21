@@ -82,7 +82,7 @@ import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, re
   if(raw_ahn == TRUE){  
     ahn_raw_directory <- paste(aws_working_directory, "raw", sep="/")
     ahn_raw_raster_filename <- paste(ahn_raw_directory, "/", aws_name_trim, "_", AHN, "_raw_ahn", '.tif', sep="")
-    if(!file.exists(paste(ahn_raw_directory, "/", aws_name_trim, "_raw_ahn", '.tif', sep=""))){
+    if(!file.exists(ahn_raw_raster_filename)){
       dir.create(paste(aws_working_directory, "raw", sep="/"), showWarnings = FALSE)
       print(ahn_raw_directory)
       # rawXList <<- c()
@@ -164,7 +164,7 @@ import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, re
     ahn_terrain_raster_filename <- paste(ahn_terrain_directory, "/", aws_name_trim, "_", AHN ,"_terrain_ahn", '.tif', sep="")
     # terrainXList <<- c()
     # terrainYList <<- c()
-    if(!file.exists(paste(ahn_terrain_directory, "/", aws_name_trim, "_", AHN ,"_terrain_ahn", '.tif', sep=""))){
+    if(!file.exists(ahn_terrain_raster_filename)){
       dir.create(paste(aws_working_directory, "terrain", sep="/"), showWarnings = FALSE)
       print(ahn_terrain_directory)
       print(paste("Amount of sheets found:", length(bladnrs), sep=" "))
@@ -237,7 +237,7 @@ import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, re
   }
   
   if(redownload_files == TRUE){
-    warning("AHN files already exsitsed and were redownloaded")
+    warning("AHN file(s) already existed and were redownloaded")
     import_single_ahn(aws_name = aws_name, station_coords = station_coords, X = X, Y = Y, LONLAT = LONLAT, resolution = resolution, radius = radius, raw_ahn = raw_ahn, terrain_ahn = terrain_ahn, AHN3 = AHN3, delete_sheets = delete_sheets, redownload = TRUE)
   } else {
     if(raw_ahn == TRUE & terrain_ahn == TRUE){
