@@ -20,3 +20,5 @@ multiple_import_bgt <- function(aws_list, radius = 150, delete_raw_gmls = TRUE){
   elapsed_time <- ceiling(end_time - start_time)
   return(list("all_objects_count" = all_objects_count, "all_bgt_objects"=all_bgt_objects))
 }
+
+multiple_import_bgt(c("De Bilt"))
