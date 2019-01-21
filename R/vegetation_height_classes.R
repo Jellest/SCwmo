@@ -1,4 +1,4 @@
-vegetation_classes <- function (df, cv_colName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
+vegetation_classes <- function (df, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
@@ -13,22 +13,22 @@ vegetation_classes <- function (df, cv_colName = "Criteria_Value", aws_name, AHN
   }
   
   vhc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "vegetation height")
-  vhc <- check_criteria(df = vhc, cv_colName = cv_colName)
+  vhc <- check_criteria(df = vhc, criteria_columnName = criteria_columnName)
   
   class_1_filter <-  filter(vhc, Class == "1")
-  class_1_cv <- as.numeric(class_1_filter[,cv_colName][1])
+  class_1_cv <- as.numeric(class_1_filter[,criteria_columnName][1])
   
   class_2_filter <-  filter(vhc, Class == "2")
-  class_2_cv <- as.numeric(class_2_filter[,cv_colName][1])
+  class_2_cv <- as.numeric(class_2_filter[,criteria_columnName][1])
   
   class_3_filter <-  filter(vhc, Class == "3")
-  class_3_cv <- as.numeric(class_3_filter[,cv_colName][1])
+  class_3_cv <- as.numeric(class_3_filter[,criteria_columnName][1])
   
   class_4_filter <-  filter(vhc, Class == "4")
-  class_4_cv <- as.numeric(class_4_filter[,cv_colName][1])
+  class_4_cv <- as.numeric(class_4_filter[,criteria_columnName][1])
   
   class_5_filter <-  filter(vhc, Class == "5")
-  class_5_cv <- as.numeric(class_5_filter[,cv_colName][1])
+  class_5_cv <- as.numeric(class_5_filter[,criteria_columnName][1])
   
   if(df[1,"Median"] < class_1_cv){
     df[1,"meet_class1"] <- TRUE
@@ -91,6 +91,7 @@ vegetation_classes <- function (df, cv_colName = "Criteria_Value", aws_name, AHN
       fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
     }
   }
+  message(paste0("Vegetaion height passed criteria for class ", df[1,"final_class"], "."))
   #View(df)
   return(df)
 }
