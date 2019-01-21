@@ -1,14 +1,19 @@
 library(raster)
 library(rgeos)
-vegetation_height <- function(aws_name, radius, AHN3 = FALSE, exportCSV = FALSE){
+vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AHN3 = FALSE, exportCSV = FALSE){
   if(AHN3 == TRUE){
     AHN <- "AHN3"
   } else {
     AHN <- "AHN2"
   }
   
-  aws_name_trim <- getAWS_name_trim(aws_name)
-  single_aws <- select_single_aws(aws.df = AWS.df, aws_name = aws_name, sensor_name = temperature_sensor_name)
+  aws <- check_aws_names(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+  aws_name <- aws[1,"AWS"]
+  sensor_name <- aws[1,"Sensor"]  
+
+  single_aws <- select_single_aws(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+  
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   
   aws_buffer<-raster::buffer(single_aws[["aws_rd.sp"]], width = radius)
   

@@ -1,4 +1,4 @@
-projected_shade_class <- function(data_path, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE){
+projected_shade_class <- function(aws.df = AWS.df, data_path, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
   }
@@ -8,7 +8,7 @@ projected_shade_class <- function(data_path, criteria_columnName = "Criteria_Val
     AHN <- "AHN2"
   }
   
-  aws_name_trim <- getAWS_name_trim(aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   
   data <- fread(data_path, data.table = FALSE)
   

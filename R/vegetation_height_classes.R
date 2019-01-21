@@ -1,9 +1,9 @@
-vegetation_classes <- function (df, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
+vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   }
   
   if(AHN3 == TRUE){

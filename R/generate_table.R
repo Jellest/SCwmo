@@ -1,5 +1,5 @@
-generate_table <- function(aws_name, sensor_name, file, AHN3 = FALSE){
-  aws_name_trim <- getAWS_name_trim(aws_name)
+generate_table <- function(aws.df = AWS.df, aws_name, sensor_name, file, AHN3 = FALSE){
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   
   if(AHN3 == TRUE){
     AHN <- "AHN3"

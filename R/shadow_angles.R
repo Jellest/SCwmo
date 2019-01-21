@@ -26,7 +26,8 @@
 #' maxDist=100)
 #'@export
 
-shadow_angles <- function(aws_name, spatialpoint,
+shadow_angles <- function(aws.df = AWS.df,
+                          aws_name, spatialpoint,
                           X,
                           Y,
                           LONLAT,
@@ -63,7 +64,7 @@ shadow_angles <- function(aws_name, spatialpoint,
     aws_name <- ""
     aws_name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   }
 
   if(missing(sensor_height)){

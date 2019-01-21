@@ -42,8 +42,6 @@ start <- function(settings){
   sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
   sAWStemperature_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names & Sensor == temperature_sensor_name)
   ahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% ahn3_temp_names & Sensor == temperature_sensor_name)
-  ahn3_temp1 <<- c("Voorschoten", "Wijk aan zee")
-  ahn3_temp2 <<- c("Vlissingen", "Rotterdam")
   #global  functions
   create_SpatialPoint <<- function(X, Y, LONLAT){
     if(missing(LONLAT)){
@@ -83,9 +81,33 @@ start <- function(settings){
     }
     return (df)
   }
+  check_aws_names <<- function(aws.df = AWS.df, aws_name, sensor_name){
+    check_existence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),]
+    if(nrow(check_existence) == 0 | nrow(check_existence) > 1){
+      check_existence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == "site"),]
+      if(nrow(check_existence) == 0){
+        check_existence <- aws.df[which(aws.df$AWS == aws_name),]
+        if(nrow(check_existence) == 0){
+          stop("No AWS found with this name and/or sensor name.")
+        } else if(nrow(check_existence) == 1){
+           my_sensor_name <- check_existence[1,"Sensor"]
+           message(paste0("Single entry AWS name was for for", aws_name, "using ", my_sensor_name," as sensor name."))
+           return (check_existence) 
+        } else{
+          print(check_existence)
+          stop(paste0("More than one entry has been found for ", aws_name, ". Please select an AWS name (and sensor name) that returns one entry."))
+        }
+      } else {
+          message(paste(sensor_name, "sensor is not found. 'site' is selected as sensor name."))
+          sensor_name <- "site"
+          return(check_existence)
+      }
+    } else if(nrow(check_existence) == 1){
+      return(check_existence)
+    }
+  }
   
-  select_single_aws <<- function(aws.df, aws_name, sensor_name){
-    
+  select_single_aws <<- function(aws.df = AWS.df, aws_name, sensor_name){
     if(missing(sensor_name)){
       sensor_name <- "site"
       first_sensor_name <- "site"
@@ -100,8 +122,8 @@ start <- function(settings){
       message(paste0(first_sensor_name, " sensor is not found. 'site' is selected as sensor name."))
     }
     
-    if(nrow(single_aws.df) > 0){
-      print(paste0("Getting AWS coordinate of ", aws_name, " with '", sensor_name, "' as sensor name."))
+    if(nrow(single_aws.df) == 1){
+      print(paste0("Getting AWS coordinates of ", aws_name, " with '", sensor_name, "' as sensor name."))
       single_aws_rd.sp<-data.frame(single_aws.df)
       coordinates(single_aws_rd.sp) <- ~X+Y
       crs(single_aws_rd.sp)<-CRS(epsg_rd)
@@ -118,14 +140,14 @@ start <- function(settings){
       )
       )
     } else {
-      warning("No AWS found with this AWS name.")
+      warning("No single entry AWS found with this AWS name.")
     }
   }
   
-  selectSensor_row <<- function (aws.df, aws_name, sensor_name){
-    check_presence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),] 
-    if(nrow(check_presence) == 0){
-      message("No AWS found with this name and/or sensor name.")
+  selectSensor_row <<- function (aws.df = AWS.df, aws_name, sensor_name){
+    check_existence <- aws.df[which(aws.df$AWS == aws_name & aws.df$Sensor == sensor_name),] 
+    if(nrow(check_existence) == 0){
+      stop("No AWS found with this name and/or sensor name.")
       return (NULL)
     } else {
       if(missing(sensor_name)){
@@ -140,8 +162,8 @@ start <- function(settings){
     }
   }
   
-  getAWS_name_trim <<- function (aws_name){
-    aws_name_untrimmed <- AWS.df$AWS[which(AWS.df$AWS == aws_name)][1]
+  getAWS_name_trim <<- function (aws.df = AWS.df, aws_name){
+    aws_name_untrimmed <- aws.df$AWS[which(aws.df$AWS == aws_name)][1]
     if(is.na(aws_name_untrimmed) == TRUE) {
       aws_name_trim <- stop(paste("No AWS station found with the following name:", aws_name))
     } else{
@@ -161,6 +183,8 @@ start <- function(settings){
     }
   }
 }
+
+AWS_test.df<<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
 
 #installl Perl
 #installXLSXsupport()

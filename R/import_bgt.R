@@ -5,14 +5,13 @@ library(gdalUtils)
 library(gdata)
 library(sf)
 
-import_single_bgt <- function(aws_name, sensor_name, radius = 150, delete_raw_gmls = TRUE, redownload = FALSE){
+import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 150, delete_raw_gmls = TRUE, redownload = FALSE){
   CleanGlobEnvir <- function(pattern){
     rm(list = ls(envir=globalenv())[
       grep(pattern, ls(envir=globalenv()))], envir = globalenv())
   }
-
   tryCatch({
-    aws_name_trim <- getAWS_name_trim(aws_name) 
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
     if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/")) & redownload == TRUE){  
       file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/"))
       file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shx"), sep="/"))
@@ -20,13 +19,13 @@ import_single_bgt <- function(aws_name, sensor_name, radius = 150, delete_raw_gm
       file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".dbf"), sep="/"))
       warning("BGT shapefile for this aws is already found. They were removed and redownloaded.")
       
-      import_single_bgt(aws_name = aws_name, sensor_name = sensor_name, radius = radius, delete_raw_gmls = delete_raw_gmls, redownload = TRUE)
+      import_single_bgt(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name, radius = radius, delete_raw_gmls = delete_raw_gmls, redownload = TRUE)
     } else if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/")) & redownload == FALSE){
       warning("BGT shapefile for this aws is already found and will used. Please remove it if you want to redownlolad it, or set redownload to TRUE..")
     } else {
       
       #aws station
-      selected_aws <- select_single_aws(aws.df = AWS.df, aws_name = aws_name, sensor_name = sensor_name) 
+      selected_aws <- select_single_aws(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name) 
     
       #create 200 meter buffer arouond sensor
       surroundingBuffer <- buffer(selected_aws[["aws_rd.sp"]],width=radius)

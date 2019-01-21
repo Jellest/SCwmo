@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
+presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -13,7 +13,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
     go_to_next_class <- FALSE
   }
   
-  aws_name_trim <- getAWS_name_trim(aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   ##load criteria
   tluc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "land use" & Class == class)
   tluc <- check_criteria(df = tluc, criteria_columnName = criteria_columnName)
@@ -347,7 +347,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          presence_objects(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("Land use passed class criteria ", class)
         }
@@ -356,7 +356,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          presence_objects(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("Land use passed class criteria ", class)
           return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))

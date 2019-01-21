@@ -1,6 +1,6 @@
-import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, resolution, radius, raw_ahn = TRUE, terrain_ahn =- TRUE, AHN3 = FALSE, delete_sheets = TRUE, redownload = FALSE){
+import_single_ahn <- function(aws.df = AWS.df, aws_name, station_coords, X, Y, LONLAT = FALSE, resolution, radius, raw_ahn = TRUE, terrain_ahn =- TRUE, AHN3 = FALSE, delete_sheets = TRUE, redownload = FALSE){
   redownload_files <- FALSE
-  aws_name_trim <- getAWS_name_trim(aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   if(missing(resolution)){
     warning("No correct resolution was found for importing AHN. Resolution of 0.5 m was used.")
     resolution_name <- "05m"
@@ -238,7 +238,7 @@ import_single_ahn <- function(aws_name, station_coords, X, Y, LONLAT = FALSE, re
   
   if(redownload_files == TRUE){
     warning("AHN file(s) already existed and were redownloaded")
-    import_single_ahn(aws_name = aws_name, station_coords = station_coords, X = X, Y = Y, LONLAT = LONLAT, resolution = resolution, radius = radius, raw_ahn = raw_ahn, terrain_ahn = terrain_ahn, AHN3 = AHN3, delete_sheets = delete_sheets, redownload = TRUE)
+    import_single_ahn(aws.df = aws.df, aws_name = aws_name, station_coords = station_coords, X = X, Y = Y, LONLAT = LONLAT, resolution = resolution, radius = radius, raw_ahn = raw_ahn, terrain_ahn = terrain_ahn, AHN3 = AHN3, delete_sheets = delete_sheets, redownload = TRUE)
   } else {
     if(raw_ahn == TRUE & terrain_ahn == TRUE){
       ahn_rasters <- stack(ahn_raw_raster, ahn_terrain_raster)
