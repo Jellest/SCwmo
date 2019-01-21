@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, cv_colName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
+presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -16,7 +16,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
   aws_name_trim <- getAWS_name_trim(aws_name)
   ##load criteria
   tluc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "land use" & Class == class)
-  tluc <- check_criteria(df = tluc, cv_colName = cv_colName)
+  tluc <- check_criteria(df = tluc, criteria_columnName = criteria_columnName)
   #selected_aws_row <- which(temperature_criteria.df == aws_name)
   ##functions
   createBuffer <- function(coords, distance){
@@ -37,11 +37,11 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
     return(annulus)}
   
   ##select criteria for buffers and relative area according to class
-  outer_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "outer buffer distance")[1,cv_colName])
-  inner_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "inner buffer distance")[1,cv_colName])
-  outer_buffer_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area outer buffer")[1,cv_colName])
-  annulus_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area annulus")[1,cv_colName])
-  inner_buffer_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area inner buffer")[1,cv_colName])
+  outer_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "outer buffer distance")[1,criteria_columnName])
+  inner_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "inner buffer distance")[1,criteria_columnName])
+  outer_buffer_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area outer buffer")[1,criteria_columnName])
+  annulus_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area annulus")[1,criteria_columnName])
+  inner_buffer_relArea_criteria <- as.numeric(dplyr::filter(tluc, Name == "relative area inner buffer")[1,criteria_columnName])
   
   meet_classNr <- paste("meetClass_", toString(class), sep="")
   if(class >= 5){
@@ -111,7 +111,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
     
   
     if(class == 1 | class == 2){
-      region <- dplyr::filter(tluc, Name == "annulus distance")[1,cv_colName]
+      region <- dplyr::filter(tluc, Name == "annulus distance")[1,criteria_columnName]
       annulus_objectCountColName <- paste("objectCount_",as.character(region),"m", sep="")
       annulus_sumObjectAreasColName <- paste("sumObjectAreas_",as.character(region),"m", sep="")
       annulus_relAreaColName <- paste("relAreaRegion_",as.character(region),"m", sep="")
@@ -349,7 +349,7 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
           go_to_next_class = TRUE
           presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
-          message("BGT clip passed class criteria ", class)
+          message("Land use passed class criteria ", class)
         }
       } else if(missing(class) == FALSE & missing(go_to_next_class) == FALSE){
         if(temperature_criteria.df[1,meet_classNr] == FALSE){
@@ -358,23 +358,23 @@ presence_objects <- function(aws_name, coords, bgt_shape, temperature_criteria.d
           go_to_next_class = TRUE
           presence_objects(aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
-          message("BGT clip passed class criteria ", class)
+          message("Land use passed class criteria ", class)
           return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
         }
       } else if(missing(class) == FALSE & missing(go_to_next_class)){
         #only provide output of selected class
         if(temperature_criteria.df[1,meet_classNr] == FALSE){
-          print(paste("BGT clip did NOT pass class ", class," criteria", sep=""))
+          print(paste("Land use did NOT pass class ", class," criteria", sep=""))
           return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
         } else{
-          message("BGT clip passed class criteria ", class)
+          message("Land use passed class criteria ", class)
           return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
           
         }
       }
   } else {
     temperature_criteria.df[1,"final_class"] <- class
-    message("Pass. BGT clip passed criteria for class ", class, ".")
+    message("Land use passed criteria for class ", class, ".")
     return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
   }
 }
