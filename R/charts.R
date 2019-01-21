@@ -1,5 +1,5 @@
 #sun shadow chart
-sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
+sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE, extract_method = 'bilinear'){
   if(missing(aws_name)){
     aws_name <- ""
   }
@@ -12,7 +12,7 @@ sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
   aws_name_trim <- getAWS_name_trim(aws_name)
   
   data <- fread(data_path, data.table = FALSE)
-  print(nrow(data))
+  data_exists <- file.exists(data_path)
   # plot(month_all_solar_angles[[1]]$azimuth, month_all_solar_angles[[1]]$elevation, type="l", xlim=c(0,360), ylim=c(0,70), xlab="azimuth", ylab="elevation")
   # for (p in 2:length(month_solar_angles)){
   #   par(new=T)
@@ -38,8 +38,9 @@ sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
     shadow_angles <- FALSE
   }
   
-  if(solar_angles == TRUE & shadow_angles == TRUE){
+  if((solar_angles == TRUE & shadow_angles == TRUE) | data_exists == TRUE){
     chart <- ggplot(data, aes(x=azimuth, y=shadow_angle)) + geom_area() +
+      ggtitle(paste("Sun and shadow chart for", aws_name)) +
       geom_line(data = filter(data, day == "21-Jun"), aes(x=azimuth, y=elevation, colour="21 June")) +
       geom_line(data = filter(data, day == "21-May"), aes(x=azimuth, y=elevation, colour="21 May")) +
       geom_line(data = filter(data, day == "21-Apr"), aes(x=azimuth, y=elevation,  colour="21 April")) +
@@ -47,17 +48,22 @@ sun_shade_angles_chart <- function(data_path, aws_name,  AHN3 = FALSE){
       geom_line(data = filter(data, day == "21-Feb"), aes(x=azimuth, y=elevation, colour="21 February")) +
       geom_line(data = filter(data, day == "21-Jan"), aes(x=azimuth, y=elevation, colour="21 January")) +
       geom_line(data = filter(data, day == "21-Dec"), aes(x=azimuth, y=elevation, colour="21 December")) +
-      labs(x = "azimuth (degrees)", y = "elevation (degrees)") +
-      xlim(50,310) +
-      ylim(0,65) +
+      #labs(fill = "Your Title") +
+      #labs(x = "azimuth (degrees)", y = "elevation (degrees)") +
+      #xlim(48,312) +
+      scale_x_continuous(name="azimuth (degrees)", limits=c(50, 310), breaks=seq(50,310,50)) +
+      scale_y_continuous(name="elevation (degrees)", limits=c(0, 65), breaks=seq(0,65,10)) +
+      #ylim(0,65) +# scale_y_continuous(breaks=seq(0,70,10)) +
       theme_bw() +
-      theme(text = element_text(size=24)) +
+      theme(text = element_text(size=12)) +
       scale_colour_manual("", breaks = c("21 June", "21 May", "21 April", "21 March", "21 February", "21 January", "21 December"), values = c("21 December"="black", "21 January"="purple", "21 February"="orange", "21 March"="brown", "21 April"="green", "21 May"="yellow", "21 June"="red"))
     if(aws_name != ""){
-      ggsave(paste0("output/solar_shadow_angles/", aws_name_trim,"/", aws_name_trim, "_", AHN, "_solar_shadow_chart.png"))
+      ggsave(paste0("output/solar_shadow_angles/", aws_name_trim,"/", aws_name_trim, "_", AHN, "_", extract_method, "_solar_shadow_chart.png"))
     } else {
-      ggsave("output/solar_shadow_angles/solar_shadow_chart.png")
+      ggsave(paste0("output/solar_shadow_angles/", AHN, "_", extract_method, "_solar_shadow_chart.png"))
     }
     return(chart)
   }
 }
+
+sun_shade_angles_chart(data_path = "output/solar_shadow_angles/DeBilt/DeBilt_AHN2_ah_solar_shadow_angles_complete.csv", aws_name = "De Bilt",  AHN3 = FALSE, extract_method = 'bilinear')
