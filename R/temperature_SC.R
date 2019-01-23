@@ -1,0 +1,13 @@
+temperature_SC <- create_temperature_SC (aws.df = AWS.df,
+                                                aws_list = c(ahn3_temp_names),
+                                                sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value",
+                                                AHN3 = TRUE, import_ahn = FALSE, redownload_ahn = FALSE,
+                                                ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
+                                                import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
+                                                solar_angles = FALSE, angle_selection_byIndexNr = "all",
+                                                years = c(2018), months = c(12, 1:6), days = c(21),
+                                                s_hour = 0, f_hour = 23, minutes_interval = 15,
+                                                calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE,
+                                                shadow_radius = 300, full_circle_mask = FALSE, extract_method = 'bilinear',
+                                                vegetation_radius = 10,
+                                                exportShp = TRUE, exportCSV = TRUE, printChart = FALSE)
