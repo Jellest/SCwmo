@@ -19,10 +19,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
   tluc <- check_criteria(df = tluc, criteria_columnName = criteria_columnName)
   #selected_aws_row <- which(temperature_criteria.df == aws_name)
   ##functions
-  createBuffer <- function(coords, distance){
-    buffer <- st_buffer(coords, dist=distance)
-    st_crs(buffer, epsg_rd)
-    return (buffer)}
+  
   
   createAnnulus <- function(coords, region){
     split_values <- strsplit(region, split="_")
@@ -125,10 +122,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     #coordinates
     #coords.sf <- st_as_sf(coords)
     #outer buffer area
-
-    
     #units::set_units(shape_insct.sf, m^2)
-    
 
     temperature_criteria.df[1,outer_objectCountColName] <- nrow(artificial_objects.sf)
     if(nrow(artificial_objects.sf) == 0){
