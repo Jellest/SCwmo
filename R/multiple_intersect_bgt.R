@@ -8,7 +8,7 @@ multiple_intersect_bgt <- function(aws.df = AWS.df, aws_list, sensor_name, crite
     bgt.sf <- st_transform(bgt.shp, epsg_rd)
     #View(single_aws[["aws_rd.sf"]])
     #bgt.sf <- st_as_sf(bgt.shp)
-    presence_objects <- presence_objects(aws.df = aws.df, aws_name = aws_name, coords = single_aws[["aws_rd.sf"]], bgt_shape = bgt.sf, temperature_criteria.df = single_aws[["aws.df"]][,c(1,5)], criteria_columnName = criteria_columnName, exportCSV = exportCSV, exportShp = exportShp)
+    presence_objects <- find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, coords = single_aws[["aws_rd.sf"]], bgt_shape = bgt.sf, temperature_criteria.df = single_aws[["aws.df"]][,c(1,5)], criteria_columnName = criteria_columnName, exportCSV = exportCSV, exportShp = exportShp)
   }
   return (presence_objects)
 }

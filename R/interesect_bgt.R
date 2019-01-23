@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
+find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -313,19 +313,19 @@ presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, tempe
   }
   #export
   if(exportCSV == TRUE | exportShp == TRUE){
-    if(!dir.exists("output/objects")){
-      dir.create("output/objects")
+    if(!dir.exists(paste0("output/", aws_name_trim))){
+      dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
     }
-    if(!dir.exists(paste0("output/objects/",aws_name_trim))){
-      dir.create(paste0("output/objects/", aws_name_trim))
+    if(!dir.exists(paste0("output/", aws_name_trim, "/land_use"))){
+      dir.create(paste0("output/", aws_name_trim, "/land_use"), showWarnings = FALSE)
     }
-    output_path <- paste0("output/objects/", aws_name_trim, "/")
+    output_path <- paste0("output/", aws_name_trim, "/land_use/")
   }
   if(exportCSV == TRUE){
     if(temperature_criteria.df[1,meet_classNr] == TRUE){
       temperature_criteria.df[1,"final_class"] <- class
     }
-    fwrite(temperature_criteria.df, paste0(output_path, aws_name_trim, "_objects_classes.csv"))
+    fwrite(temperature_criteria.df, paste0(output_path, aws_name_trim, "_landUse_classes.csv"))
   }
   if(exportShp == TRUE){
     check_shpExists(paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"))
@@ -347,7 +347,7 @@ presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, tempe
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          presence_objects(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("Land use passed class criteria ", class)
         }
@@ -356,7 +356,7 @@ presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, tempe
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          presence_objects(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
           message("Land use passed class criteria ", class)
           return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
@@ -388,7 +388,7 @@ presence_objects <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, tempe
 # crs(BGT_station_adjust.sp) <- crs(epsg_rd)
 # BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
 # 
-# temperature_landuse_criteria.df_site <- presence_objects(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
-# temperature_landuse_criteria.df_temp <- presence_objects(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
+# temperature_landuse_criteria.df_site <- find_land_use_and_classes(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
+# temperature_landuse_criteria.df_temp <- find_land_use_and_classes(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
 # mapview(BGT_station_adjust.sf)
 # View(temperature_landuse_criteria.df_site[["df"]])

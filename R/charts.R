@@ -102,7 +102,7 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  angle_
     chart <- chart + scale_colour_manual("", breaks = breaks_list, values = values_list)
     
     if(aws_name != ""){
-      ggsave(paste0("output/solar_shadow_angles/", aws_name_trim,"/", aws_name_trim, "_", AHN, "_", extract_method, "_solar_shadow_chart.png"))
+      ggsave(paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_", extract_method, "_solar_shadow_chart.png"))
     } else {
       ggsave(paste0("output/solar_shadow_angles/", AHN, "_", extract_method, "_solar_shadow_chart.png"))
     }

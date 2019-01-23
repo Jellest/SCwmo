@@ -97,10 +97,10 @@ shadow_angles <- function(aws.df = AWS.df,
     names(shadows)<-c("height","shadow_angle")
     #print(str(shadows[["shadow_angle"]]))
     #plot(shadows)
-    writeRaster(shadows[["shadow_angle"]], paste0(x = "output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
+    writeRaster(shadows[["shadow_angle"]], paste0(x = "output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
   } else {
     print(paste0("Only reading exisiting values using the ", extract_method, " method..."))
-    sa_values <- raster(paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
+    sa_values <- raster(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
     shadows<-raster::stack(ahn_mask,sa_values)
     names(shadows)<-c("height","shadow_angle")
   }

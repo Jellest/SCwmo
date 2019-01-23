@@ -10,10 +10,17 @@ multiple_Moments_solarAngles <- function(aws.df = AWS.df, aws_name, sensor_name,
   #print(aws[["aws_wgs.sp"]]@data$LAT)
   
   aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  if(!dir.exists(paste0("output/", aws_name_trim))){
+    dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
+  }
+  if(!dir.exists(paste0("output/", aws_name_trim, "/solar_shadow_angles"))){
+    dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles"))
+  }
+  dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters"), showWarnings = FALSE)
+  dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN), showWarnings = FALSE)
+  dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks"), showWarnings = FALSE)
+  dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows"), showWarnings = FALSE)
   
-  dir.create(paste0("output/solar_shadow_angles/", aws_name_trim), showWarnings = FALSE)
-  dir.create(paste0("output/solar_shadow_angles/", aws_name_trim, "/rasters"), showWarnings = FALSE)
-  dir.create(paste0("output/solar_shadow_angles/", aws_name_trim, "/rasters/", AHN), showWarnings = FALSE)
   all_solar_angles <-  data.frame(LAT = numeric(0), LON = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0), stringsAsFactors = FALSE)
   
   for(y in 1:length(years)){   
@@ -87,8 +94,8 @@ multiple_Moments_solarAngles <- function(aws.df = AWS.df, aws_name, sensor_name,
   
   if(exportCSV == TRUE){
     #dir.create("output/solar_shadow_angles", getAWS_name_trim(aws_name))
-    fwrite(x = all_solar_angles, file = paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_solar_angles.csv"))
-    fwrite(x = all_ah_solar_angles, file = paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_ah_solar_angles.csv"))
+    fwrite(x = all_solar_angles, file = paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_solar_angles.csv"))
+    fwrite(x = all_ah_solar_angles, file = paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_ah_solar_angles.csv"))
     print("Exported solar angles to output folder.")
   }
   
@@ -145,10 +152,10 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
     #shdf <- data.frame(shadow_height = heightShadow, shadow_angle = shad_angle)
     soshdf <- merge(solar_angles[a,], shadow_ha)
     ah_solar_shadow_angles <- rbind(ah_solar_shadow_angles, soshdf)
-    fwrite(ah_solar_shadow_angles, paste0("output/solar_shadow_angles/", aws_name_trim,"/",aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv"))
+    fwrite(ah_solar_shadow_angles, paste0("output/", aws_name_trim, "/solar_shadow_angles/",aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv"))
     if(a == length(azimuths)){
       #ah_solar_shadow_angles <- ah_solar_shadow_angles[,c("lat", "lon", "altitude", "julian_day", "azimuth", "zenith", "elevation", "shadow_height", "shadow_angle")]
-      export_path <- paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_complete.csv") 
+      export_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_backup.csv") 
       fwrite(ah_solar_shadow_angles, export_path)
       if(printChart == TRUE){
         sun_shade_angles_chart(data_path = export_path, aws_name = aws_name) 
@@ -165,7 +172,7 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
   for(a in 1:length(aws_list)){
     single_aws.df <- dplyr::filter(aws.df, AWS == aws_list[a] & Sensor == sensor_name)
     aws_name <- single_aws.df[1,"AWS"]
-    message(paste("Starting angle calcuations for", aws_name))
+    message(paste("Starting angle calculations for", aws_name))
     if(solar_angles == TRUE){
       solar_angles <- multiple_Moments_solarAngles(aws.df = aws.df,
                                                    aws_name = aws_name,

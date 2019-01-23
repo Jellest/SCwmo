@@ -44,11 +44,11 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, cri
                                 exportCSV = exportCSV)
   }
   #calcluate classes
-  sa_sha_csv_path <- paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv")
+  sa_sha_csv_path <- paste0("output/", aws_name_trim,"/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv")
   shading_table <- projected_shade_class(aws.df = aws.df, data_path = sa_sha_csv_path, aws_name = aws_name, criteria_columnName = criteria_columnName, AHN3 = AHN3)
   
   # create chart
-  angles_csv_path <- paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN,"_ah_solar_shadow_angles_complete.csv") 
+  angles_csv_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN,"_ah_solar_shadow_angles.csv") 
   chart <- sun_shade_angles_chart(aws.df = aws.df, data_path = angles_csv_path, aws_name = aws_name, AHN3 = AHN3, extract_method = extract_method)
   
   
@@ -84,9 +84,9 @@ summary_classifcation <- function(aws.df = AWS.df, aws_name, sensor_name, class_
   
   aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
   
-  shc <- fread(paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"), data.table = FALSE)
-  luc <- fread(paste0("output/objects/", aws_name_trim, "/", aws_name_trim, "_objects_classes.csv"), data.table = FALSE)
-  vhc <- fread(paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"), data.table = FALSE)
+  shc <- fread(paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"), data.table = FALSE)
+  luc <- fread(paste0("output/", aws_name_trim, "/land_use/", aws_name_trim, "_landUse_classes.csv"), data.table = FALSE)
+  vhc <- fread(paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"), data.table = FALSE)
   
   shc_finalClass <- shc[1,class_selection] 
   luc_finalClass <- luc[1,class_selection]
@@ -117,7 +117,7 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, criter
   colnames(summary_classifcations) <- column_names
   
   get_manualValue <- function(aws_name){
-    manual_class <- dplyr::filter(manual_SC_values, AWS == aws_name)[1,"manual_Temperature"]
+    manual_class <- dplyr::filter(manual_SC_values, AWS == aws_name)[1,"Manual_Temperature_SC"]
     return (manual_class)
   }
   for (c in 1:length(aws_list)){
@@ -138,7 +138,8 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, criter
     }
  
     entry <- classifications[["summary"]][1,] 
-    entry <- cbind(entry, manual_class, AHN_selected, extract_methodology, criteria_values)
+  
+    entry <- cbind(entry, manual_class, AHN_selected)#, extract_methodology, criteria_values)
     summary_classifcations <- rbind(summary_classifcations, entry)
     print("Created classifications successfully.")
     print(" ")

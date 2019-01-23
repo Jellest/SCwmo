@@ -8,9 +8,9 @@ generate_table <- function(aws.df = AWS.df, aws_name, sensor_name, file, AHN3 = 
   }
   
   #csv files
-  shcl <- fread(paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"), data.table = FALSE)
-  lucl <- fread(paste0("output/objects/", aws_name_trim, "/", aws_name_trim, "_objects_classes.csv"), data.table = FALSE)
-  vhcl <- fread(paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"), data.table = FALSE)
+  shcl <- fread(paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"), data.table = FALSE)
+  lucl <- fread(paste0("output/", aws_name_trim, "/land_use/", aws_name_trim, "_landUse_classes.csv"), data.table = FALSE)
+  vhcl <- fread(paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"), data.table = FALSE)
   #View(vhcl)
   
   #shading classes

@@ -78,20 +78,25 @@ vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Crit
   
 
   if(exportCSV == TRUE){
-    if(!dir.exists("output/vegetation_height")){
+    if(aws_name_trim == ""){
       dir.create("output/vegetation_height", showWarnings = FALSE)
     }
-    if(dir.exists(paste0("output/vegetation_height/", aws_name_trim)) == FALSE & aws_name_trim != ""){
-      dir.create(paste0("output/vegetation_height/", aws_name_trim), showWarnings = FALSE)
+    
+    if(!dir.exists(paste0("output/", aws_name_trim))){
+      dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
     }
+    if(!dir.exists(paste0("output/", aws_name_trim,"/vegetation_height"))){
+      dir.create(paste0("output/", aws_name_trim, "/vegetation_height"), showWarnings = FALSE)
+    }
+
     
     if(aws_name != ""){
-      fwrite(df, paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"))
+      fwrite(df, paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"))
     } else {
       fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
     }
   }
-  message(paste0("Vegetaion height passed criteria for class ", df[1,"final_class"], "."))
+  message(paste0("Vegetation height passed criteria for class ", df[1,"final_class"], "."))
   #View(df)
   return(df)
 }

@@ -131,9 +131,18 @@ projected_shade_class <- function(aws.df = AWS.df, data_path, criteria_columnNam
   final_class <- max(data[,"final_indiv_class"]) 
   #print(final_class)
   data$final_class <- final_class 
+  if(aws_name_trim == ""){
+    dir.create("output/solar_shadow_angles", showWarnings = FALSE)
+  }
+  if(!dir.exists(paste0("output/", aws_name_trim))){
+    dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
+  }
+  if(!dir.exists(paste0("output/", aws_name_trim, "/solar_shadow_angles"))){
+    dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles"), showWarnings = FALSE)
+  }
   
   if(aws_name != ""){
-    fwrite(data, paste0("output/solar_shadow_angles/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"))
+    fwrite(data, paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"))
   } else {
     fwrite(data, paste0("output/solar_shadow_angles/",AHN, "_ah_solar_shadow_angles_classes.csv"))
   }

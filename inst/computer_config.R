@@ -184,7 +184,7 @@ start <- function(settings){
   }
 }
 
-AWS_test.df<<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
+#AWS_test.df<<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
 
 #installl Perl
 #installXLSXsupport()

@@ -39,14 +39,24 @@ vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AH
   df[1, "3rdQu"] <- stats["3rd Qu.",]
   
   if(exportCSV == TRUE){
-    if(!dir.exists("output/vegetation_height")){
+    if(aws_name_trim == ""){
       dir.create("output/vegetation_height", showWarnings = FALSE)
     }
-    if(!dir.exists(paste0("output/vegetation_height/", aws_name_trim))){
-      dir.create(paste0("output/vegetation_height/", aws_name_trim), showWarnings = FALSE)
+    
+    if(!dir.exists(paste0("output/", aws_name_trim))){
+      dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
     }
-    writeRaster(height_difference_raster, filename = paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_", radius, "m_height_difference.tif"), overwrite = TRUE)
-    fwrite(df, file = paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_", radius ,"m_vegetation_height_stats.csv"))  
+    if(!dir.exists(paste0("output/", aws_name_trim, "/vegetation_height"))){
+      dir.create(paste0("output/", aws_name_trim, "/vegetation_height"), showWarnings = FALSE)
+    }
+    
+    if(aws_name_trim != ""){
+      writeRaster(height_difference_raster, filename = paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_", radius, "m_height_difference.tif"), overwrite = TRUE)
+      fwrite(df, file = paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_", radius ,"m_vegetation_height_stats.csv"))  
+    } else {
+      writeRaster(height_difference_raster, filename = paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_", radius, "m_height_difference.tif"), overwrite = TRUE)
+      fwrite(df, file = paste0("output/vegetation_height/", aws_name_trim, "/", aws_name_trim, "_", AHN, "_", radius ,"m_vegetation_height_stats.csv"))  
+    }
   }
   #df[selected_row_number, "avgheight"]  
   #View(summary(height_difference_raster))

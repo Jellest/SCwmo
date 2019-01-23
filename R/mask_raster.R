@@ -14,7 +14,7 @@ simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3,
   aws_mask<-raster::buffer(spatialpoint,width=radius)
   ahn_crop<-raster::crop(ahn,aws_mask)
   ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/",aws_name_trim,"/rasters/", AHN, " /", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE)
+  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, " /Masks", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE)
   
   print("Masked the raster object.")
   return(ahn_mask)
@@ -89,7 +89,8 @@ mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, ahn_raster, AHN
   aws_mask <- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
   #plot(aws_mask, axes = TRUE)
   ahn_mask <- raster::mask(ahn_raster, aws_mask)
-  writeRaster(ahn_mask, paste0("output/solar_shadow_angles/", aws_name_trim,"/rasters/", AHN, "/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
+  
+  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
   print("Masked the raster object.")
   #print(summary(ahn_mask))
   return(ahn_mask)
