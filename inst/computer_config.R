@@ -37,11 +37,16 @@ start <- function(settings){
   guideline_criteria <<- fread("wmoSC/data-raw/guideline_criteria.csv", data.table = FALSE)
   epsg_rd <<- "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
   temperature_sensor_name <<- "temp_150cm"
+  
+  AWS_temperature_list.df <<-dplyr::filter(AWS.df, Sensor == temperature_sensor_name)
+  AWS_temperature_names <<- unlist(select(AWStemperature_list.df, AWS))
+  
   sAWS_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
-  ahn3_temp_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Rotterdam")
   sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
-  sAWStemperature_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names & Sensor == temperature_sensor_name)
-  ahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% ahn3_temp_names & Sensor == temperature_sensor_name)
+  
+  sAWSahn3_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Rotterdam")
+  sAWSahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWSahn3_names & Sensor == temperature_sensor_name)
+  
   #global  functions
   create_SpatialPoint <<- function(X, Y, LONLAT){
     if(missing(LONLAT)){
@@ -171,6 +176,11 @@ start <- function(settings){
     }
     return (aws_name_trim)
   }
+  
+  createBuffer <<- function(coords, distance){
+    buffer <- st_buffer(coords, dist=distance)
+    st_crs(buffer, epsg_rd)
+    return (buffer)}
   
   check_shpExists <<- function (shape_path){
     first_part_path <-  substr(shape_path, 1, nchar(shape_path)-4) 
