@@ -149,7 +149,9 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
     AHN <- "AHN2"
   }
   if(addition != ""){
-    addition = paste0(addition, "_")
+    underscore = "_"
+  } else {
+    underscore = ""
   }
   if(summary_addition != ""){
     summary_addition <- paste0(summary_addition, "_")
@@ -184,12 +186,12 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
     print(" ")
     print("===========================")
     if(c == length(aws_list)){
-      fwrite(summary_classifcations, file = paste0("output/", summary_addition, addition, AHN, "_summary_aws_classifcations.csv"))
+      fwrite(summary_classifcations, file = paste0("output/", summary_addition, addition, underscore, AHN, "_summary_aws_classifcations.csv"))
     }  
   }
   
   ahn2_analysed <- cbind(ahn2_analysed, aws_name)
-  View(summary_classifcations)
+  #View(summary_classifcations)
 
   if(length(aws_list) > 1){
       return (list("summary"=summary_classifcations,
