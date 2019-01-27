@@ -65,37 +65,37 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
     if("21-Jun" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Jun"), aes(x=azimuth, y=elevation, colour="21 June")) 
       breaks_list <- cbind(breaks_list, "21 June")
-      values_list <- cbind(values_list, "21 June"="red")
+      values_list <- cbind(values_list, "21 June"="yellow")
     }
     if("21-May" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-May"), aes(x=azimuth, y=elevation, colour="21 May")) 
       breaks_list <- cbind(breaks_list, "21 May")
-      values_list <- cbind(values_list, "21 May"="yellow")
+      values_list <- cbind(values_list, "21 May"="black")
     }
     if("21-Apr" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Apr"), aes(x=azimuth, y=elevation,  colour="21 April"))
       breaks_list <- cbind(breaks_list, "21 April")
-      values_list <- cbind(values_list, "21 April"="green")
+      values_list <- cbind(values_list, "21 April"="blue")
     }
     if("21-Mar" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Mar"), aes(x=azimuth, y=elevation, colour="21 March"))
       breaks_list <- cbind(breaks_list, "21 March")
-      values_list <- cbind(values_list, "21 March"="brown")
+      values_list <- cbind(values_list, "21 March"="purple")
     } 
     if("21-Feb" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Feb"), aes(x=azimuth, y=elevation, colour="21 February"))
       breaks_list <- cbind(breaks_list, "21 February")
-      values_list <- cbind(values_list, "21 February"="orange")
+      values_list <- cbind(values_list, "21 February"="red")
     } 
     if("21-Jan" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Jan"), aes(x=azimuth, y=elevation, colour="21 January"))
       breaks_list <- cbind(breaks_list, "21 January")
-      values_list <- cbind(values_list, "21 January"="purple")
+      values_list <- cbind(values_list, "21 January"="green")
     }
     if("21-Dec" %in% data$day == TRUE){
       chart <- chart + geom_line(data = filter(data, day == "21-Dec"), aes(x=azimuth, y=elevation, colour="21 December"))
       breaks_list <- cbind(breaks_list, "21 December")
-      values_list <- cbind(values_list, "21 December"="black")
+      values_list <- cbind(values_list, "21 December"="orange")
     }  
     
     #add legend
