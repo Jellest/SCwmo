@@ -40,7 +40,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     vegetation <- FALSE
   } else {
     vegetation <- TRUE
-    #vegetation_height_raster <- raster(paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_", vegetation_radius, "m_height_difference.tif"))
+    vegetation_height_raster <- raster(paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_", vegetation_radius, "m_height_difference.tif"))
   }
   
   
@@ -55,18 +55,18 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
   luchtfoto <- "https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts/2018_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg"
   map <- leaflet(options = leafletOptions(
     #crs = epsg28992, 
-    minZoom = 4, maxZoom = 18
+    minZoom = 4, maxZoom = 20
     )) %>%
     setView(single_aws[1,"LON"], single_aws[1,"LAT"], zoom = 8) %>%
-    addTiles(luchtfoto) %>%
-    addScaleBar(position = "bottomright", options = scaleBarOptions(maxWidth = 100, metric = TRUE, imperial = TRUE, updateWhenIdle = TRUE)) %>%
-    addMeasure(
-      position = "bottomleft",
-      primaryLengthUnit = "meters",
-      primaryAreaUnit = "sqmeters",
-      activeColor = "#3D535D",
-      completedColor = "#7D4479") %>%
-    addMouseCoordinates() %>%
+    addTiles(luchtfoto, attribution = "KNMI, Kadaster, PDOK, AHN, 2019") %>%
+    addScaleBar(position = "bottomright", options = scaleBarOptions(maxWidth = 100, metric = TRUE, imperial = FALSE, updateWhenIdle = TRUE)) %>%
+    # addMeasure(
+    #   position = "bottomleft",
+    #   primaryLengthUnit = "meters",
+    #   primaryAreaUnit = "sqmeters",
+    #   activeColor = "#3D535D",
+    #   completedColor = "#7D4479") %>%
+    # addMouseCoordinates() %>%
     addWMSTiles(
       "https://geodata.nationaalgeoregister.nl/ahn2/wms?"
       , layers = "ahn2_05m_ruw"
@@ -82,7 +82,8 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     addCircleMarkers(data = single_aws[1,], lng = single_aws[1,"LON"], lat = single_aws[1,"LAT"],
                           radius = 5,  stroke = TRUE, color = "black", weight = 2.0,
                           fillColor = "#e9ff00", fillOpacity = 1.0,
-                          group = "AWS") #%>%
+                          group = "AWS"
+                     ) #%>%
     #addControl(title, position = "bottomleft", className="map-title")
   
     # addWMSTiles(
@@ -117,7 +118,8 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
       map <- addPolygons(map, data = my_bgt_wgs[id[bgt_counter],], smoothFactor = 0.5,
                          opacity = 1.0, color = 'black', weight = 0.4,
                          fillColor = fillColours[id[bgt_counter]], fillOpacity = .7, 
-                         group = "Land use (BGT)")
+                         group = "Land use (BGT)"
+                         )
       bgt_counter <- bgt_counter + 1
     }
   }
@@ -125,7 +127,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
   if(vegetation == TRUE){
     overlays <- append(overlays, "Vegetation height")
     pal <- colorNumeric(c("#e5f5f9", "#99d8c9", "#2ca25f"), values(vegetation_height_raster), na.color = "transparent")
-   map <- addRasterImage(map, vegetation_height_raster, colors = pal, opacity = 0.8, group = "Vegetation height")
+    map <- addRasterImage(map, vegetation_height_raster, colors = pal, opacity = 0.8, group = "Vegetation height")
   }
   if(circles == TRUE){
     #add circles
@@ -161,6 +163,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
   setView(single_aws[1,"LON"], single_aws[1,"LAT"], zoom = 17)
   map <- hideGroup(map, "AHN2")
   map <- hideGroup(map, "AHN3")
-return(map)}
+  return(map)
+}
 
 map_rd(aws_name = "De Bilt", sensor_name = temperature_sensor_name, buffers = c(50, 30, 10), vegetation_height_raster = "f")
