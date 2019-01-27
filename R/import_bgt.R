@@ -5,13 +5,13 @@ library(gdalUtils)
 library(gdata)
 library(sf)
 
-import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 150, delete_raw_gmls = TRUE, redownload = FALSE){
+import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, addition = "", radius = 150, delete_raw_gmls = TRUE, redownload = FALSE){
   CleanGlobEnvir <- function(pattern){
     rm(list = ls(envir=globalenv())[
       grep(pattern, ls(envir=globalenv()))], envir = globalenv())
   }
   tryCatch({
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
     if(file.exists(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/")) & redownload == TRUE){  
       file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shp"), sep="/"))
       file.remove(paste("data/BGT/", aws_name_trim, paste0("BGT_", aws_name_trim, ".shx"), sep="/"))
@@ -104,6 +104,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "begroeidterreindeel" 
           shp$object <- "vegetation"
+          shp$colour <- "green"
+          shp$hexColour <- "#5dcb1e"
           
           drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'optalud_le', 'fysiekvoor', 'creationda', 'terminat_1', 'plus.fys_1', 'optalud', 'lv.publica', 'tijdstipre', 'kruinlijn_')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -119,6 +121,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "onbegroeidterreindeel" 
           shp$object <- "barren"
+          shp$colour <- "yellow"
+          shp$hexColour<-"#f1f4c7"
           
           drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'optalud_le', 'fysiekvoor', 'creationda', 'terminat_1', 'plus.fys_1', 'optalud', 'lv.publica', 'tijdstipre', 'kruinlijn_')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -134,6 +138,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "waterdeel" 
           shp$object <- "water"
+          shp$colour <- "blue"
+          shp$hexColour <- "#25e0ed"
           
           drops<- c('type_codes', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre', 'plus.type_')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -145,6 +151,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "wegdeel" 
           shp$object <- "road"
+          shp$colour <- "gray"
+          shp$hexColour <- "#93969b"
           
           drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'plus.fys_1', 'lv.publica', 'kruinlijn_', 'tijdstipre', 'optalud', 'creationda', 'optalud_le', 'fysiekvoor', 'terminat_1', 'functie_co')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -160,6 +168,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "scheiding" 
           shp$object <- "seperation"
+          shp$colour <- "brown"
+          shp$hexColour <- "#9b4b26"
           
           drops<- c('type_codes', 'status_lee', 'status_cod', 'plus.type_', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -178,6 +188,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "pand" 
           shp$object <- "building"
+          shp$colour <- "red"
+          shp$hexColour<- "#f0495f"
           
           drops<- c('identifica', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -196,6 +208,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "overigbouwwerk" 
           shp$object <- "other construction"
+          shp$colour <- "black"
+          shp$hexColour <- "#000000"
           
           drops<- c('type_codes', 'plus.type_', 'identifica', 'status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -210,6 +224,8 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$naam <- NA
           shp$object_typ <- "spoor" 
           shp$object <- "railway"
+          shp$colour <- "other"
+          shp$hexColour <- "#ffffff"
           
           drops<- c('status_lee', 'status_cod', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'functie_co', 'creationda', 'terminat_1', 'lv.publica', 'tijdstipre')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -225,7 +241,9 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           shp$plus.typ_1 <- NA
           shp$plus.type <- NA
           shp$object_typ <- "functioneelgebied" 
-          shp$object <- "functional area" 
+          shp$object <- "functional area"
+          shp$colour <- "other"
+          shp$hexColour <- "#ffffff"
           
           drops<- c('type_codes', 'status_lee', 'status_cod', 'plus.type_', 'inonderzoe', 'eindregist', 'terminatio', 'lokaalid', 'inonderz_1', 'creationda', 'terminat_1', 'naam_leeg', 'lv.publica', 'tijdstipre')
           shp <- shp[,!(names(shp) %in% drops)]
@@ -259,7 +277,7 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
         print(paste("shapefile: ", shape_file, sep=""))
     
         object <- tryCatch({
-          ogr2ogr(src_datasource_name = wfs    , dst_datasource_name = shape_file, layer = bgt_object_name, overwrite = TRUE)
+          ogr2ogr(src_datasource_name = wfs, dst_datasource_name = shape_file, layer = bgt_object_name, overwrite = TRUE)
           
           object_name <- readOGR(dsn = raw_data_location, layer = object_name_short, stringsAsFactors=FALSE)
           #object_name@data$object_type<- c(object_name_short)
@@ -281,7 +299,7 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
           if((tmp.bgt_counter == 1 & tmp.create_sp_atNext == FALSE) | (tmp.bgt_counter > 1 & tmp.create_sp_atNext == TRUE)){
             print("creating BGT_station.sp...")
             tmp.BGT_station.sp <<- object_name
-            CRS(tmp.BGT_station.sp) <- epsg_rd
+            crs(tmp.BGT_station.sp) <- epsg_rd
             print(paste("length object:",length(object_name), sep=" "))
             print(paste("length BGT:",length(tmp.BGT_station.sp), sep=" "))
             tmp.create_sp_atNext <<- FALSE
@@ -365,7 +383,7 @@ import_single_bgt <- function(aws.df = AWS.df, aws_name, sensor_name, radius = 1
       if(delete_raw_gmls == TRUE){
        unlink(paste("data", "BGT", aws_name_trim, "raw" ,sep="/"), recursive = TRUE)
       }
-      return(list("BGT.sf" = BGT_aws.sf, "objects_count"=objects_count, "bgt_objects"=all_bgt_objects))
+      return(list("BGT.sf" = BGT_aws.sf, "relevant_objects_count"=objects_count, "all_objects_count"=all_bgt_objects))
     }
   }, error=function(e){
     print(e)

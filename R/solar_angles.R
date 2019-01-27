@@ -59,23 +59,11 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     m <- cbind(LON, LAT, julian_day, sun_position)
     df <- data.frame(m)
     df$elevation <- 90 - df$zenith
-    # if(!missing(aws_name)){
-    #   df$aws <- aws_name
-    # }
-    # if(!missing(sensor_name)){
-    #   df$sensor <- sensor_name
-    # }
     return(df)
   }
   
-  # all_solar_angles <- data.frame(solar_angles(lon = aws_debilt_wgs.sp@coords[,"lon"],
-  #                        lat = aws_debilt_wgs.sp@coords[,"lat"],
-  #                        altitude = 42.70,
-  #                        julian_day = intervals))
-  # all_solar_angles$elevation <- 90 - all_solar_angles$zenith
-  # above_horizon_solar_angles <- subset(all_solar_angles, zenith < 90)
-  
   julian_day_hour <- function(year,month,day, s_hour, f_hour, minutes_interval){
+    #print(paste(day, month, year))
     if(missing(s_hour)){
       s_hour <- 0
     }
@@ -127,10 +115,11 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
       month_name = "Dec"
     }
     date <- paste(day, month_name, sep="-")
+    #print(date)
     return (date)
   }
   
-  
+  #print(paste(day, month))
   all_solar_angles <- data.frame(get_solar_angles(lon = LON,
                                               lat = LAT,
                                               julian_day = julian_day), day = getDate(day, month), stringsAsFactors = FALSE)

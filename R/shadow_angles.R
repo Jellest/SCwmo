@@ -27,14 +27,14 @@
 #'@export
 
 shadow_angles <- function(aws.df = AWS.df,
-                          aws_name, spatialpoint,
+                          aws_name, addition = "",
+                          spatialpoint,
                           X,
                           Y,
                           LONLAT,
                           ahn_mask,
                           angle,
                           maxDist,
-                          sensor_height,
                           AHN3 = FALSE,
                           read_only = FALSE,
                           extract_method = 'bilinear'){
@@ -64,25 +64,13 @@ shadow_angles <- function(aws.df = AWS.df,
     aws_name <- ""
     aws_name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   }
 
-  if(missing(sensor_height)){
-    sensor_height = 0
-    if_height_instrument = FALSE
-  } else {
-    if_height_instrument = TRUE
-  }
-  
   if(AHN3 == TRUE){
     AHN <- "AHN3"
   } else{
     AHN <- "AHN2"
-  }
-  
-  
-  if(if_height_instrument == TRUE & sensor_height > 0){
-    
   }
   
   if(read_only == FALSE){
@@ -97,10 +85,10 @@ shadow_angles <- function(aws.df = AWS.df,
     names(shadows)<-c("height","shadow_angle")
     #print(str(shadows[["shadow_angle"]]))
     #plot(shadows)
-    writeRaster(shadows[["shadow_angle"]], paste0(x = "output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
+    writeRaster(shadows[["shadow_angle"]], paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
   } else {
     print(paste0("Only reading exisiting values using the ", extract_method, " method..."))
-    sa_values <- raster(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
+    sa_values <- raster(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
     shadows<-raster::stack(ahn_mask,sa_values)
     names(shadows)<-c("height","shadow_angle")
   }

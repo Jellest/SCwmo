@@ -1,4 +1,4 @@
-simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3, aws_name){
+simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3, aws_name, addition = ""){
   if(missing(AHN3)){
     AHN3 <- FALSE
     AHN <- "AHN2"
@@ -10,7 +10,7 @@ simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3,
   }
   
   print("Masking the raster object...")
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   aws_mask<-raster::buffer(spatialpoint,width=radius)
   ahn_crop<-raster::crop(ahn,aws_mask)
   ahn_mask<-raster::mask(ahn_crop,aws_mask)
@@ -20,12 +20,12 @@ simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3,
   return(ahn_mask)
 }
 
-mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, ahn_raster, AHN3, azimuth, radius){
+mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", ahn_raster, AHN3, azimuth, radius){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   }
   if(missing(AHN3)){
     AHN3 <- FALSE

@@ -2,7 +2,7 @@
 library(sf)
 library(mapview)
 
-find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_shape, temperature_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
+find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, addition = "", coords, bgt_shape, land_use_criteria.df, class, go_to_next_class, criteria_columnName = "Criteria_Value", exportCSV = FALSE, exportShp = FALSE){
   #load possible missing values
   if(missing(class)){
     #start at class 1
@@ -13,14 +13,12 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     go_to_next_class <- FALSE
   }
   
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   ##load criteria
   tluc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "land use" & Class == class)
   tluc <- check_criteria(df = tluc, criteria_columnName = criteria_columnName)
-  #selected_aws_row <- which(temperature_criteria.df == aws_name)
+  #selected_aws_row <- which(land_use_criteria.df == aws_name)
   ##functions
-  
-  
   createAnnulus <- function(coords, region){
     split_values <- strsplit(region, split="_")
     
@@ -33,6 +31,20 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     st_crs(annulus, epsg_rd)
     return(annulus)}
   
+  determine_buffers <- function(class){
+    
+    if(class == 1){
+      buffers <- c(100, 30, 10)  
+    } else if(class == 2 | class == 3){
+      buffers <- c(30, 10, 5)  
+    } else if(class == 4){
+      buffers <- c(10, 3)  
+    } else if(class ==5){
+      buffers <- c(30, 10, 5, 3)   
+    }
+  return (buffers)
+  }
+  
   ##select criteria for buffers and relative area according to class
   outer_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "outer buffer distance")[1,criteria_columnName])
   inner_buffer_dist <- as.numeric(dplyr::filter(tluc, Name == "inner buffer distance")[1,criteria_columnName])
@@ -42,7 +54,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
   
   meet_classNr <- paste("meetClass_", toString(class), sep="")
   if(class >= 5){
-    temperature_criteria.df[1,meet_classNr] <- TRUE
+    land_use_criteria.df[1,meet_classNr] <- TRUE
     annulus_insct.sf <- NULL
     outerBuffer_intsct.sf <- NULL
     inner_buffer_insct.sf <- NULL
@@ -61,7 +73,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     st_crs(outerBuffer_intsct.sf, epsg_rd)
     
     #select artifical objects within outer buffer
-    artificial_objects.sf <- subset(outerBuffer_intsct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel")
+    artificial_objects.sf <- subset(outerBuffer_intsct.sf, object_typ == "pand" | object_typ == "wegdeel" | object_typ == "waterdeel" | object_typ == "overigbouwwerk" | object_typ == "scheiding")
     buildings <- subset(outerBuffer_intsct.sf, object_typ == "pand")
     water <- subset(outerBuffer_intsct.sf, object_typ == "waterdeel")
     roads <- subset(outerBuffer_intsct.sf, object_typ == "wegdeel")
@@ -124,16 +136,16 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     #outer buffer area
     #units::set_units(shape_insct.sf, m^2)
 
-    temperature_criteria.df[1,outer_objectCountColName] <- nrow(artificial_objects.sf)
+    land_use_criteria.df[1,outer_objectCountColName] <- nrow(artificial_objects.sf)
     if(nrow(artificial_objects.sf) == 0){
-      temperature_criteria.df[1,outer_sumObjectAreasColName] <- 0
-      temperature_criteria.df[1,outer_relAreaColName] <- 0
-      temperature_criteria.df[1,inner_sumObjectAreasColName] <- 0
-      temperature_criteria.df[1,inner_relAreaColName] <- 0
+      land_use_criteria.df[1,outer_sumObjectAreasColName] <- 0
+      land_use_criteria.df[1,outer_relAreaColName] <- 0
+      land_use_criteria.df[1,inner_sumObjectAreasColName] <- 0
+      land_use_criteria.df[1,inner_relAreaColName] <- 0
       inner_buffer_insct.sf <- NULL
       if(class == 1 | class == 2){
-        temperature_criteria.df[1,annulus_sumObjectAreasColName] <- 0
-        temperature_criteria.df[1,annulus_relAreaColName] <- 0
+        land_use_criteria.df[1,annulus_sumObjectAreasColName] <- 0
+        land_use_criteria.df[1,annulus_relAreaColName] <- 0
       
       }
       annulus_insct.sf <- NULL
@@ -142,10 +154,10 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
       area_objects_outer_buffer <- st_area(artificial_objects.sf)
       units::set_units(area_objects_outer_buffer, m^2)
       sum_area_objects_outer_buffer <- sum(area_objects_outer_buffer)
-      temperature_criteria.df[1,outer_sumObjectAreasColName] <- sum_area_objects_outer_buffer
+      land_use_criteria.df[1,outer_sumObjectAreasColName] <- sum_area_objects_outer_buffer
       
       relArea_outer_buffer <- as.numeric(sum_area_objects_outer_buffer) / as.numeric(area_outer_buffer)
-      temperature_criteria.df[1,outer_relAreaColName] <- relArea_outer_buffer
+      land_use_criteria.df[1,outer_relAreaColName] <- relArea_outer_buffer
       if(class == 1 | class == 2){
         #create annulus
         annulus <- createAnnulus(coords, region)
@@ -156,7 +168,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
         annulus_insct.sf <- st_intersection(artificial_objects.sf, annulus)
         
         #count amount of objects annulus
-        temperature_criteria.df[1,annulus_objectCountColName] <- nrow(annulus_insct.sf)
+        land_use_criteria.df[1,annulus_objectCountColName] <- nrow(annulus_insct.sf)
         
         #calcuate area
         area_annulus <- st_area(outer_buffer)
@@ -167,8 +179,8 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
         sum_area_objects_annulus <- sum(area_objects_annulus)
         relArea_annulus <- sum_area_objects_annulus / area_annulus
         
-        temperature_criteria.df[1,annulus_sumObjectAreasColName] <- sum_area_objects_annulus
-        temperature_criteria.df[1,annulus_relAreaColName] <- relArea_annulus
+        land_use_criteria.df[1,annulus_sumObjectAreasColName] <- sum_area_objects_annulus
+        land_use_criteria.df[1,annulus_relAreaColName] <- relArea_annulus
       } else {
         annulus_insct.sf <- NULL
       }
@@ -183,7 +195,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
       inner_buffer_insct.sf <- st_intersection(artificial_objects.sf, inner_buffer)
       
       #count amount of objects
-      temperature_criteria.df[1,inner_objectCountColName] <- nrow(inner_buffer_insct.sf)
+      land_use_criteria.df[1,inner_objectCountColName] <- nrow(inner_buffer_insct.sf)
       
       #calculate area
       area_inner_buffer <- st_area(inner_buffer)
@@ -195,8 +207,8 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
       
       relArea_inner_buffer <- sum_area_objects_inner_buffer / area_inner_buffer
       
-      temperature_criteria.df[1,inner_sumObjectAreasColName] <- sum_area_objects_inner_buffer
-      temperature_criteria.df[1,inner_relAreaColName] <- relArea_inner_buffer
+      land_use_criteria.df[1,inner_sumObjectAreasColName] <- sum_area_objects_inner_buffer
+      land_use_criteria.df[1,inner_relAreaColName] <- relArea_inner_buffer
     }
     
     #view data on map
@@ -215,93 +227,93 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     #meet individual criteria
     #inner and outer buffer relative areas
     
-    if(temperature_criteria.df[1,outer_relAreaColName] < outer_buffer_relArea_criteria){
-      temperature_criteria.df[1,meet_outerBuffer_criteria] <- TRUE
+    if(land_use_criteria.df[1,outer_relAreaColName] < outer_buffer_relArea_criteria){
+      land_use_criteria.df[1,meet_outerBuffer_criteria] <- TRUE
     } else {
-      temperature_criteria.df[1,meet_outerBuffer_criteria] <- FALSE
+      land_use_criteria.df[1,meet_outerBuffer_criteria] <- FALSE
     }
-    if(temperature_criteria.df[1, inner_relAreaColName] < inner_buffer_relArea_criteria){
-      temperature_criteria.df[1,meet_innerBuffer_criteria] <- TRUE
+    if(land_use_criteria.df[1, inner_relAreaColName] < inner_buffer_relArea_criteria){
+      land_use_criteria.df[1,meet_innerBuffer_criteria] <- TRUE
     } else {
-      temperature_criteria.df[1,meet_innerBuffer_criteria] <- FALSE
+      land_use_criteria.df[1,meet_innerBuffer_criteria] <- FALSE
     }
     #no objects within outer buffer
     if(class != 4){ #Class 1, 2 or 3
-      if(temperature_criteria.df[1, outer_objectCountColName] == 0){
-        temperature_criteria.df[1, meet_noObjects_outerBuffer_criteria] <- TRUE
+      if(land_use_criteria.df[1, outer_objectCountColName] == 0){
+        land_use_criteria.df[1, meet_noObjects_outerBuffer_criteria] <- TRUE
       } else {
-        temperature_criteria.df[1, meet_noObjects_outerBuffer_criteria] <- FALSE
+        land_use_criteria.df[1, meet_noObjects_outerBuffer_criteria] <- FALSE
       }
     }
     
     #annulus relative area
     if(class == 1 | class == 2){
-      if(temperature_criteria.df[1, annulus_relAreaColName] < annulus_relArea_criteria){
-        temperature_criteria.df[1, meet_annulus_criteria] <- TRUE
+      if(land_use_criteria.df[1, annulus_relAreaColName] < annulus_relArea_criteria){
+        land_use_criteria.df[1, meet_annulus_criteria] <- TRUE
       } else {
-        temperature_criteria.df[1, meet_annulus_criteria] <- FALSE
+        land_use_criteria.df[1, meet_annulus_criteria] <- FALSE
       }
     }
     #meet all class criteria column
-    outer_buffer_object_count <- temperature_criteria.df[1, outer_objectCountColName]
+    outer_buffer_object_count <- land_use_criteria.df[1, outer_objectCountColName]
     if(class == 1 | class == 2){
-      if(temperature_criteria.df[1, outer_objectCountColName] == 0){
+      if(land_use_criteria.df[1, outer_objectCountColName] == 0){
         print(paste("No artifical objects are found within ", toString(outer_buffer_dist), "m.", "Class ", class, " is met.", sep=""))
-        temperature_criteria.df[1,meet_classNr] <- TRUE
+        land_use_criteria.df[1,meet_classNr] <- TRUE
         if(class == 1){
-          temperature_criteria.df[1,"meet_class2"] <- "NA"
-          temperature_criteria.df[1,"meet_class3"] <- "NA"
-          temperature_criteria.df[1,"meet_class4"] <- "NA"
-          temperature_criteria.df[1,"meet_class5"] <- "NA"
+          land_use_criteria.df[1,"meet_class2"] <- "NA"
+          land_use_criteria.df[1,"meet_class3"] <- "NA"
+          land_use_criteria.df[1,"meet_class4"] <- "NA"
+          land_use_criteria.df[1,"meet_class5"] <- "NA"
         } else if(class == 2){
-          temperature_criteria.df[1,"meet_class3"] <- "NA"
-          temperature_criteria.df[1,"meet_class4"] <- "NA"
-          temperature_criteria.df[1,"meet_class5"] <- "NA"
+          land_use_criteria.df[1,"meet_class3"] <- "NA"
+          land_use_criteria.df[1,"meet_class4"] <- "NA"
+          land_use_criteria.df[1,"meet_class5"] <- "NA"
         }
-      } else if(temperature_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
-                temperature_criteria.df[1, meet_annulus_criteria] == TRUE &
-                temperature_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
-        temperature_criteria.df[1,meet_classNr] <- TRUE
+      } else if(land_use_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
+                land_use_criteria.df[1, meet_annulus_criteria] == TRUE &
+                land_use_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
+        land_use_criteria.df[1,meet_classNr] <- TRUE
         if(class == 1){
-          temperature_criteria.df[1,"meet_class2"] <- "NA"
-          temperature_criteria.df[1,"meet_class3"] <- "NA"
-          temperature_criteria.df[1,"meet_class4"] <- "NA"
-          temperature_criteria.df[1,"meet_class5"] <- "NA"
+          land_use_criteria.df[1,"meet_class2"] <- "NA"
+          land_use_criteria.df[1,"meet_class3"] <- "NA"
+          land_use_criteria.df[1,"meet_class4"] <- "NA"
+          land_use_criteria.df[1,"meet_class5"] <- "NA"
         } else if(class == 2){
-          temperature_criteria.df[1,"meet_class3"] <- "NA"
-          temperature_criteria.df[1,"meet_class4"] <- "NA"
-          temperature_criteria.df[1,"meet_class5"] <- "NA"
+          land_use_criteria.df[1,"meet_class3"] <- "NA"
+          land_use_criteria.df[1,"meet_class4"] <- "NA"
+          land_use_criteria.df[1,"meet_class5"] <- "NA"
         }
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii. Class ", class, " is met.", sep=""))
       } else {
-        temperature_criteria.df[1,meet_classNr] <- FALSE
+        land_use_criteria.df[1,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but significant size in area within radii. Class ", class, " is not met.", sep=""))
       }
     } else if(class == 3){
-      if(temperature_criteria.df[1, outer_objectCountColName] == 0){
-        temperature_criteria.df[1,meet_classNr] <- TRUE
+      if(land_use_criteria.df[1, outer_objectCountColName] == 0){
+        land_use_criteria.df[1,meet_classNr] <- TRUE
         print(paste("No artifical objects are found within ", toString(outer_buffer_dist), "m.", "Class ", class, " is met.", sep=""))
-        temperature_criteria.df[1,"meet_class4"] <- "NA"
-        temperature_criteria.df[1,"meet_class5"] <- "NA"
-      } else if(temperature_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
-                temperature_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
-        temperature_criteria.df[1,meet_classNr] <- TRUE
-        temperature_criteria.df[1,"meet_class4"] <- "NA"
-        temperature_criteria.df[1,"meet_class5"] <- "NA"
+        land_use_criteria.df[1,"meet_class4"] <- "NA"
+        land_use_criteria.df[1,"meet_class5"] <- "NA"
+      } else if(land_use_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
+                land_use_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
+        land_use_criteria.df[1,meet_classNr] <- TRUE
+        land_use_criteria.df[1,"meet_class4"] <- "NA"
+        land_use_criteria.df[1,"meet_class5"] <- "NA"
       } else {
-        temperature_criteria.df[1,meet_classNr] <- FALSE
+        land_use_criteria.df[1,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but significant size in area within radii. Class ", class, " is not met.", sep=""))
       }
     } else if(class == 4){
-      if(temperature_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
-        temperature_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
-        temperature_criteria.df[1,meet_classNr] <- TRUE
-        temperature_criteria.df[1,"meet_class5"] <- "NA"
+      if(land_use_criteria.df[1, meet_outerBuffer_criteria] == TRUE &
+        land_use_criteria.df[1, meet_innerBuffer_criteria] == TRUE){
+        land_use_criteria.df[1,meet_classNr] <- TRUE
+        land_use_criteria.df[1,"meet_class5"] <- "NA"
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), "m buffer ", "but NOT significant size in area within radii. Class ", class, " is met.", sep=""))
       } else {
-        temperature_criteria.df[1,meet_classNr] <- FALSE
+        land_use_criteria.df[1,meet_classNr] <- FALSE
         print(paste(toString(outer_buffer_object_count), " artifical objects found within ", toString(outer_buffer_dist), " m buffer ", "but significant size in area within radii. Class ", class, " is not met.", sep=""))
-        temperature_criteria.df[1,"meet_class5"] <- TRUE
+        land_use_criteria.df[1,"meet_class5"] <- TRUE
       }
     }
   }
@@ -316,10 +328,10 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
     output_path <- paste0("output/", aws_name_trim, "/land_use/")
   }
   if(exportCSV == TRUE){
-    if(temperature_criteria.df[1,meet_classNr] == TRUE){
-      temperature_criteria.df[1,"final_class"] <- class
+    if(land_use_criteria.df[1,meet_classNr] == TRUE){
+      land_use_criteria.df[1,"final_class"] <- class
     }
-    fwrite(temperature_criteria.df, paste0(output_path, aws_name_trim, "_landUse_classes.csv"))
+    fwrite(land_use_criteria.df, paste0(output_path, aws_name_trim, "_landUse_classes.csv"))
   }
   if(exportShp == TRUE){
     check_shpExists(paste0(output_path, aws_name_trim, "_", outer_buffer_dist, "m_buffer.shp"))
@@ -334,42 +346,48 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
   }
   
   #finalize class
-  if(temperature_criteria.df[1,meet_classNr] == FALSE){
+  if(land_use_criteria.df[1,meet_classNr] == FALSE){
     if(missing(class) & missing(class)){
         #go through all the classes and privide output of all the relevant classes, starting at class 1
-        if(temperature_criteria.df[1,meet_classNr] == FALSE){
+        if(land_use_criteria.df[1,meet_classNr] == FALSE){
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, addition = addition, coords = coords, bgt_shape = bgt_shape,class = new_classNr, land_use_criteria.df = land_use_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
+          buffers <- determine_buffers(class)
           message("Land use passed class criteria ", class)
+          return (list("buffers" = buffers))
         }
       } else if(missing(class) == FALSE & missing(go_to_next_class) == FALSE){
-        if(temperature_criteria.df[1,meet_classNr] == FALSE){
+        if(land_use_criteria.df[1,meet_classNr] == FALSE){
           new_classNr <- class + 1
           print(paste("Going to next class. Checking criteria for class ", toString(new_classNr), "...", sep=""))
           go_to_next_class = TRUE
-          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, coords = coords, bgt_shape = bgt_shape,class = new_classNr, temperature_criteria.df = temperature_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
+          find_land_use_and_classes(aws.df = aws.df, aws_name = aws_name, addition = addition,coords = coords, bgt_shape = bgt_shape,class = new_classNr, land_use_criteria.df = land_use_criteria.df, go_to_next_class = TRUE, exportCSV = exportCSV, exportShp = exportShp)
         } else{
+          buffers <- determine_buffers(class)
           message("Land use passed class criteria ", class)
-          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+          return(list("df" = land_use_criteria.df, "buffers" = buffers, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
         }
       } else if(missing(class) == FALSE & missing(go_to_next_class)){
         #only provide output of selected class
-        if(temperature_criteria.df[1,meet_classNr] == FALSE){
+        if(land_use_criteria.df[1,meet_classNr] == FALSE){
+          buffers <- determine_buffers(class)
           print(paste("Land use did NOT pass class ", class," criteria", sep=""))
-          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
-        } else{
+          return(list("df" = land_use_criteria.df, "buffers" = buffers, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+        } else {
+          buffers <- determine_buffers(class)
           message("Land use passed class criteria ", class)
-          return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+          return(list("df" = land_use_criteria.df, "buffers" = buffers, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
           
         }
       }
   } else {
-    temperature_criteria.df[1,"final_class"] <- class
+    land_use_criteria.df[1,"final_class"] <- class
+    buffers <- determine_buffers(class)
     message("Land use passed criteria for class ", class, ".")
-    return(list("df" = temperature_criteria.df, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
+    return(list("df" = land_use_criteria.df, "buffers" = buffers, "outer_buf" = outerBuffer_intsct.sf, "annulus" = annulus_insct.sf,"inner_buf" = inner_buffer_insct.sf))
   }
 }
 
@@ -382,7 +400,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, coords, bgt_sha
 # crs(BGT_station_adjust.sp) <- crs(epsg_rd)
 # BGT_station_adjust.sf <- st_as_sf(BGT_station_adjust.sp)
 # 
-# temperature_landuse_criteria.df_site <- find_land_use_and_classes(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_site[[1]][,c(1,5)])
-# temperature_landuse_criteria.df_temp <- find_land_use_and_classes(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], temperature_criteria.df = selected_aws_temp[[1]][,c(1,5)])
+# temperature_landuse_criteria.df_site <- find_land_use_and_classes(aws_name = "De Bilt", coords = selected_aws_site[[3]], bgt_shape = BGT_DeBilt[[1]], land_use_criteria.df = selected_aws_site[[1]][,c(1,5)])
+# temperature_landuse_criteria.df_temp <- find_land_use_and_classes(aws_name = selected_aws_temp[[1]]$AWS, coords = selected_aws_temp[[3]], bgt_shape = BGT_DeBilt[[1]], land_use_criteria.df = selected_aws_temp[[1]][,c(1,5)])
 # mapview(BGT_station_adjust.sf)
 # View(temperature_landuse_criteria.df_site[["df"]])

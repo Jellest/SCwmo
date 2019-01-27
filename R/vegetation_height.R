@@ -1,6 +1,6 @@
 library(raster)
 library(rgeos)
-vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AHN3 = FALSE, exportCSV = FALSE){
+vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, addition = "", radius, AHN3 = FALSE, exportCSV = FALSE){
   if(AHN3 == TRUE){
     AHN <- "AHN3"
   } else {
@@ -13,7 +13,7 @@ vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AH
 
   single_aws <- select_single_aws(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
   
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   
   aws_buffer<-raster::buffer(single_aws[["aws_rd.sp"]], width = radius)
   
@@ -32,11 +32,11 @@ vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AH
   df <- data.frame(minHeight = numeric(1), maxHeight = numeric(1)
                    #, avgHeight = numeric(nrow(vegetation_criteria))
                    )
-  df[1, "maxHeight"] <- stats["Max.",]
-  df[1, "minHeight"] <- stats["Min.",]
-  df[1, "Median"] <- stats["Median",]
-  df[1, "1stQu"] <- stats["1st Qu.",]
-  df[1, "3rdQu"] <- stats["3rd Qu.",]
+  df[1, "maxHeight"] <- abs(stats["Max.",])
+  df[1, "minHeight"] <- abs(stats["Min.",])
+  df[1, "Median"] <- abs(stats["Median",])
+  df[1, "1stQu"] <- abs(stats["1st Qu.",])
+  df[1, "3rdQu"] <- abs(stats["3rd Qu.",])
   
   if(exportCSV == TRUE){
     if(aws_name_trim == ""){
@@ -62,7 +62,7 @@ vegetation_height <- function(aws.df = AWS.df, aws_name, sensor_name, radius, AH
   #View(summary(height_difference_raster))
   #View(df)
   #plot(height_difference_raster)
-return (list("heightDifference" = height_difference_raster, "df" = df, "raw_mask" = ahn_raw_mask, "terrain_mask" = ahn_terrain_mask))
+return (list("height_raster" = height_difference_raster, "df" = df, "raw_mask" = ahn_raw_mask, "terrain_mask" = ahn_terrain_mask))
 }
 
 plot(heightDifference[["raw_mask"]])

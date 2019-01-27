@@ -1,5 +1,5 @@
 #sun shadow chart
-sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  angle_selection_byIndexNr = "all", AHN3 = FALSE, extract_method = 'bilinear'){
+sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  addition = "", angle_selection_byIndexNr = "all", AHN3 = FALSE, extract_method = 'bilinear'){
   if(missing(aws_name)){
     aws_name <- ""
   }
@@ -9,7 +9,7 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  angle_
     AHN <- "AHN2"
   }
   
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   
   data_exists <- file.exists(data_path)
   if(angle_selection_byIndexNr == "all"){

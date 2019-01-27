@@ -1,9 +1,9 @@
-vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE, exportCSV = FALSE){
+vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Criteria_Value", aws_name, addition = "", AHN3 = FALSE, exportCSV = FALSE){
   if(missing(aws_name)){
     aws_name <- ""
     aws_name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
   }
   
   if(AHN3 == TRUE){
@@ -97,6 +97,5 @@ vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Crit
     }
   }
   message(paste0("Vegetation height passed criteria for class ", df[1,"final_class"], "."))
-  #View(df)
   return(df)
 }

@@ -27,6 +27,8 @@ start <- function(settings){
     library(dplyr)
     library(horizon)
     library(xtable)
+    library(htmlwidgets)
+    library(htmltools)
   }
   hd(settings)
   libs()
@@ -39,7 +41,9 @@ start <- function(settings){
   temperature_sensor_name <<- "temp_150cm"
   
   AWS_temperature_list.df <<-dplyr::filter(AWS.df, Sensor == temperature_sensor_name)
-  AWS_temperature_names <<- unlist(select(AWStemperature_list.df, AWS))
+  AWS_temperature_names <<- unlist(select(AWS_temperature_list.df, AWS))
+  
+  AWS_temperature_ahn3Only_names <<- setdiff(AWS_temperature_names, c("Maastricht", "Ell", "Arcen", "Hupsel", "Twenthe", "Nieuw Beerta", "Eelde", "Deelen"))
   
   sAWS_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
   sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
@@ -167,12 +171,15 @@ start <- function(settings){
     }
   }
   
-  getAWS_name_trim <<- function (aws.df = AWS.df, aws_name){
+  getAWS_name_trim <<- function (aws.df = AWS.df, aws_name, addition = ""){
     aws_name_untrimmed <- aws.df$AWS[which(aws.df$AWS == aws_name)][1]
     if(is.na(aws_name_untrimmed) == TRUE) {
       aws_name_trim <- stop(paste("No AWS station found with the following name:", aws_name))
     } else{
       aws_name_trim <- gsub(" ", "", aws_name_untrimmed)
+    }
+    if(addition != ""){
+      aws_name_trim <- paste0(aws_name_trim, "_", addition)
     }
     return (aws_name_trim)
   }
@@ -198,4 +205,4 @@ start <- function(settings){
 
 #installl Perl
 #installXLSXsupport()
-# install.packages(c("horizon", "raster", "rgeos", "gdalUtils", "gdata", "sp", "sf", "lubridate", "insol", "ggplot2", "leaflet", "mapview", "devtools", "data.table", "dplyr"), dependencies = TRUE )
+# install.packages(c("horizon", "raster", "rgeos", "gdalUtils", "gdata", "sp", "sf", "lubridate", "insol", "ggplot2", "leaflet", "mapview", "devtools", "data.table", "dplyr", "htmlwidgets", "htmltools"), dependencies = TRUE )
