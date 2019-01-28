@@ -45,10 +45,10 @@ start <- function(settings){
   
   AWS_temperature_ahn3Only_names <<- setdiff(AWS_temperature_names, c("Maastricht", "Ell", "Arcen", "Hupsel", "Twenthe", "Nieuw Beerta", "Eelde", "Deelen"))
   
-  sAWS_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Arcen", "Rotterdam")
+  sAWS_names <<- c("De Bilt", "Arcen", "Rotterdam","Vlissingen", "Voorschoten", "Wijk aan zee")
   sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
   
-  sAWSahn3_names <<- c("De Bilt", "Voorschoten", "Wijk aan zee", "Vlissingen", "Rotterdam")
+  sAWSahn3_names <<- c("De Bilt", "Rotterdam", "Vlissingen", "Voorschoten", "Wijk aan zee")
   sAWSahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWSahn3_names & Sensor == temperature_sensor_name)
   
   #global  functions
