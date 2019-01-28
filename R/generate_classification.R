@@ -203,10 +203,10 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
       map
       return(list("summary" = single_aws_classifications[["summary"]],
                   "overview_shading_table" = single_aws_classifications[["overview_shading_table"]],
-                  "comlete_shading_table" = single_aws_classifications[["complete_shading_table"]],
+                  "complete_shading_table" = single_aws_classifications[["complete_shading_table"]],
                   "shading_chart" = single_aws_classifications[["shading_chart"]],
                   "land_use_table" = single_aws_classifications[["land_use_table"]],
-                  "vegation_height" = single_aws_classifications[["vegetation_table"]],
+                  "vegetation_table" = single_aws_classifications[["vegetation_table"]],
                   "map" = single_aws_classifications[["map"]])
              )
   } else {
