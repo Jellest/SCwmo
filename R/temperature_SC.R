@@ -45,7 +45,8 @@ cs <- create_temperature_SC(aws.df = AWS.df,
 
 #sResults
   View(cs[["summary"]])
-  View(cs[["shading_table"]])
+  View(cs[["overview_shading_table"]])
+  View(cs[["complete_shading_table"]])
   plot(cs[["shading_chart"]])
   cs[["map"]]
   View(cs[["land_use"]])
@@ -66,7 +67,8 @@ mapshot(temp_map, file = "DeBilt_vegetation_height.png", remove_url = TRUE, remo
 selected_aws <- "De Bilt"
 View(cs[[selected_aws]][["summary"]])
 View(cs[["AWS"]][[selected_aws]][["summary"]])
-View(cs[["AWS"]][[selected_aws]][["shading_table"]])
+View(cs[["AWS"]][[selected_aws]][["overview_shading_table"]])
+View(cs[["AWS"]][[selected_aws]][["complete_shading_table"]])
 plot(cs[["AWS"]][[selected_aws]][["shading_chart"]])
 cs[["AWS"]][[selected_aws]][["map"]]
 View(cs[["AWS"]][[selected_aws]][["land_use"]])

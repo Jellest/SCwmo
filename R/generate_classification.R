@@ -50,13 +50,14 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
       #calcluate classes
       
       sa_sha_csv_path <- paste0("output/", aws_name_trim,"/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv")
-      shading_table <- projected_shade_classes(aws.df = aws.df, data_path = sa_sha_csv_path, aws_name = aws_name, addition = addition, criteria_columnName = criteria_columnName, AHN3 = AHN3)
-      
+      complete_shading_table <- projected_shade_classes(aws.df = aws.df, data_path = sa_sha_csv_path, aws_name = aws_name, addition = addition, criteria_columnName = criteria_columnName, AHN3 = AHN3)
+      overview_shading_table <- select(complete_shading_table[1,], AWS, class1_count, class2_count, class3_count, class4_count, class5_count, final_class)
       # create chart
       angles_csv_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN,"_ah_solar_shadow_angles.csv") 
       chart <- sun_shade_angles_chart(aws.df = aws.df, data_path = angles_csv_path, aws_name = aws_name, addition = addition, AHN3 = AHN3, extract_method = extract_method)
     } else {
-      shading_table <- NA
+      overvieW_shading_table <- NA
+      complete_shading_table <- NA
       chart <- NA
     }
   
@@ -87,7 +88,7 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   #vhc <- fread(paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"), data.table = FALSE)
   
     if(include_shadow_angles == TRUE){
-      shc_finalClass <- shading_table[1,class_selection] 
+      shc_finalClass <- complete_shading_table[1,class_selection] 
     } else {
       shc_finalClass <- NA
     }
@@ -139,7 +140,7 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   #map
   map <- map_rd(aws_name = aws_name, sensor_name = sensor_name, addition = addition, buffers = presence_objects[["buffers"]], vegetation_height_raster = vegetation_height[["height_raster"]], vegetation_radius = vegetation_radius, AHN3 = AHN3, aws.df = aws.df, class = summary.df[1,"final_class"])
   #map
-  return (list("summary" = summary.df, "shading_table" = shading_table , "shading_chart"= chart, "land_use_table" = presence_objects[["df"]], "vegetation_table" = vegetation_classes, "map" = map))
+  return (list("summary" = summary.df, "overview_shading_table" = overview_shading_table, "complete_shading_table" = complete_shading_table , "shading_chart"= chart, "land_use_table" = presence_objects[["df"]], "vegetation_table" = vegetation_classes, "map" = map))
 }
 
 create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", criteria_columnName = "Criteria_Value", class_selection = "final_class", import_ahn = FALSE, import_bgt = FALSE, redownload_bgt = FALSE, redownload_ahn = FALSE, AHN3 = FALSE, solar_angles = FALSE, angle_selection_byIndexNr = "all", years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, include_shadow_angles = FALSE, calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE, extract_method = ' bilinear', shadow_radius = 300, full_circle_mask = FALSE, sensor_height = 0, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE, test = FALSE, summary_addition = ""){
@@ -201,7 +202,8 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
       map <- single_aws_classifications[["map"]]
       map
       return(list("summary" = single_aws_classifications[["summary"]],
-                  "shading_table" = single_aws_classifications[["shading_table"]],
+                  "overview_shading_table" = single_aws_classifications[["overview_shading_table"]],
+                  "comlete_shading_table" = single_aws_classifications[["complete_shading_table"]],
                   "shading_chart" = single_aws_classifications[["shading_chart"]],
                   "land_use_table" = single_aws_classifications[["land_use_table"]],
                   "vegation_height" = single_aws_classifications[["vegetation_table"]],
