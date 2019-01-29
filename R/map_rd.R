@@ -60,13 +60,13 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     setView(single_aws[1,"LON"], single_aws[1,"LAT"], zoom = 8) %>%
     addTiles(luchtfoto, attribution = "KNMI, Kadaster, PDOK, AHN, 2019") %>%
     addScaleBar(position = "bottomright", options = scaleBarOptions(maxWidth = 100, metric = TRUE, imperial = FALSE, updateWhenIdle = TRUE)) %>%
-    # addMeasure(
-    #   position = "bottomleft",
-    #   primaryLengthUnit = "meters",
-    #   primaryAreaUnit = "sqmeters",
-    #   activeColor = "#3D535D",
-    #   completedColor = "#7D4479") %>%
-    # addMouseCoordinates() %>%
+    addMeasure(
+      position = "bottomleft",
+      primaryLengthUnit = "meters",
+      primaryAreaUnit = "sqmeters",
+      activeColor = "#3D535D",
+      completedColor = "#7D4479") %>%
+    addMouseCoordinates() %>%
     addWMSTiles(
       "https://geodata.nationaalgeoregister.nl/ahn2/wms?"
       , layers = "ahn2_05m_ruw"
@@ -143,7 +143,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
   }
   
   #add legend and control
-  map <- addLegend(map, position = "topright", values = aws_name, color = "#e9ff00", labels = paste0(aws_name, " (class ", class,")"),
+  map <- addLegend(map, position = "topright", values = aws_name, color = "#e9ff00", labels = paste0(aws_name, " (land use class ", class,")"),
               title = "temperature sensor", group = "AWS")
   if(circles == TRUE){
     map <- addLegend(map, position = "topright",

@@ -138,9 +138,15 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   #View(summary.df)
   
   #map
-  map <- map_rd(aws_name = aws_name, sensor_name = sensor_name, addition = addition, buffers = presence_objects[["buffers"]], vegetation_height_raster = vegetation_height[["height_raster"]], vegetation_radius = vegetation_radius, AHN3 = AHN3, aws.df = aws.df, class = summary.df[1,"final_class"])
+  map <- map_rd(aws_name = aws_name, sensor_name = sensor_name, addition = addition, buffers = presence_objects[["buffers"]], vegetation_height_raster = vegetation_height[["height_raster"]], vegetation_radius = vegetation_radius, AHN3 = AHN3, aws.df = aws.df, class = summary.df[1,"objects_class"])
   #map
-  return (list("summary" = summary.df, "overview_shading_table" = overview_shading_table, "complete_shading_table" = complete_shading_table , "shading_chart"= chart, "land_use_table" = presence_objects[["df"]], "vegetation_table" = vegetation_classes, "map" = map))
+  return (list("summary" = summary.df,
+               "overview_shading_table" = overview_shading_table,
+               "complete_shading_table" = complete_shading_table ,
+               "shading_chart"= chart,
+               "land_use_table" = presence_objects[["df"]],
+               "vegetation_table" = vegetation_classes,
+               "map" = map))
 }
 
 create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", criteria_columnName = "Criteria_Value", class_selection = "final_class", import_ahn = FALSE, import_bgt = FALSE, redownload_bgt = FALSE, redownload_ahn = FALSE, AHN3 = FALSE, solar_angles = FALSE, angle_selection_byIndexNr = "all", years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, include_shadow_angles = FALSE, calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE, extract_method = ' bilinear', shadow_radius = 300, full_circle_mask = FALSE, sensor_height = 0, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE, test = FALSE, summary_addition = ""){
