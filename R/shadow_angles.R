@@ -82,7 +82,7 @@ shadow_angles <- function(aws.df = AWS.df,
                                          ll=LONLAT)
     
     shadows<-raster::stack(ahn_mask,horizon_grid)
-    names(shadows)<-c("height","shadow_angle")
+    names(shadows)<-c("height","shadow_angle_raw")
     #print(str(shadows[["shadow_angle"]]))
     #plot(shadows)
     writeRaster(shadows[["shadow_angle"]], paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE)
@@ -90,7 +90,7 @@ shadow_angles <- function(aws.df = AWS.df,
     print(paste0("Only reading exisiting values using the ", extract_method, " method..."))
     sa_values <- raster(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
     shadows<-raster::stack(ahn_mask,sa_values)
-    names(shadows)<-c("height","shadow_angle")
+    names(shadows)<-c("height","shadow_angle_raw")
   }
   
   df<-extract(x = shadows, y = spatialpoint, method=extract_method)

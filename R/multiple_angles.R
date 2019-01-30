@@ -150,9 +150,16 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
       ahn_mask <- mask_raster(aws.df = aws.df, aws_name = aws_name, addition = addition, spatialpoint = spatialpoint[["point_rd.sp"]], ahn_raster = aws_ahn, AHN3 = AHN3, azimuth = azimuths[a],radius = radius)
     }
     #print(paste0("New raw ahn height value: ", extract(ahn_mask, spatialpoint[["point_rd.sp"]], sp = TRUE)@data[1,paste0(aws_name_trim, "_", AHN, "_raw_ahn")]))
-    shadow_ha <-data.frame(shadow_angles(aws.df = aws.df, aws_name = aws_name, addition = addition, spatialpoint = spatialpoint[["point_rd.sp"]], ahn_mask = ahn_mask, angle = azimuths[a], maxDist = radius, LONLAT = FALSE, AHN3 = AHN3, extract_method = extract_method,read_only = read_only_shadow_values)$df)
-
-    sol_sha.df <- merge(solar_angles[a,], shadow_ha)
+    
+    #calcluate shadow_angle
+    shadow_angle_raw <- shadow_angles(aws.df = aws.df, aws_name = aws_name, addition = addition, spatialpoint = spatialpoint[["point_rd.sp"]], ahn_mask = ahn_mask, angle = azimuths[a], maxDist = radius, LONLAT = FALSE, AHN3 = AHN3, extract_method = extract_method,read_only = read_only_shadow_values)$df
+    
+    #correct if higher than highest possible shadow angle
+    shadow_angle <- highest_shadow_angle(aws_name = aws_name, sensor_name = sensor_name, x = azimuths[a], shadow_angle_raw = shadow_angle_raw[1,"shadow_angle_raw"])
+    shadows <-cbind(shadow_angles_raw, shadow_angle)
+    
+    #merge with solar angles
+    sol_sha.df <- merge(solar_angles[a,], shadows)
     ah_solar_shadow_angles <- rbind(ah_solar_shadow_angles, sol_sha.df)
     fwrite(ah_solar_shadow_angles, paste0("output/", aws_name_trim, "/solar_shadow_angles/",aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv"))
     if(a == length(azimuths)){
@@ -164,7 +171,9 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
     end_time <- Sys.time()
     }
   }
-
+  ah_solar_shadow_angles
+  
+  
   elapsed_time <- ceiling(end_time - start_time)
   message(paste("Finished angle calculations for", aws_name, ". Elapsed Time:", elapsed_time, "seconds."))
 }

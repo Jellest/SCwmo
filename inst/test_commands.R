@@ -9,3 +9,6 @@ BGT_DeBilt <- import_bgt("De Bilt", "temp_150cm")
 BGT_HvH <-import_bgt("Hoek van Holland", "site")
 
 BGT_DeBilt <- import_single_bgt("De Bilt", "site", delete_raw_gmls = TRUE)
+
+
+#correct projected shade classes
