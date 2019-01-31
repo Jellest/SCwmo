@@ -14,7 +14,7 @@ simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3,
   aws_mask<-raster::buffer(spatialpoint,width=radius)
   ahn_crop<-raster::crop(ahn,aws_mask)
   ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, " /Masks", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE)
+  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, " /Masks", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
   
   print("Masked the raster object.")
   return(ahn_mask)
@@ -45,15 +45,15 @@ mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", 
   X0 <- spatialpoint@coords[,"X"] 
   Y0 <- spatialpoint@coords[,"Y"]
   
-  #X points East and West from line
+  #X point East from line
   PXe <- X0 + (radius * sin((azimuth_east*(pi/180))))
   PYe <- Y0 + (radius * cos((azimuth_east*(pi/180))))
   
-  #Y points East and West from line  
+  #Y point West from line  
   PXw <- X0 + (radius * sin((azimuth_west*(pi/180))))
   PYw <- Y0 + (radius * cos((azimuth_west*(pi/180))))
     
-  s_radius <- 12
+  s_radius <- 15
   
   #point other side
   TXe <- X0 + (s_radius * sin((360-(180 - azimuth_west))*(pi/180)))
@@ -63,11 +63,11 @@ mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", 
   TYw <- Y0 + (s_radius * cos((360-(180 - azimuth_east))*(pi/180)))
 
   #perpendicular points sun side
-  PTXe <- TXe + ((radius + s_radius) * sin((azimuth*(pi/180))))
-  PTYe <- TYe + ((radius + s_radius) * cos((azimuth*(pi/180))))
+  PTXe <- TXe + ((s_radius + radius) * sin((azimuth*(pi/180))))
+  PTYe <- TYe + ((s_radius + radius) * cos((azimuth*(pi/180))))
   
-  PTXw <- TXw + ((radius + s_radius) * sin((azimuth*(pi/180))))
-  PTYw <- TYw + ((radius + s_radius) * cos((azimuth*(pi/180))))
+  PTXw <- TXw + ((s_radius + radius) * sin((azimuth*(pi/180))))
+  PTYw <- TYw + ((s_radius + radius) * cos((azimuth*(pi/180))))
   
   #perpendicular points nearby aws other side
   PAXw <- TXw + ((s_radius - 3) * sin((azimuth*(pi/180))))
@@ -90,7 +90,7 @@ mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", 
   #plot(aws_mask, axes = TRUE)
   ahn_mask <- raster::mask(ahn_raster, aws_mask)
   
-  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
+  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
   print("Masked the raster object.")
   #print(summary(ahn_mask))
   return(ahn_mask)

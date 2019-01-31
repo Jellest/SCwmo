@@ -115,7 +115,11 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
   
   aws_name <- solar_angles$AWS[1]
   aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
-  
+  if(addition != ""){
+    orig_aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name)
+  } else {
+    orig_aws_name_trim <- aws_name_trim
+  }
   azimuths <- solar_angles$azimuth
   start_time <- Sys.time()
   spatialpoint <- create_SpatialPoint(solar_angles[1,"X"], Y = solar_angles[1,"Y"], LONLAT = FALSE)
@@ -124,7 +128,8 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
   } else {
     AHN <- "AHN2"
   }
-  aws_path <- paste0("data/", AHN, "/", aws_name_trim, "/raw/", aws_name_trim, "_", AHN,"_raw_ahn.tif")
+
+  aws_path <- paste0("data/", AHN, "/", orig_aws_name_trim, "/raw/", orig_aws_name_trim, "_", AHN,"_raw_ahn.tif")
   #print(aws_path)
   aws_ahn <- raster(aws_path)
   
@@ -155,15 +160,15 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
     shadow_angle_raw <- shadow_angles(aws.df = aws.df, aws_name = aws_name, addition = addition, spatialpoint = spatialpoint[["point_rd.sp"]], ahn_mask = ahn_mask, angle = azimuths[a], maxDist = radius, LONLAT = FALSE, AHN3 = AHN3, extract_method = extract_method,read_only = read_only_shadow_values)$df
     
     #correct if higher than highest possible shadow angle
-    shadow_angle <- highest_shadow_angle(aws_name = aws_name, sensor_name = sensor_name, x = azimuths[a], shadow_angle_raw = shadow_angle_raw[1,"shadow_angle_raw"])
-    shadows <-cbind(shadow_angles_raw, shadow_angle)
+    shadow_angle <- highest_shadow_angle(aws_name = aws_name, sensor_name = temperature_sensor_name, x = azimuths[a], shadow_angle_raw = shadow_angle_raw[1,"shadow_angle_raw"])
+    shadows <-cbind(shadow_angle_raw, shadow_angle)
     
     #merge with solar angles
     sol_sha.df <- merge(solar_angles[a,], shadows)
     ah_solar_shadow_angles <- rbind(ah_solar_shadow_angles, sol_sha.df)
     fwrite(ah_solar_shadow_angles, paste0("output/", aws_name_trim, "/solar_shadow_angles/",aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv"))
     if(a == length(azimuths)){
-      export_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles.csv") 
+      export_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_backup.csv") 
       fwrite(ah_solar_shadow_angles, export_path)
       if(printChart == TRUE){
         sun_shade_angles_chart(data_path = export_path, aws_name = aws_name) 
@@ -178,12 +183,28 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
   message(paste("Finished angle calculations for", aws_name, ". Elapsed Time:", elapsed_time, "seconds."))
 }
 
-multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", solar_angles = TRUE, angle_selection_byIndexNr = "all", calculate_shadow_angles = TRUE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE){
+multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", solar_angles = TRUE, angle_selection_byIndexNr = "all", calculate_shadow_angles = TRUE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE, test = FALSE){
   start_time <- Sys.time()
   
   for(a in 1:length(aws_list)){
     single_aws.df <- dplyr::filter(aws.df, AWS == aws_list[a] & Sensor == sensor_name)
     aws_name <- single_aws.df[1,"AWS"]
+    
+    ahn2_analysed <<- c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijk aan zee", "Voorschoten")
+    ahn3_analysed <<- c("De Bilt", "Rotterdam", "Vlissingen", "Wijk aan zee", "Voorschoten")
+    
+    if(AHN3 == FALSE){  
+      if(aws_name %in% ahn2_analysed == TRUE & test == FALSE){
+        message(paste(aws_name, "is already analysed for AHN2. Going to the next station."))
+        next
+      }
+    } else if(AHN3 == TRUE){
+      if(aws_name %in% ahn3_analysed == TRUE & test == FALSE){
+        message(paste(aws_name, "is already analysed for AHN3. Going to the next station."))
+        next
+      }
+    }
+    
     message(paste("Starting angle calculations for", aws_name))
     if(solar_angles == TRUE){
       solar_angles <- multiple_Moments_solarAngles(aws.df = aws.df,
@@ -209,7 +230,13 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
                                                   extract_method = extract_method,
                                                   addition = addition)
     }
-
+    
+    if(AHN3 == FALSE){
+      ahn3_analysed <<- cbind(ahn2_analysed, aws_name)
+    } else if(AHN3 == TRUE){
+      ahn3_analysed <<- cbind(ahn2_analysed, aws_name)
+    }
+    
     print(paste("Completed angle calculations for", aws_name))
     print("")
     print("=====================")
@@ -221,12 +248,12 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
 }
 
 multipleSolar_shadow_angles(aws.df = AWS.df,
-                            aws_list = c("De Bilt"),
+                            aws_list = c(AWS_temperature_names),
                             sensor_name = temperature_sensor_name,
-                            addition = "_150cm",
+                            addition = "",
                             solar_angles = TRUE, angle_selection_byIndexNr = "all",
                             calculate_shadow_angles = TRUE,
-                            sensor_height = 1.5,
+                            sensor_height = 0,
                             read_only_shadow_values = FALSE,
                             extract_method = 'bilinear',
                             years = c(2018),
@@ -239,5 +266,6 @@ multipleSolar_shadow_angles(aws.df = AWS.df,
                             AHN3 = FALSE,
                             full_circle_mask = FALSE,
                             printChart = FALSE,
-                            exportCSV = TRUE)
+                            exportCSV = TRUE,
+                            test = FALSE)
 

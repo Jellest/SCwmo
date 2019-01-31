@@ -13,7 +13,7 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
   
   data_exists <- file.exists(data_path)
   if(angle_selection_byIndexNr == "all"){
-    data <- fread(data_path, data.table = FALSE)[]
+    data <- fread(data_path, data.table = FALSE)
   } else {
     data <- fread(data_path, data.table = FALSE)[angle_selection_byIndexNr]
   }
@@ -111,4 +111,4 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
   }
 }
 
-sun_shade_angles_chart(data_path = "output/solar_shadow_angles/DeBilt/DeBilt_AHN2_ah_solar_shadow_angles_complete.csv", aws_name = "De Bilt",  AHN3 = FALSE, extract_method = 'bilinear')
+plot(sun_shade_angles_chart(data_path = "output/DeBilt_15r/solar_shadow_angles/DeBilt_15r_AHN2_ah_solar_shadow_angles.csv", aws_name = "De Bilt",  AHN3 = FALSE, extract_method = 'bilinear'))

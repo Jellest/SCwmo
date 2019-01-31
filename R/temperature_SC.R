@@ -19,7 +19,7 @@ results <- function(results, aws_name){
   }
 }
 
-singleAWS <- create_temperature_SC(aws_list = c("De Bilt"),
+singleAWS <- create_temperature_SC(aws_list = c("Wijk aan zee"),
                             aws.df = AWS.df, addition = "", summary_addition = "", 
                             sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value", class_selection = "final_class",
                             AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,

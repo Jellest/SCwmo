@@ -5,8 +5,7 @@ highest_shadow_angle <- function(aws,
                                  x,
                                  shadow_angle_raw
                                 ){
-  print("checking and corercting angle")
-  #aws <- select_single_aws(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
+  aws <- select_single_aws(aws.df = aws.df, aws_name = aws_name, sensor_name = sensor_name)
   solar_angles <- solar_angles(X = aws[["aws.df"]][1,"LON"],
                                Y = aws[["aws.df"]][1,"LAT"],
                                year = 2018,
