@@ -79,7 +79,7 @@ View(singleAWS[["land_use_table"]])
 View(singleAWS[["vegetation_table"]])
 
 
-selected_aws <- "De Bilt"
+selected_aws <- sAWS_names[4]
 #AHN2
 View(sAWS[["summary"]])
 View(sAWS_ahn3[["summary"]])
@@ -95,7 +95,6 @@ View(sAWS[["AWS"]][[selected_aws]][["vegetation_table"]])
 
 #AHN3
 View(sAWS_ahn3[["summary"]])
-View(sAWS_ahn3_ahn3[["summary"]])
 View(sAWS_ahn3[["AWS"]][[selected_aws]][["summary"]])
 View(sAWS_ahn3[["AWS"]][[selected_aws]][["overview_shading_table"]])
 View(sAWS_ahn3[["AWS"]][[selected_aws]][["complete_shading_table"]])

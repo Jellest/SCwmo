@@ -1,14 +1,19 @@
-diff <- function(ahn2, ahn3){
-  
+ahn3_ahn2_difference <- function(ahn2, ahn3, aws_name_trim){
   difference <- ahn3 - ahn2
   
-  plot(difference)
-  writeRaster(difference, "output/Wijkaanzee/ahn3_ahn2_diff.tif")
+  #plot(difference)
+  writeRaster(difference, paste0("output/", aws_name_trim, "/", aws_name_trim, "_ahn3_ahn2_diff.tif"))
 }
 
 
-diff(
-  ahn2 = raster("data/AHN2/Wijkaanzee/raw/Wijkaanzee_AHN2_raw_ahn.tif"),
-  ahn3 = raster("data/AHN3/Wijkaanzee/raw/Wijkaanzee_AHN3_raw_ahn.tif")
-)
+
+for(s in 1:length(sAWSahn3_names)){
+  aws <- sAWSahn3_names[s]
+  aws_name_trim <- getAWS_name_trim(aws_name = aws)
+  ahn3_ahn2_difference(
+    ahn2 = raster(paste0("data/AHN2/", aws_name_trim, "/raw/", aws_name_trim, "_AHN2_raw_ahn.tif")),
+    ahn3 = raster(paste0("data/AHN3/", aws_name_trim, "/raw/", aws_name_trim, "_AHN3_raw_ahn.tif")),
+    aws_name_trim = aws_name_trim
+  )
+}
 
