@@ -58,14 +58,14 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     minZoom = 4, maxZoom = 20
     )) %>%
     setView(single_aws[1,"LON"], single_aws[1,"LAT"], zoom = 8) %>%
-    addTiles(luchtfoto, attribution = "KNMI, Kadaster, PDOK, AHN, 2019") %>%
+    addTiles(luchtfoto, attribution = "KNMI, Kadaster, PDOK, AHN, 2018") %>%
     addScaleBar(position = "bottomright", options = scaleBarOptions(maxWidth = 100, metric = TRUE, imperial = FALSE, updateWhenIdle = TRUE)) %>%
-    addMeasure(
-      position = "bottomleft",
-      primaryLengthUnit = "meters",
-      primaryAreaUnit = "sqmeters",
-      activeColor = "#3D535D",
-      completedColor = "#7D4479") %>%
+    # addMeasure(
+    #   position = "bottomleft",
+    #   primaryLengthUnit = "meters",
+    #   primaryAreaUnit = "sqmeters",
+    #   activeColor = "#3D535D",
+    #   completedColor = "#7D4479") %>%
     addMouseCoordinates() %>%
     addWMSTiles(
       "https://geodata.nationaalgeoregister.nl/ahn2/wms?"

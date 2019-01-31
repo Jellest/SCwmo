@@ -19,7 +19,7 @@ results <- function(results, aws_name){
   }
 }
 
-singleAWS <- create_temperature_SC(aws_list = c("Wijk aan zee"),
+singleAWS <- create_temperature_SC(aws_list = c("De Bilt"),
                             aws.df = AWS.df, addition = "", summary_addition = "", 
                             sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value", class_selection = "final_class",
                             AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
@@ -66,8 +66,8 @@ sAWS_ahn3 <- create_temperature_SC(aws.df = AWS.df,
 
 
 mapshot(singleAWS[["map"]], file = "DeBilt_vegetation_height.png", remove_url = TRUE, removeControls = c("zoomControl", "layersControl", "homeButton"))
-temp_map <- map_rd(aws_name = "De Bilt", sensor_name = temperature_sensor_name, vegetation_height_raster = TRUE, vegetation_radius = 10)
-mapshot(temp_map, file = "DeBilt_vegetation_height.png", remove_url = TRUE, removeControls = c("zoomControl", "layersControl", "homeButton"))
+temp_map <- map_rd(aws_name = "De Bilt", sensor_name = temperature_sensor_name, buffers = c(30, 10, 5, 3), vegetation_height_raster = FALSE, vegetation_radius = 10)
+mapshot(temp_map, file = "DeBilt_landUse.png", remove_url = TRUE, removeControls = c("zoomControl", "layersControl", "homeButton"))
 
 #single AWS Results
 View(singleAWS[["summary"]])
@@ -79,7 +79,7 @@ View(singleAWS[["land_use_table"]])
 View(singleAWS[["vegetation_table"]])
 
 
-selected_aws <- "Wijk aan zee"
+selected_aws <- "De Bilt"
 #AHN2
 View(sAWS[["summary"]])
 View(sAWS_ahn3[["summary"]])
@@ -88,6 +88,8 @@ View(sAWS[["AWS"]][[selected_aws]][["overview_shading_table"]])
 View(sAWS[["AWS"]][[selected_aws]][["complete_shading_table"]])
 plot(sAWS[["AWS"]][[selected_aws]][["shading_chart"]])
 sAWS[["AWS"]][[selected_aws]][["map"]]
+mapshot(sAWS[["AWS"]][[selected_aws]][["map"]], file = "test2.png", remove_url = TRUE, removeControls = c("zoomControl", "layersControl", "homeButton"))
+
 View(sAWS[["AWS"]][[selected_aws]][["land_use_table"]])
 View(sAWS[["AWS"]][[selected_aws]][["vegetation_table"]])
 

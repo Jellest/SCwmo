@@ -42,6 +42,7 @@ find_land_use_and_classes <- function(aws.df = AWS.df, aws_name, addition = "", 
     } else if(class ==5){
       buffers <- c(30, 10, 5, 3)   
     }
+    buffers <- c(100, 30, 10, 5, 3)
   return (buffers)
   }
   
