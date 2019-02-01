@@ -41,8 +41,7 @@ start <- function(settings){
   temperature_sensor_name <<- "temp_150cm"
   
   AWS_temperature_list.df <<-dplyr::filter(AWS.df, Sensor == temperature_sensor_name)
-  AWS_temperature_names <<- unlist(select(AWS_temperature_list.df, AWS))
-  
+  AWS_temperature_names <<- as.character(unlist(select(AWS_temperature_list.df, AWS)))
   AWS_temperature_ahn3Only_names <<- setdiff(AWS_temperature_names, c("Maastricht", "Ell", "Arcen", "Hupsel", "Twenthe", "Nieuw Beerta", "Eelde", "Deelen"))
   
   sAWS_names <<- c("De Bilt", "Arcen", "Rotterdam","Vlissingen", "Voorschoten", "Wijk aan zee")
