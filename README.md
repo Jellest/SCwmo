@@ -2,12 +2,6 @@ Please note that this project is still ongoing and the coding is not complete ye
 
 # wmoSC
 
-The focus of this research is to develop an automated Siting Classification model that is based on the current classification guidelines defined by the WMO (no. 8). 
+The focus of this research is to develop an automated Siting Classification model for the temperature variable that is based on the current classification guidelines defined by the WMO (no. 8). 
 
-This includes the variables:
 
-* temperature
-* radiation
-* wind
-* environment
-* precipitation
