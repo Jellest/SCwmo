@@ -108,7 +108,7 @@ multiple_Moments_solarAngles <- function(aws.df = AWS.df, aws_name, sensor_name,
   return(list("all angles" = all_solar_angles, "all ah angles" = all_ah_solar_angles, "all month angles" = month_angles))
 }
 
-multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, addition = ""){
+multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, addition = "", angle_selection_byIndexNr = "all"){
   ah_solar_shadow_angles <- data.frame(AWS = character(0), sensor_name = character(0), X = numeric(0), Y = numeric(0), LON = numeric(0), LAT = numeric(0), altitude = numeric(0), julian_day = numeric(0), azimuth = numeric(0), zenith = numeric(0), elevation = numeric(0), shadow_height = numeric(0), shadow_angle = numeric(0), stringsAsFactors = FALSE)
   ah_solar_shadow_angles <- ah_solar_shadow_angles[,c("LON", "LAT", "altitude", "julian_day", "azimuth", "zenith", "elevation", "shadow_height", "shadow_angle")]
   ah_shadow_rasters <- list()
@@ -134,15 +134,50 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
   aws_ahn <- raster(aws_path)
   
   if(sensor_height > 0){
-    terrain_raster <- raster(paste0("data/", AHN,"/", aws_name_trim,"/terrain/", aws_name_trim,"_", AHN, "_terrain_ahn.tif")) 
-    terrain_height <- extract(terrain_raster, spatialpoint[["point_rd.sp"]], sp = TRUE)@data[1,paste0(aws_name_trim, "_", AHN, "_terrain_ahn")]
+    terrain_raster <- raster(paste0("data/", AHN,"/", orig_aws_name_trim,"/terrain/", orig_aws_name_trim,"_", AHN, "_terrain_ahn.tif")) 
+    terrain_height <- extract(terrain_raster, spatialpoint[["point_rd.sp"]], sp = TRUE)@data[1,paste0(orig_aws_name_trim, "_", AHN, "_terrain_ahn")]
     
     ahn_sensor_height <- terrain_height + sensor_height
     
     cellNr_raw <- cellFromXY(aws_ahn, spatialpoint[["point_rd.sp"]])
     print(paste0("Raw ahn original height value: ", aws_ahn[cellNr_raw]))
-    aws_ahn[cellNr_raw] <- ahn_sensor_height
+    #aws_ahn[cellNr_raw] <- ahn_sensor_height
+    adjacentCells <- adjacent(aws_ahn, cells=c(cellNr_raw), directions=8, pairs=FALSE, include = TRUE, id = TRUE)
+    #print(adjacentCells)
+    for(adj in 1:length(adjacentCells)){
+      aws_ahn[adjacentCells[adj]] <- ahn_sensor_height 
+    }
     print(paste0("Set height at location of sensor from:", terrain_height," (terrain) to: ", ahn_sensor_height,"..."))
+  }
+  
+  
+  if(sensor_height == 0){
+    terrain_raster <- raster(paste0("data/", AHN,"/", orig_aws_name_trim,"/terrain/", orig_aws_name_trim,"_", AHN, "_terrain_ahn.tif")) 
+    terrain_extract <- extract(terrain_raster, spatialpoint[["point_rd.sp"]], sp = TRUE, cellnumbers = TRUE)@data[1,]
+    terrain_height <- terrain_extract[1,paste0(orig_aws_name_trim, "_", AHN, "_terrain_ahn")]
+    terrain_height_cellNr <- terrain_extract[1, "cells"] 
+    #cellNr_terrain <- cellFromXY(terrain_raster, spatialpoint[["point_rd.sp"]])
+    
+    neighbours <-  matrix(1, nrow=21, ncol=21) 
+    neighbours[221] <- 0
+    print("Getting surrounding terrain height values...")
+    terrain_height_surrounding_cellNrs <- adjacent(terrain_raster, cells=c(terrain_height_cellNr), directions=neighbours, pairs=FALSE, include = TRUE) 
+    values <- c()
+    for (c in 1:length(terrain_height_surrounding_cellNrs)){
+      values <- append(values, terrain_raster[terrain_height_surrounding_cellNrs[c]])
+    }
+    minHeight <- min(values)
+    #adjust cell and surroundng 5 m. to terrain height values.
+    cellNr_raw <- cellFromXY(aws_ahn, spatialpoint[["point_rd.sp"]])
+    print(paste0("Raw ahn original height value: ", aws_ahn[cellNr_raw]))
+    #aws_ahn[cellNr_raw] <- ahn_sensor_height
+    adjacentCells <- adjacent(aws_ahn, cells=c(cellNr_raw), directions=neighbours, pairs=FALSE, include = TRUE, id = TRUE)
+    #print(adjacentCells)
+    for(adj in 1:length(adjacentCells)){
+      aws_ahn[adjacentCells[adj]] <- minHeight
+    }
+    print(paste0("Set height at location of sensor with a radius of 3 m. to terrain height: ", terrain_height, "(..."))
+    writeRaster(x = aws_ahn, filename = paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/AAAA_newMask.tif"), overwrite = TRUE)
   }
   
   
@@ -171,13 +206,11 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
       export_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_backup.csv") 
       fwrite(ah_solar_shadow_angles, export_path)
       if(printChart == TRUE){
-        sun_shade_angles_chart(data_path = export_path, aws_name = aws_name) 
+        sun_shade_angles_chart(aws.df = aws.df, data_path = export_path, aws_name = aws_name, addition = addition, angle_selection_byIndexNr = angle_selection_byIndexNr, AHN3 = AHN3, extract_method = extract_method) 
       }
-    end_time <- Sys.time()
+      end_time <- Sys.time()
     }
   }
-  ah_solar_shadow_angles
-  
   
   elapsed_time <- ceiling(end_time - start_time)
   message(paste("Finished angle calculations for", aws_name, ". Elapsed Time:", elapsed_time, "seconds."))
@@ -185,8 +218,8 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
 
 multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", solar_angles = TRUE, angle_selection_byIndexNr = "all", calculate_shadow_angles = TRUE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE, test = FALSE){
   start_time <- Sys.time()
-  ahn2_analysed <<- c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijk aan zee", "Voorschoten", "Berkhout", "Cabauw mast", "De Kooy")
-  ahn3_analysed <<- c("De Bilt", "Rotterdam", "Vlissingen", "Wijk aan zee", "Voorschoten")
+  ahn2_analysed <<- c()#c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijk aan zee", "Voorschoten", "Berkhout", "Cabauw mast", "De Kooy", "Deelen")
+  ahn3_analysed <<- c()#c("De Bilt", "Schiphol")#"Rotterdam", "Vlissingen", "Wijk aan zee", "Voorschoten")
   for(a in 1:length(aws_list)){
     single_aws.df <- dplyr::filter(aws.df, AWS == aws_list[a] & Sensor == sensor_name)
     aws_name <- single_aws.df[1,"AWS"]
@@ -226,7 +259,8 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
                                                   sensor_height = sensor_height,
                                                   read_only_shadow_values = read_only_shadow_values,
                                                   extract_method = extract_method,
-                                                  addition = addition
+                                                  addition = addition,
+                                                  angle_selection_byIndexNr = angle_selection_byIndexNr
                                              )
     }
     
@@ -247,9 +281,9 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
 }
 
 multipleSolar_shadow_angles(aws.df = AWS.df,
-                            aws_list = AWS_temperature_names,
+                            aws_list = AWS_temperature_ahn3Only_names_tmp,#c("De Bilt", "Schiphol"),
                             sensor_name = temperature_sensor_name,
-                            addition = "",
+                            addition = "__",
                             solar_angles = TRUE, angle_selection_byIndexNr = "all",
                             calculate_shadow_angles = TRUE,
                             sensor_height = 0,
@@ -261,8 +295,8 @@ multipleSolar_shadow_angles(aws.df = AWS.df,
                             s_hour = 0,
                             f_hour = 23,
                             minutes_interval = 15,
-                            radius = 300,
-                            AHN3 = FALSE,
+                            radius = 100,
+                            AHN3 = TRUE,
                             full_circle_mask = FALSE,
                             printChart = FALSE,
                             exportCSV = TRUE,

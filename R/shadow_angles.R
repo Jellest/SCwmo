@@ -73,22 +73,24 @@ shadow_angles <- function(aws.df = AWS.df,
     AHN <- "AHN2"
   }
   
+  shadow_angles_path <- paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif")
   if(read_only == FALSE){
     print(paste0("Calculating shadow angles using the ", extract_method, " method..."))
     horizon_grid<-horizon::horizonSearch(x = ahn_mask,  
                                          degrees= TRUE,
                                          maxDist = maxDist, 
                                          azimuth = angle,
-                                         ll=LONLAT)
+                                         ll=LONLAT,
+                                         filename = shadow_angles_path)
     
     shadows<-raster::stack(ahn_mask,horizon_grid, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
     names(shadows)<-c("height","shadow_angle_raw")
     #print(str(shadows[["shadow_angle"]]))
     #plot(shadows)
-    writeRaster(shadows[["shadow_angle_raw"]], paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
+    #writeRaster(shadows[["shadow_angle_raw"]], paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
   } else {
     print(paste0("Only reading exisiting values using the ", extract_method, " method..."))
-    sa_values <- raster(paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Shadows/", aws_name_trim, "_", AHN,"_sa_", angle, ".tif"))
+    sa_values <- raster(shadow_angles_path)
     shadows<-raster::stack(ahn_mask,sa_values, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
     names(shadows)<-c("height","shadow_angle_raw")
   }
