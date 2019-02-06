@@ -47,7 +47,7 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
   if((solar_angles == TRUE & shadow_angles == TRUE) | data_exists == TRUE){
     #add shadow chart, layout, axes and labels
     chart <- ggplot(data, aes(x=azimuth, y=shadow_angle)) + geom_area() +
-      ggtitle(paste("Sun and shadow chart for", aws_name)) +
+      ggtitle(paste("Sun and shadow chart for", aws_name_trim)) +
       #labs(fill = "Your Title") +
       #labs(x = "azimuth (degrees)", y = "elevation (degrees)") +
       #xlim(48,312) +
@@ -111,4 +111,4 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
   }
 }
 
-plot(sun_shade_angles_chart(data_path = "output/DeBilt_15r/solar_shadow_angles/DeBilt_15r_AHN2_ah_solar_shadow_angles.csv", aws_name = "De Bilt",  AHN3 = FALSE, extract_method = 'bilinear'))
+plot(sun_shade_angles_chart(data_path = "output/Schiphol___/solar_shadow_angles/Schiphol____AHN3_ah_solar_shadow_angles.csv", aws_name = "Schiphol", addition = "__",AHN3 = FALSE, extract_method = 'bilinear'))
