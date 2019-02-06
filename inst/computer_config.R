@@ -50,6 +50,11 @@ start <- function(settings){
   sAWSahn3_names <<- c("De Bilt", "Rotterdam", "Vlissingen", "Voorschoten", "Wijk aan zee")
   sAWSahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWSahn3_names & Sensor == temperature_sensor_name)
   
+  AWS_temperature_names_tmp <<- append(sAWS_names, AWS_temperature_names)
+  AWS_temperature_ahn3Only_names_tmp <<- append(sAWSahn3_names, AWS_temperature_ahn3Only_names)
+  
+  
+  
   #global  functions
   create_SpatialPoint <<- function(X, Y, LONLAT){
     if(missing(LONLAT)){

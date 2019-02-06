@@ -116,6 +116,18 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   manual_class_1 <- manual_classes["1"]
   manual_class_R <- manual_classes["R"]
   
+  if(max_class == manual_class_1){
+    exact_match <- TRUE
+  } else {
+    exact_match <- FALSE
+  }
+  
+  if(grepl(max_class, manual_class_R) == TRUE){
+    partial_match <- TRUE
+  } else {
+    partial_match <- FALSE
+  }
+  
   AHN_selected <- AHN
   extract_methodology <- extract_method
   sensor_height <- sensor_height
@@ -126,13 +138,13 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
     criteria_values <- criteria_columnName
   }
   
-  info.df <- data.frame(manual_class_1, manual_class_R, AHN_selected, extract_methodology, sensor_height, criteria_values)
+  info.df <- data.frame(manual_class_1, manual_class_R, exact_match, partial_match, AHN_selected, extract_methodology, sensor_height, criteria_values)
   
   #info.df <- rbind(info.df, info_entry)
   
   summary.df <- cbind(summary.df, info.df)
   #View(info.df)
-  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "Manual_class_1", "Manual_class_R", "AHN selected", "Extract method", "Sensor height", "Criteria values")
+  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "Manual_class_1", "Manual_class_R", "Exact match", "Partial match", "AHN selected", "Extract method", "Sensor height", "Criteria values")
   colnames(summary.df) <- column_names
   
   #View(summary.df)
@@ -221,7 +233,7 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
 }
 
 create_temperature_SC(aws.df = AWS.df,
-                      aws_list = c("Wijk aan zee"), addition = "", summary_addition = "", 
+                      aws_list = sAWS_names, addition = "", summary_addition = "", 
                       sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value", class_selection = "final_class",
                       AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
                       import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
@@ -232,5 +244,5 @@ create_temperature_SC(aws.df = AWS.df,
                       shadow_radius = 300, full_circle_mask = FALSE, extract_method = 'bilinear',
                       sensor_height = 0,
                       vegetation_radius = 10,
-                      exportShp = TRUE, exportCSV = TRUE, printChart = FALSE, test = TRUE)
+                      exportShp = TRUE, exportCSV = TRUE, printChart = FALSE, test = FALSE)
 
