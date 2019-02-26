@@ -60,7 +60,7 @@ projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, c
       df[n,"meet_class5"] <- TRUE
     }
     
-    #class 2 / 3
+    #class 2
     if(df[n,"shadow_angle"] >= class_1_cv & df[n,"shadow_angle"] < class_2_3_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
       df[n,"meet_class1"] <- FALSE
       df[n,"meet_class2"] <- TRUE
@@ -69,8 +69,8 @@ projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, c
       df[n,"meet_class5"] <- TRUE
     }
     
-    #class 4
-    if(df[n,"shadow_angle"] >= class_2_3_cv & df[n,"shadow_angle"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+    #class 3
+    if(df[n,"shadow_angle"] >= class_2_cv & df[n,"shadow_angle"] < class_3_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
       df[n,"meet_class1"] <- FALSE
       df[n,"meet_class2"] <- FALSE
       df[n,"meet_class3"] <- FALSE
@@ -78,14 +78,14 @@ projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, c
       df[n,"meet_class5"] <- TRUE
     }
     
-    ##class 4
-    # if(df[n,"shadow_angle"] >= class_3_cv & df[n,"shadow_angle"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
-    #   df[n,"meet_class1"] <- FALSE
-    #   df[n,"meet_class2"] <- FALSE
-    #   df[n,"meet_class3"] <- FALSE
-    #   df[n,"meet_class4"] <- TRUE
-    #   df[n,"meet_class5"] <- TRUE
-    # }
+    #class 4
+    if(df[n,"shadow_angle"] >= class_3_cv & df[n,"shadow_angle"] < class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){
+      df[n,"meet_class1"] <- FALSE
+      df[n,"meet_class2"] <- FALSE
+      df[n,"meet_class3"] <- FALSE
+      df[n,"meet_class4"] <- TRUE
+      df[n,"meet_class5"] <- TRUE
+    }
     
     #class 5
     if(df[n,"shadow_angle"] >= class_4_cv & df[n,"shadow_angle"] > df[n,"elevation"]){

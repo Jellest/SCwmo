@@ -203,7 +203,6 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
     shadow_angle_raw <- shadow_angles(aws.df = aws.df, aws_name = aws_name, addition = addition, spatialpoint = spatialpoint[["point_rd.sp"]], ahn_mask = ahn_mask, angle = azimuths[a], maxDist = radius, LONLAT = FALSE, AHN3 = AHN3, extract_method = extract_method,read_only = read_only_shadow_values)$df
     
     #correct if higher than highest possible shadow angle
-    print(shadow_angle_raw)
     shadow_angle <- highest_shadow_angle(aws_name = aws_name, sensor_name = temperature_sensor_name, x = azimuths[a], shadow_angle_raw = shadow_angle_raw[1,"shadow_angle_raw"])
     shadows <-cbind(shadow_angle_raw, shadow_angle)
     
@@ -227,7 +226,12 @@ multipleShadowAngles <- function(aws.df = AWS.df, solar_angles, radius, AHN3 = F
 
 multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", solar_angles = TRUE, angle_selection_byIndexNr = "all", calculate_shadow_angles = TRUE, years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, radius, AHN3 = FALSE, sensor_height = 0, read_only_shadow_values = FALSE, extract_method = 'bilinear', full_circle_mask = FALSE, printChart = FALSE, exportCSV = FALSE, test = FALSE){
   start_time <- Sys.time()
-  ahn2_analysed <- c()#"De Bilt", "Arcen", "Rotterdam", "Vlissingen", "Voorschoten")#c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijk aan zee", "Voorschoten", "Berkhout", "Cabauw mast", "De Kooy", "Deelen")
+  
+  if(AHN3 == TRUE){
+    aws_list <- AWS_temperature_ahn3Only_names
+  }
+  
+  ahn2_analysed <- c("Rotterdam","Vlissingen", "Voorschoten", "Wijk aan zee")#"De Bilt", "Arcen", "Rotterdam", "Vlissingen", "Voorschoten")#c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijk aan zee", "Voorschoten", "Berkhout", "Cabauw mast", "De Kooy", "Deelen")
   ahn3_analysed <- c()#c("De Bilt", "Schiphol")#"Rotterdam", "Vlissingen", "Wijk aan zee", "Voorschoten")
   for(a in 1:length(aws_list)){
     single_aws.df <- dplyr::filter(aws.df, AWS == aws_list[a] & Sensor == sensor_name)
@@ -290,10 +294,10 @@ multipleSolar_shadow_angles <- function(aws.df = AWS.df, aws_list, sensor_name, 
 }
 
 multipleSolar_shadow_angles(aws.df = AWS.df,
-                            aws_list = AWS_temperature_names_tmp,#c("De Bilt", "Schiphol"),
+                            aws_list = AWS_temperature_names[29:34],#c("De Bilt", "Schiphol"),
                             sensor_name = temperature_sensor_name,
                             addition = "__",
-                            solar_angles = TRUE, angle_selection_byIndexNr = c(1, 13),
+                            solar_angles = TRUE, angle_selection_byIndexNr = "all",
                             calculate_shadow_angles = TRUE,
                             sensor_height = 0,
                             read_only_shadow_values = FALSE,
@@ -307,6 +311,6 @@ multipleSolar_shadow_angles(aws.df = AWS.df,
                             radius = 100,
                             AHN3 = FALSE,
                             full_circle_mask = FALSE,
-                            printChart = TRUE,
+                            printChart = FALSE,
                             exportCSV = TRUE,
                             test = FALSE)

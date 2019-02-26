@@ -108,13 +108,23 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   get_manualValue <- function(aws_name){
     manual_class_1 <- dplyr::filter(manual_SC_values, AWS == aws_name)[1,"Manual_TC_1"]
     manual_class_R <- dplyr::filter(manual_SC_values, AWS == aws_name)[1,"Manual_TC_R"]
-    return (list("1" = manual_class_1, "R" = manual_class_R))
+    if(nchar(manual_class_R > 1)){
+      manual_class_Rl <- as.numeric(substr(manual_class_R, 1, 1))
+      manual_class_Rh <- as.numeric(substr(manual_class_R, 3, 3))
+    } else {
+      #manual_class_R <- as.numeric(manual_class_R)
+      manual_class_Rl <- as.numeric(manual_class_R)
+      manual_class_Rh <- as.numeric(manual_class_R)
+    }
+    return (list("1" = manual_class_1, "R" = manual_class_R, "Rl" = manual_class_Rl, "Rh" = manual_class_Rh))
   }
   
   #info.df <- data.frame(manual_class_1 = numeric(), manual_class_R = character(), AHN_selected = character (), extract_method = character(), sensor_height = character(), criteria_values = character())
   manual_classes <- get_manualValue(aws_name)
   manual_class_1 <- manual_classes["1"]
   manual_class_R <- manual_classes["R"]
+  manual_class_Rl <- manual_classes["Rl"]
+  manual_class_Rh <- manual_classes["Rh"]
   
   if(max_class == manual_class_1){
     exact_match <- TRUE
@@ -131,20 +141,35 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
   AHN_selected <- AHN
   extract_methodology <- extract_method
   sensor_height <- sensor_height
-  
   if(criteria_columnName == "Criteria_Value"){
     criteria_values <- "WM0 Guidelines"
   } else {
     criteria_values <- criteria_columnName
   }
   
-  info.df <- data.frame(manual_class_1, manual_class_R, exact_match, partial_match, AHN_selected, extract_methodology, sensor_height, criteria_values)
+  if(aws_name %in% AWS_temperature_ahn3Only_names == TRUE){
+    has_AHN3 <- TRUE   
+  } else {
+    has_AHN3 <- FALSE
+  }
+  
+  info.df <- data.frame(manual_class_1,
+                        manual_class_R,
+                        manual_class_Rl,
+                        manual_class_Rh,
+                        exact_match,
+                        partial_match,
+                        AHN_selected,
+                        extract_methodology,
+                        sensor_height,
+                        criteria_values,
+                        has_AHN3)
   
   #info.df <- rbind(info.df, info_entry)
   
   summary.df <- cbind(summary.df, info.df)
   #View(info.df)
-  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "Manual_class_1", "Manual_class_R", "Exact match", "Partial match", "AHN selected", "Extract method", "Sensor height", "Criteria values")
+  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "manual_class_1", "manual_class_R", "manual_class_Rl", "manual_class_Rh", "exact_match", "partial_match", "AHN_selected", "extract_method", "sensor_height", "criteria_values", "has_AHN3")
   colnames(summary.df) <- column_names
   
   #View(summary.df)
@@ -164,9 +189,11 @@ generate_classifications <- function(aws.df = AWS.df, aws_name, sensor_name, add
 create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, addition = "", criteria_columnName = "Criteria_Value", class_selection = "final_class", import_ahn = FALSE, import_bgt = FALSE, redownload_bgt = FALSE, redownload_ahn = FALSE, AHN3 = FALSE, solar_angles = FALSE, angle_selection_byIndexNr = "all", years, months, days, s_hour = 0, f_hour = 23, minutes_interval = 60, ahn_resolution = 0.5, ahn_radius = 500, bgt_radius = 150, include_shadow_angles = FALSE, calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE, extract_method = ' bilinear', shadow_radius = 300, full_circle_mask = FALSE, sensor_height = 0, vegetation_radius = 10, exportShp = FALSE, exportCSV = FALSE, printChart = FALSE, delete_ahn_sheets = TRUE, delete_bgt_gmls = TRUE, test = FALSE, summary_addition = ""){
   if(AHN3 == TRUE){
     AHN <- "AHN3"
+    aws_list <- AWS_temperature_ahn3Only_names
   } else {
     AHN <- "AHN2"
   }
+  
   if(addition != ""){
     underscore = "_"
   } else {
@@ -176,11 +203,27 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
     summary_addition <- paste0(summary_addition, "_")
   }
   
-  summary_classifcations <- data.frame(AWS = character(0), sensor_name = character(0), shades_class = numeric(0), objects_class = numeric(0), vegetation_height_class = numeric(0), final_class = numeric(0), manual_class_1 = numeric(0), manual_class_R = character(0), AHN_selected = character (0), extract_method = character(0), sensor_height = character(0), criteria_values = character(0))
-  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "Manual_class_1", "Manual_class_R", "AHN selected", "Extract method", "Sensor height", "Criteria values")
+  summary_classifcations <- data.frame(AWS = character(0),
+                                       sensor_name = character(0),
+                                       shades_class = numeric(0),
+                                       objects_class = numeric(0),
+                                       vegetation_height_class = numeric(0),
+                                       final_class = numeric(0),
+                                       manual_class_1 = numeric(0),
+                                       manual_class_R = character(0),
+                                       manual_class_Rl = numeric(0),
+                                       manual_class_Rh = numeric(0),
+                                       exact_match = logical(0),
+                                       partial_match = logical(0),
+                                       AHN_selected = character (0),
+                                       extract_method = character(0),
+                                       sensor_height = character(0),
+                                       criteria_values = character(0),
+                                       has_AHN3 = character(0))
+  column_names <- c("AWS", "Sensor", "shades_class", "objects_class", "vegetation_height_class", "final_class", "manual_class_1", "manual_class_R", "manual_class_Rl", "manual_class_Rh", "exact_match", "partial_match", "AHN_selected", "extract_method", "sensor_height", "criteria_values", "has_AHN3")
   colnames(summary_classifcations) <- column_names
   
-  ahn2_analysed <- c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijkaanzee", "Voorschoten", "Berkhout", "Cabauwmast")
+  ahn2_analysed <- c()#c("De Bilt", "Rotterdam", "Arcen", "Vlissingen", "Wijkaanzee", "Voorschoten", "Berkhout", "Cabauwmast")
   aws_classifications <- list()
   for (c in 1:length(aws_list)){
     print(" ")
@@ -205,7 +248,7 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
     print(" ")
     print("===========================")
     if(c == length(aws_list)){
-      fwrite(summary_classifcations, file = paste0("output/", summary_addition, addition, underscore, AHN, "_summary_aws_classifcations.csv"))
+      fwrite(summary_classifcations, file = paste0("output/", summary_addition, addition, underscore, AHN, "_summary_aws_classifications.csv"))
     }  
   }
   
@@ -233,16 +276,16 @@ create_temperature_SC <- function(aws.df = AWS.df, aws_list, sensor_name, additi
 }
 
 create_temperature_SC(aws.df = AWS.df,
-                      aws_list = sAWS_names, addition = "", summary_addition = "", 
+                      aws_list = AWS_temperature_names, addition = "", summary_addition = "", 
                       sensor_name = temperature_sensor_name, criteria_columnName = "Criteria_Value", class_selection = "final_class",
-                      AHN3 = FALSE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
+                      AHN3 = TRUE, import_ahn = FALSE, redownload_ahn = FALSE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
                       import_bgt = FALSE, redownload_bgt = FALSE, bgt_radius = 150, delete_bgt_gmls = TRUE,
                       solar_angles = TRUE, angle_selection_byIndexNr = c("all"),
                       years = c(2018), months = c(12, 1:6), days = c(21),
                       s_hour = 0, f_hour = 23, minutes_interval = 15,
                       include_shadow_angles = TRUE, calculate_shadow_angles = FALSE, read_only_shadow_values = FALSE,
-                      shadow_radius = 300, full_circle_mask = FALSE, extract_method = 'bilinear',
+                      shadow_radius = 100, full_circle_mask = FALSE, extract_method = 'bilinear',
                       sensor_height = 0,
                       vegetation_radius = 10,
-                      exportShp = TRUE, exportCSV = TRUE, printChart = FALSE, test = FALSE)
+                      exportShp = FALSE, exportCSV = TRUE, printChart = FALSE, test = FALSE)
 

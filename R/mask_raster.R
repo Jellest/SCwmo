@@ -1,4 +1,4 @@
-simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3, aws_name, addition = ""){
+simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3 = FALSE, aws_name, addition = ""){
   if(missing(AHN3)){
     AHN3 <- FALSE
     AHN <- "AHN2"
@@ -14,11 +14,13 @@ simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3,
   aws_mask<-raster::buffer(spatialpoint,width=radius)
   ahn_crop<-raster::crop(ahn,aws_mask)
   ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, " /Masks", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
+  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
   
   print("Masked the raster object.")
   return(ahn_mask)
 }
+aws_deBilt <- select_single_aws(,"De Bilt", temperature_sensor_name)
+simple_mask_raster(aws.df = AWS.df, aws_deBilt[["aws_rd.sp"]], ahn = raster("data/AHN3/DeBilt/raw/DeBilt_AHN3_raw_ahn.tif"), radius = 500, AHN3 = TRUE, aws_name = "De Bilt", addition = "")
 
 mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", ahn_raster, AHN3, azimuth, radius){
   if(missing(aws_name)){
