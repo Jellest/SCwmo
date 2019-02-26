@@ -2,7 +2,7 @@
 start <- function(settings){
   hd <- function(settings){
     # make sure home directory is directry that includes  R folder and the data foder.
-    home_directories <- c("/nobackup/users/stuurman","C:/Users/Jelle/Dropbox/KNMI/R_SPQJ")
+    home_directories <- c("/nobackup/users/stuurman","C:/Users/Jelle/Dropbox/KNMI/R_SPQJ", "C:/Users/3691233/Dropbox/KNMI/R_SPQJ")
     home_directory <<- home_directories[settings]
     setwd(home_directory)
     print(paste("setup_settings:", settings, sep="  "))
@@ -29,6 +29,8 @@ start <- function(settings){
     library(xtable)
     library(htmlwidgets)
     library(htmltools)
+    library(tmap)
+    library(rasterVis)
   }
   hd(settings)
   libs()
@@ -42,7 +44,9 @@ start <- function(settings){
   
   AWS_temperature_list.df <<-dplyr::filter(AWS.df, Sensor == temperature_sensor_name)
   AWS_temperature_names <<- as.character(unlist(select(AWS_temperature_list.df, AWS)))
-  AWS_temperature_ahn3Only_names <<- setdiff(AWS_temperature_names, c("Maastricht", "Ell", "Arcen", "Hupsel", "Twenthe", "Nieuw Beerta", "Eelde", "Deelen"))
+  
+  AWS_temperature_ahn3Only_names <<- setdiff(AWS_temperature_names, c("Maastricht AP", "Ell", "Arcen", "Hupsel", "Twenthe", "Nieuw Beerta", "Eelde", "Deelen"))
+  AWS_temperature_ahn2Only_names <<- setdiff(AWS_temperature_names, AWS_temperature_ahn3Only_names)
   
   sAWS_names <<- c("De Bilt", "Arcen", "Rotterdam","Vlissingen", "Voorschoten", "Wijk aan zee")
   sAWS_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWS_names)
@@ -50,8 +54,8 @@ start <- function(settings){
   sAWSahn3_names <<- c("De Bilt", "Rotterdam", "Vlissingen", "Voorschoten", "Wijk aan zee")
   sAWSahn3_list.df <<- dplyr::filter(AWS.df, AWS %in% sAWSahn3_names & Sensor == temperature_sensor_name)
   
-  AWS_temperature_names_tmp <<- append(sAWS_names, AWS_temperature_names)
-  AWS_temperature_ahn3Only_names_tmp <<- append(sAWSahn3_names, AWS_temperature_ahn3Only_names)
+  #AWS_temperature_names_tmp <<- append(sAWS_names, AWS_temperature_names)
+  #AWS_temperature_ahn3Only_names_tmp <<- append(sAWSahn3_names, AWS_temperature_ahn3Only_names)
   
   
   
@@ -209,4 +213,4 @@ start <- function(settings){
 
 #installl Perl
 #installXLSXsupport()
-# install.packages(c("horizon", "raster", "rgeos", "gdalUtils", "gdata", "sp", "sf", "lubridate", "insol", "ggplot2", "leaflet", "mapview", "devtools", "data.table", "dplyr", "htmlwidgets", "htmltools"), dependencies = TRUE )
+install.packages(c("horizon", "raster", "rgeos", "gdalUtils", "gdata", "sp", "sf", "lubridate", "insol", "ggplot2", "leaflet", "mapview", "devtools", "data.table", "dplyr", "htmlwidgets", "htmltools", "rasterVis", "xtable"), dependencies = TRUE )
