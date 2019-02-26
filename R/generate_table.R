@@ -34,3 +34,11 @@ generate_table(aws_name = "De Bilt",
                AHN3 = FALSE
                )
 
+f_s <- fread("output/all_shades_distribution.csv", data.table = FALSE)
+
+g <- select(f_s, AWS, total_count, notClass1_count, class1_count, class2_count, class3_count, class4_count, class5_count)
+
+print.xtable(xtable(g),
+             type = getOption("xtable.type", "latex"),
+             include.rownames = getOption("xtable.include.rownames", FALSE),
+             booktabs = getOption("xtable.booktabs", TRUE))

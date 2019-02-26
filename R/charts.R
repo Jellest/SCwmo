@@ -47,7 +47,7 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
   if((solar_angles == TRUE & shadow_angles == TRUE) | data_exists == TRUE){
     #add shadow chart, layout, axes and labels
     chart <- ggplot(data, aes(x=azimuth, y=shadow_angle)) + geom_area() +
-      ggtitle(paste("Sun and shadow chart for", aws_name_trim)) +
+      #ggtitle(paste("Sun and shadow chart for", aws_name_trim)) +
       #labs(fill = "Your Title") +
       #labs(x = "azimuth (degrees)", y = "elevation (degrees)") +
       #xlim(48,312) +
@@ -103,12 +103,131 @@ sun_shade_angles_chart <- function(aws.df = AWS.df, data_path, aws_name,  additi
     
     if(aws_name != ""){
       ggsave(paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_", extract_method, "_solar_shadow_chart.png"))
+      #ggsave("test.png")
     } else {
-      ggsave(paste0("output/solar_shadow_angles/", AHN, "_", extract_method, "_solar_shadow_chart.png"))
+      #ggsave(paste0("output/solar_shadow_angles/", AHN, "_", extract_method, "_solar_shadow_chart.png"))
+      #ggsave("test.png")
     }
     
     return(chart)
   }
 }
 
-plot(sun_shade_angles_chart(data_path = "output/Schiphol___/solar_shadow_angles/Schiphol____AHN3_ah_solar_shadow_angles.csv", aws_name = "Schiphol", addition = "__",AHN3 = FALSE, extract_method = 'bilinear'))
+plot(sun_shade_angles_chart(data_path = "DeBilt_AHN3_ah_solar_shadow_angles.csv", aws_name = "De Bilt", addition = "", AHN3 = TRUE, extract_method = 'bilinear'))
+
+
+
+class_differences <- function(data_path){
+  data <- fread(data_path, data.table = FALSE)
+
+  #rownames(data) <- AWS_temperature_names
+  #selected_data <- select(data, AWS, AHN_selected, exact_match, partial_match, automated_class_is, class_difference)
+  #View(selected_data)
+  colnames(data) <- c("Difference", "Count")
+  #View(data)
+  #mycols <- c("#cb181d", "#fee0d2", "#fcae91", "#fb6a4a", "#238b45")
+  
+  data <- data.frame(c(-3, -2, -1, 0, 1, 2, 3),c("-3", "-2", "-1", "0", "1", "2", "3"), c(0,1,0,19,4,5,5))
+  colnames(data) <- c("Difference", "Difference_str", "Count")
+  bar <- ggplot(data, aes(x = Difference_str, y = Count)) +
+    geom_bar(stat="identity", width = 0.8, fill="#6C8EBF") +
+    #coord_polar(theta = "y", start = 0) +
+    #scale_fill_manual(values = mycols) +
+
+    ylim(0,20) +
+    xlab("Class Difference") +
+    ylab("Number of AWS sites") +
+    #scale_x_discrete(labels = unlist(data$Difference_str)) +
+    #xlim(-3,3) +
+    theme(axis.text.x = element_text(face = "bold", size=12),
+         axis.text.y = element_text(face = "bold", size=12),
+         axis.title.x = element_text(colour = "#6C8EBF", face = "bold", size =14),
+         axis.title.y = element_text(colour = "#6C8EBF", face = "bold", size =14),
+         panel.grid.major.y = element_line(size = 1, colour="#DAE8FC"),
+         panel.grid.minor.y = element_line(colour="#DAE8FC"),
+         panel.grid.major.x = element_blank(),
+         panel.grid.minor.x = element_blank(),
+         panel.border = element_blank())
+    #geom_text(aes(y = lab.ypos, label = ), color = "white") +
+  #scale_fill_brewer(palette = "Reds")
+  bar
+  ggsave("class_differences.png", plot = last_plot())
+  ggsave(filename = "C:/Users/3691233/Dropbox/Apps/ShareLaTeX/Automated Temperature SC  MSc Thesis/Figures/Results/class_differences.png", plot = last_plot())
+  
+}
+
+class_differences(data_path = "output/class_differences.csv")
+
+OverviewClasses <- function(){
+  # class_count <- fread("output/class_counts.csv", data.table = FALSE)[,1:3]
+  #  rownames(class_count) <- c("class 1 count" ,
+  #                           "class 2 count",
+  #                             "class 3 count",
+  #                             "class 4 count",
+  #                             "class 5 count",
+  #                             "shades count",
+  #                             "objects count",
+  #                           "shadesObjects count")
+  #  class_count <- cbind(c("Class 1" ,
+  #                         "Class 2",
+  #                         "Class 3",
+  #                         "Class 4",
+  #                         "Class 5",
+  #                         "shades count",
+  #                         "objects count",
+  #                       "sh  adesObjects count"), class_count)
+  # colnames(class_count) <- c("Class", "SC Class", "Count", "Relative", "Total", "Both", "Shades", "Heat_sources", "Vegetation")
+  # 
+  # class_count <- class_count[1:5,]
+  # 
+  # View(class_count)
+  # 
+  # shades_distr <- fread("output/all_shades_distribution.csv", data.table = FALSE)
+  # rownames(shades_distr) <- AWS_temperature_names
+  # View(shades_distr)
+  # 
+  # theme_set(theme_bw())
+  # my_plot <- ggplot(class_count, aes(x=Class, y=Count)) + 
+  #   geom_bar(stat="identity", width=.8, fill="#6C8EBF") + 
+  #   #labs(title="Overview ASC SC Class values", 
+  #        #subtitle="All 34 AWS") + 
+  #   ylim(0,25) +
+  #   xlab("Final SC") + ylab("Number of AWS sites") +
+  #   theme(axis.text.x = element_text(face = "bold", size=12),
+  #         axis.text.y = element_text(face = "bold", size=12),
+  #         axis.title.x = element_text(colour = "#6C8EBF", face = "bold", size =14),
+  #         axis.title.y = element_text(colour = "#6C8EBF", face = "bold", size =14),
+  #         panel.grid.major.y = element_line(size = 1, colour="#DAE8FC"),
+  #         panel.grid.minor.y = element_line(colour="#DAE8FC"),
+  #         panel.grid.major.x = element_blank(),
+  #         panel.border = element_blank())
+  # 
+  # 
+  # 
+  data <- fread("output/class_counts_ext.csv", data.table = FALSE)[,1:3]
+  #View(data)
+  specific_plot <- ggplot(data, aes(factor(SC_Class), Count, fill = factor(Criteria, levels = c("total", "shadow & heat sources", "shadow", "heat sources", "vegetation height")))) +
+    geom_bar(stat = "identity", position = position_dodge(width = 1)) +
+    #ggtitle("Default color comparison") +
+    scale_fill_manual(values = c("#6C8EBF", "red", "#74767a", "orange","purple")) +
+    labs(fill = "") +
+    ylim(0,25) +
+    xlab("Final SC") + ylab("Number of AWS sites") +
+    theme(legend.position = c(1,1), legend.justification = c(1,1),
+          axis.text.x = element_text(face = "bold", size=14),
+          axis.text.y = element_text(face = "bold", size=14),
+          axis.title.x = element_text(colour = "#6C8EBF", face = "bold", size =16),
+          axis.title.y = element_text(colour = "#6C8EBF", face = "bold", size =16),
+          panel.grid.major.y = element_line(size = 1, colour="#DAE8FC"),
+          panel.grid.minor.y = element_line(colour="#DAE8FC"),
+          panel.grid.major.x = element_blank(),
+          panel.border = element_blank(),
+          legend.text = element_text(size=12, face="bold"))
+  
+  specific_plot
+  ggsave(filename = "overviewClasses.png", plot = last_plot())
+  ggsave(filename = "C:/Users/3691233/Dropbox/Apps/ShareLaTeX/Automated Temperature SC  MSc Thesis/Figures/Results/overviewClasses.png", plot = last_plot())
+}
+
+OverviewClasses()
+
