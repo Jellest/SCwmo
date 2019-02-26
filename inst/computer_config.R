@@ -38,7 +38,7 @@ start <- function(settings){
   #global variables
   AWS.df<<-fread("data/coordinates/AWS_coordinates.csv", data.table = FALSE)
   manual_SC_values <<- fread("data/classifcations/manual_classification_values.csv", data.table = FALSE) 
-  guideline_criteria <<- fread("wmoSC/data-raw/guideline_criteria.csv", data.table = FALSE)
+  guideline_criteria <<- fread("data/wmo_guidelines/guideline_criteria.csv", data.table = FALSE)
   epsg_rd <<- "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.4171,50.3319,465.5524,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
   temperature_sensor_name <<- "temp_150cm"
   
