@@ -58,7 +58,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     minZoom = 4, maxZoom = 20
     )) %>%
     setView(single_aws[1,"LON"], single_aws[1,"LAT"], zoom = zoom) %>%
-    addTiles(luchtfoto, attribution = "KNMI, Kadaster, PDOK, 2018") %>%
+    addTiles(luchtfoto, attribution = "KNMI, PDOK, 2018") %>%
     addScaleBar(position = "bottomright", options = scaleBarOptions(maxWidth = 100, metric = TRUE, imperial = FALSE, updateWhenIdle = TRUE)) %>%
     # addMeasure(
     #   position = "bottomleft",
@@ -79,6 +79,7 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
       , options = WMSTileOptions(format = "image/png", transparent = FALSE)
       , group = "AHN3"
     )
+    #%>%
     #addControl(title, position = "bottomleft", className="map-title")
   
     # addWMSTiles(
@@ -96,44 +97,39 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
     # )
   
   ## Add Land use (BGT)
+
   if(circles == TRUE){  
     overlays <- append(overlays, c("Land use (BGT)", "Circle areas"))
-    #my_bgt <- st_read(dsn = paste0("data/BGT/", aws_name_trim, "/BGT_", aws_name_trim, ".shp"))
-    my_bgt <- st_read(dsn = paste0("output/DeBilt/land_use/DeBilt_100m_buffer.shp"))
+    my_bgt <- st_read(dsn = paste0("data/BGT/", aws_name_trim, "/BGT_", aws_name_trim, ".shp"))
+    #my_bgt <- st_read(dsn = "output/DeBilt/land_use/DeBilt_100m_buffer_data.shp") 
     
     bgt <- st_transform(my_bgt, epsg_rd)
     my_bgt_wgs <- st_transform(bgt, "+init=epsg:4326")
     
+    my_bgt_wgs <- subset(my_bgt_wgs, object == "vegetation" | object == "road")
+    
     fillColours <- as.character(my_bgt_wgs$hexColour)
-    print(fillColours)
     bgt_objects <- as.character(my_bgt_wgs$object)
     bgt_objects <- unique(bgt_objects)
     bgt_colours <- unique(fillColours)
-    print(bgt_objects)
-    print(bgt_colours)
+    
     id <- 1:nrow(my_bgt_wgs)
     bgt_counter <- 1
     for(i in id){
       map <- addPolygons(map, data = my_bgt_wgs[id[bgt_counter],], smoothFactor = 0.5,
                          opacity = 1.0, color = 'black', weight = 0.4,
-                         fillColor = fillColours[id[bgt_counter]], fillOpacity = .8, 
+                         fillColor = fillColours[id[bgt_counter]], fillOpacity = 0.7, 
                          group = "Land use (BGT)"
                          )
       bgt_counter <- bgt_counter + 1
     }
   }
-  map <- addCircleMarkers(map, data = single_aws[1,], lng = single_aws[1,"LON"], lat = single_aws[1,"LAT"],
-                           radius = 5,  stroke = TRUE, color = "black", weight = 2.0,
-                           fillColor = "#e9ff00", fillOpacity = 1.0,
-                           group = "AWS")
-  
   #add height difference raster
   if(vegetation == TRUE){
     overlays <- append(overlays, "Vegetation height")
     pal <- colorNumeric(c("#e5f5f9", "#99d8c9", "#2ca25f"), values(vegetation_height_raster), na.color = "transparent")
     map <- addRasterImage(map, vegetation_height_raster, colors = pal, opacity = 0.8, group = "Vegetation height")
   }
-  circles <- FALSE
   if(circles == TRUE){
     #add circles
     for (b in 1:length(buffers)){
@@ -146,26 +142,31 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
                         group = "Circle areas")
     }
   }
-
+  map <- addCircleMarkers(map, data = single_aws[1,], lng = single_aws[1,"LON"], lat = single_aws[1,"LAT"],
+                          radius = 5,  stroke = TRUE, color = "black", weight = 2.0,
+                          fillColor = "#e9ff00", fillOpacity = 1.0,
+                          group = "AWS") 
+  
+  
+  
   if(circles == TRUE) {
     aws_label <- paste0(aws_name)#, " (land use class ", class,")")
   } else {
     aws_label <- paste0(aws_name)
   }
-  
   #add legend and control
   map <- addLegend(map, position = "topright", values = aws_name, color = "#e9ff00", labels = aws_label,
               title = "Air temperature sensor", group = "AWS")
-  #if(circles == TRUE){
+  if(circles == TRUE){
     map <- addLegend(map, position = "topright",
                     values = bgt_objects, colors = bgt_colours, labels = bgt_objects,
                     title = "Land use", group = "Land use (BGT)")
- #}
+  }
   if(vegetation == TRUE){
     map <- addLegend(map, position = "topright", values = values(vegetation_height_raster), pal = pal,
                 title = "Detected heigt (m)", group = "Vegetation height")
   }
-
+  
   map <- addLayersControl(map,
     position = "topleft",
     baseGroups = c("Satellite"),
@@ -179,16 +180,20 @@ map_rd <- function(aws_name, sensor_name, addition = "", buffers, vegetation_hei
 
 vegetation_map <- map_rd(aws_name = "De Bilt",
        sensor_name = temperature_sensor_name,
-       zoom = 18,
+       zoom = 13,
        #buffers = c(30, 10),
-       #vegetation_height_raster = TRUE,
-       #vegetation_radius = 10,
+       #vegetation_height_raster = FALSE,
+       vegetation_radius = 10,
        AHN3 = TRUE)
 
 vegetation_map
 
-mapshot(vegetation_map, file = "Wijkaanzee_BGT.png", url = NULL, remove_url = TRUE, remove_controls = c("zoomControl", "layersControl", "homeButton"))
-mapshot(vegetation_map, file = "bgt_results_circles_map.png", url = NULL, remove_url = TRUE, remove_controls = c("zoomControl", "layersControl", "homeButton"))
+mapshot(vegetation_map, file = "greaterArea_DeBilt.png", url = NULL, remove_url = TRUE, remove_controls = c("zoomControl", "layersControl", "homeButton"))
+
+
+mapshot(vegetation_map, file = "bgt_intersect_map.png", url = NULL, remove_url = TRUE, remove_controls = c("zoomControl", "layersControl", "homeButton"))
+
+
 ras <- raster(paste0("output/DeBilt/vegetation_height/DeBilt_AHN3_10m_height_difference.tif"))
 breaks <- c(0,0.1,0.4,0.6)
 pal <- colorNumeric(c("#e5f5f9", "#99d8c9", "#2ca25f"), values(ras), na.color = "transparent")
