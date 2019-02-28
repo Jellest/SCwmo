@@ -325,8 +325,8 @@ dr <- function(){
 dr()
 
 hs_stats <- function(){
-  hs_stats <- data.frame(AWS = as.character(), highest_noMeet_class = as.numeric(), inner_circle = as.character(), annulus = as.character(), outer_circle = as.character(), relArea_HS_innerCircle = as.numeric(), relArea_HS_annulus = as.numeric(), relArea_HS_outerCircle = as.numeric(), stringsAsFactors = FALSE)
-  colnames(hs_stats) <- c("AWS", "Highest Class not met", "Inner Cirlcle radius", "%area inner Circle", "Annulus", "%area annlus", "Outer circle radius","%area outer Circle")
+  hs_stats <- data.frame(AWS = as.character(), final_class = as.numeric(), class = as.numeric(), inner_circle = as.character(), annulus = as.character(), outer_circle = as.character(), relArea_HS_innerCircle = as.numeric(), relArea_HS_annulus = as.numeric(), relArea_HS_outerCircle = as.numeric(), stringsAsFactors = FALSE)
+  colnames(hs_stats) <- c("AWS", "Final Class", "Class", "Inner Cirlcle radius", "%area inner Circle", "Annulus", "%area annlus", "Outer circle radius","%area outer Circle")
   for (aws in AWS_temperature_names){
     #print(a2)
     aws_name_trim <- getAWS_name_trim(aws_name = aws)
@@ -339,55 +339,88 @@ hs_stats <- function(){
     } else {
       highest_noMeet_class <- final_class -1
     }
-    getHSvalues <- function(class, aws){
+    getHSvalues <- function(stats, class, aws, has_data){
+      print(aws)
       if(class == 1){
         outer_circle <- "100 m"
         inner_circle <- "10 m"
         annulus_area <- "10-30 m"
-        relArea_HS_outerCircle <- single_hs_stats[,"relAreaBuffer_100m"]
-        relArea_HS_innerCircle <- single_hs_stats[,"relAreaBuffer_10m"]
-        relArea_HS_annulus <- single_hs_stats[,"relAreaRegion_10_30m"]
+        if(has_data == TRUE){
+          relArea_HS_outerCircle <- stats[,"relAreaBuffer_100m"]
+          relArea_HS_innerCircle <- stats[,"relAreaBuffer_10m"]
+          relArea_HS_annulus <- stats[,"relAreaRegion_10_30m"]
+        } else {
+          relArea_HS_outerCircle <- NA
+          relArea_HS_innerCircle <- NA
+          relArea_HS_annulus <- NA
+        }
       } else if(class == 2){
         outer_circle <- "30 m"
         inner_circle <- "5 m"
         annulus_area <- "5-10 m"
-        relArea_HS_outerCircle <- single_hs_stats[,"relAreaBuffer_30m"]
-        relArea_HS_innerCircle <- single_hs_stats[,"relAreaBuffer_5m"]
-        relArea_HS_annulus <- single_hs_stats[,"relAreaRegion_5_10m"]
+        if(has_data == TRUE){
+          relArea_HS_outerCircle <- stats[,"relAreaBuffer_30m"]
+          relArea_HS_innerCircle <- stats[,"relAreaBuffer_5m"]
+          relArea_HS_annulus <- stats[,"relAreaRegion_5_10m"]
+        } else {
+          relArea_HS_outerCircle <- NA
+          relArea_HS_innerCircle <- NA
+          relArea_HS_annulus <- NA
+        }
       } else if(class == 3){
         outer_circle <- "10 m"
         inner_circle <- "5 m"
         annulus_area <- "NA"
-        relArea_HS_outerCircle <- single_hs_stats[,"relAreaBuffer_10m"]
-        relArea_HS_innerCircle <- single_hs_stats[,"relAreaBuffer_5m"]
-        relArea_HS_annulus <- NA
+        if(has_data == TRUE){
+          relArea_HS_outerCircle <- stats[,"relAreaBuffer_10m"]
+          relArea_HS_innerCircle <- stats[,"relAreaBuffer_5m"]
+          relArea_HS_annulus <- NA
+        } else {
+          relArea_HS_outerCircle <- NA
+          relArea_HS_innerCircle <- NA
+          relArea_HS_annulus <- NA
+        }
       } else if(class == 4){
         outer_circle <- "10 m"
         inner_circle <- "3 m"
         annulus_area <- "NA"
-        relArea_HS_outerCircle <- single_hs_stats[,"relAreaBuffer_10m"]
-        relArea_HS_innerCircle <- single_hs_stats[,"relAreaBuffer_3m"]
-        relArea_HS_annulus <- NA
+        if(has_data == TRUE){
+          relArea_HS_outerCircle <- stats[,"relAreaBuffer_10m"]
+          relArea_HS_innerCircle <- stats[,"relAreaBuffer_3m"]
+          relArea_HS_annulus <- NA
+        } else {
+          relArea_HS_outerCircle <- NA
+          relArea_HS_innerCircle <- NA
+          relArea_HS_annulus <- NA
+        }
       }
-      input.df <- data.frame(aws, class, inner_circle, relArea_HS_innerCircle, annulus_area, relArea_HS_annulus, outer_circle, relArea_HS_outerCircle)
-      colnames(input.df) <- c("AWS", "Highest Class not met", "Inner Cirlcle radius", "%area inner Circle", "Annulus", "%area annlus", "Outer circle radius","%area outer Circle")
+      input.df <- data.frame(aws, final_class, class, inner_circle, relArea_HS_innerCircle, annulus_area, relArea_HS_annulus, outer_circle, relArea_HS_outerCircle)
+      colnames(input.df) <- c("AWS", "Final Class", "Class", "Inner Cirlcle radius", "%area inner Circle", "Annulus", "%area annlus", "Outer circle radius","%area outer Circle")
       rownames(input.df) <- aws
       
     return(input.df)}
-    
-    for(cl in 1:final_class){
-      hs_values <- getHSvalues(cl, aws)
+    print(final_class)
+    if(final_class == 5){
+      max_class <- 4
+    } else {
+      max_class <- final_class
+    }
+    for(cl in 1:max_class){
+      print(paste(cl, "funct"))
+      hs_values <- getHSvalues(stats = single_hs_stats, class = cl, aws = aws, has_data = TRUE)
       hs_stats <- rbind(hs_stats, hs_values)
     }
-    if(final_class != 4){
-      for(ncl in final_class:4){
-        hs_remaining_values <- getHSvalues(cl, aws)
+    remaining_classes <- final_class + 1
+    if(final_class != 4 & final_class != 5){
+      for(ncl in remaining_classes:4){
+        print(paste(cl, "no funct"))
+        hs_remaining_values <- getHSvalues(stats = single_hs_stats, class = ncl, aws = aws, has_data = FALSE)
         hs_stats <- rbind(hs_stats, hs_remaining_values) 
       }
     }
   }
   hs_stats <- hs_stats[order(rownames(hs_stats)),]
-  fwrite(hs_stats, "output/all_hs_distribution.csv")
+  fwrite(hs_stats, "output_figures/all_hs_distribution.csv")
   #View(hs_stats)
   return(hs_stats)}
 
