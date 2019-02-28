@@ -47,7 +47,7 @@ temp <- function(){
   data <- fread("output/class_counts_ext.csv", data.table = FALSE)[,1:3]
   #View(data)
   specific_plot <- ggplot(data, aes(factor(SC_Class), Count, fill = factor(Criteria, levels = c("total", "shadow & heat sources", "shadow", "heat sources", "vegetation height")))) +
-    geom_bar(stat = "identity", position = position_dodge(width = 1))) +
+    geom_bar(stat = "identity", position = position_dodge(width = 1)) +
     ggtitle("Default color comparison") +
     scale_fill_manual(values = c("#6C8EBF", "red", "gray", "yellow","purple")) +
     ylim(0,25) +
@@ -65,5 +65,3 @@ temp <- function(){
 }
 
 temp()
-
-results <- fread()

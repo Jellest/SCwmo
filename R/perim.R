@@ -30,7 +30,6 @@ aws_perim <- function(){
   
   cuts=c(7,8,9,10)
   pal <- colorRampPalette(c("yellow","red"))
-  
   #plot(ahn3_Vlissingen, breaks=cuts, col = pal(5), xlim=c(30455,30475), ylim=c(385080,385140))
   
   stack <- stack(ahn2_Vlissingen, ahn3_Vlissingen)
@@ -57,7 +56,7 @@ aws_perim_lp <- function(){
   ahn3_Vlissingen <- raster("output/Vlissingen/solar_shadow_angles/rasters/aws_AHN3_Vlissingen.tif")
   
   pal <- colorRampPalette(c("yellow","red"))
-
+  pal2<- colorRampPalette(c("#ffffb2","#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"))
   stack <- stack(ahn2_Vlissingen, ahn3_Vlissingen)
   levelplot(stack, 
             margin=FALSE,                       
@@ -75,7 +74,7 @@ aws_perim_lp <- function(){
             ),
             scales=list(draw=FALSE),            
             region=TRUE,
-            col.regions=pal,                   
+            col.regions=pal2,                   
             at=seq(7, 10, len=100),
             #names.attr=c('', ''),
             #names.attr=c("AHN2 (2007)", "AHN3 (2014)"),
@@ -87,7 +86,6 @@ aws_perim_lp <- function(){
 aws_rasters <- aws_perim_lp()
 aws_perim_lp()
 png(filename = "aws_rasters.png")
-
 
 ahn_diff_lp <- function(){
   ahn2_Rotterdam <- raster("data/AHN2/Rotterdam/raw/Rotterdam_AHN2_raw_ahn.tif")
