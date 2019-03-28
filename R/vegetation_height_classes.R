@@ -1,9 +1,24 @@
-vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Criteria_Value", aws_name, addition = "", AHN3 = FALSE, exportCSV = FALSE){
-  if(missing(aws_name)){
-    aws_name <- ""
-    aws_name_trim <- ""
+#'vegetation height classes
+#'
+#'@title vegetation height Classes
+#'@description Determine vegetation height classes
+#'@param df summary statistics dataframe. Must include the column Median.
+#'@param spatialpoint single sf point in RD new coordinates
+#'@param AHN3 Default TRUE. Set to FALSE if AHN2 needs to be used.
+#'@author Jelle Stuurman
+#'@return dataframe with Class value for the vegetation criteria
+#' \enumerate{
+#'   \item height_raster: Height raster determined by subtracting the terrain from the raw AHN raster
+#'   \item df: summary statistics of results
+#'   \item raw_mask: mask raster of raw AHN
+#'   \item terrain_mask: mask raster of terrain AHN
+#' }
+vegetation_classes <- function (df, criteria_columnName = "Criteria_Value", name, name.supplement = "", AHN3 = FALSE, exportCSV = FALSE){
+  if(missing(name)){
+    name <- ""
+    name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
+    name_trim <- getName_trim(name = name, name.supplement = name.supplement)
   }
   
   if(AHN3 == TRUE){
@@ -15,19 +30,19 @@ vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Crit
   vhc <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "vegetation height")
   vhc <- check_criteria(df = vhc, criteria_columnName = criteria_columnName)
   
-  class_1_filter <-  filter(vhc, Class == "1")
+  class_1_filter <-  dplyr::filter(vhc, Class == "1")
   class_1_cv <- as.numeric(class_1_filter[,criteria_columnName][1])
   
-  class_2_filter <-  filter(vhc, Class == "2")
+  class_2_filter <-  dplyr::filter(vhc, Class == "2")
   class_2_cv <- as.numeric(class_2_filter[,criteria_columnName][1])
   
-  class_3_filter <-  filter(vhc, Class == "3")
+  class_3_filter <-  dplyr::filter(vhc, Class == "3")
   class_3_cv <- as.numeric(class_3_filter[,criteria_columnName][1])
   
-  class_4_filter <-  filter(vhc, Class == "4")
+  class_4_filter <-  dplyr::filter(vhc, Class == "4")
   class_4_cv <- as.numeric(class_4_filter[,criteria_columnName][1])
   
-  class_5_filter <-  filter(vhc, Class == "5")
+  class_5_filter <-  dplyr::filter(vhc, Class == "5")
   class_5_cv <- as.numeric(class_5_filter[,criteria_columnName][1])
   
   if(df[1,"Median"] < class_1_cv){
@@ -78,22 +93,22 @@ vegetation_classes <- function (aws.df = AWS.df, df, criteria_columnName = "Crit
   
 
   if(exportCSV == TRUE){
-    if(aws_name_trim == ""){
-      dir.create("output/vegetation_height", showWarnings = FALSE)
+    if(name_trim == ""){
+      base::dir.create("output/vegetation_height", showWarnings = FALSE)
     }
     
-    if(!dir.exists(paste0("output/", aws_name_trim))){
-      dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
+    if(!dir.exists(paste0("output/", name_trim))){
+      base::dir.create(paste0("output/", name_trim), showWarnings = FALSE)
     }
-    if(!dir.exists(paste0("output/", aws_name_trim,"/vegetation_height"))){
-      dir.create(paste0("output/", aws_name_trim, "/vegetation_height"), showWarnings = FALSE)
+    if(!dir.exists(paste0("output/", name_trim,"/vegetation_height"))){
+      base::dir.create(paste0("output/", name_trim, "/vegetation_height"), showWarnings = FALSE)
     }
 
     
-    if(aws_name != ""){
-      fwrite(df, paste0("output/", aws_name_trim, "/vegetation_height/", aws_name_trim, "_", AHN, "_vegetation_height_classes.csv"))
+    if(name != ""){
+      data.table::fwrite(df, paste0("output/", name_trim, "/vegetation_height/", name_trim, "_", AHN, "_vegetation_height_classes.csv"))
     } else {
-      fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
+      data.table::fwrite(df, "output/vegetation_height/", AHN, "_vegetation_height_classes.csv")
     }
   }
   message(paste0("Vegetation height passed criteria for class ", df[1,"final_class"], "."))

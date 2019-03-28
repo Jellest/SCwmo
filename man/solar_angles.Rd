@@ -4,30 +4,34 @@
 \alias{solar_angles}
 \title{solar angles}
 \usage{
-solar_angles(lat = 54.32556, lon = 2.935833, elv = 42.7, jd = 3)
+solar_angles(spatialpoint, AWS = FALSE, day, month, year, s_hour, f_hour,
+  minutes.interval = 60)
 }
 \arguments{
-\item{lat}{latitude of the station in WGS84}
+\item{spatialpoint}{single sf point.}
 
-\item{lon}{longitude}
+\item{day}{vector list. Days of the month to determine solar angles.}
 
-\item{elv}{elevation}
+\item{month}{numerical vector list. Numerical months of the year to determine solar angles.}
 
-\item{jd}{julian day}
+\item{year}{vector list. years to determine solar angles}
+
+\item{s_hour}{Numeric. start hour to determine solar angles. dEFULT 0}
+
+\item{f_hour}{Numeric. finish hour to determine solar angles. Default 23.}
+
+\item{minutes.interval}{default 60. numerical minutes interval}
+
+\item{LONLAT}{Logic. Dfeault FALSE. Set to TRUE if spatialpoint is in WGS84}
 }
 \value{
-dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,...
+dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,... This includes all
 }
 \description{
-iets over wat de functie doet
+Determine solarangles at the selected point for the determined year(s), moth(s) day(s) for the selected time interval.
 }
 \details{
-Calculating the solar angles for AWS locations
-}
-\examples{
-
-data(AWS.df)
-solar_angles(jd=seq(1,20,by=0.1)) #for the first 20 days with an accuracy of approximately 2.5 hours
+Calculating the solar angles at locations
 }
 \author{
 Jelle Stuurman

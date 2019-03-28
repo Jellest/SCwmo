@@ -1,83 +1,73 @@
-simple_mask_raster <- function(aws.df = AWS.df, spatialpoint, ahn, radius, AHN3 = FALSE, aws_name, addition = ""){
-  if(missing(AHN3)){
-    AHN3 <- FALSE
-    AHN <- "AHN2"
-  }
-  if(AHN3 == TRUE){
-    AHN <- "AHN3"
-  } else{
-    AHN <- "AHN2"
-  }
-  
-  print("Masking the raster object...")
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
-  aws_mask<-raster::buffer(spatialpoint,width=radius)
-  ahn_crop<-raster::crop(ahn,aws_mask)
-  ahn_mask<-raster::mask(ahn_crop,aws_mask)
-  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim,  "_", AHN, "_circleMask_.tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
-  
-  print("Masked the raster object.")
-  return(ahn_mask)
-}
-aws_deBilt <- select_single_aws(,"De Bilt", temperature_sensor_name)
-simple_mask_raster(aws.df = AWS.df, aws_deBilt[["aws_rd.sp"]], ahn = raster("data/AHN3/DeBilt/raw/DeBilt_AHN3_raw_ahn.tif"), radius = 500, AHN3 = TRUE, aws_name = "De Bilt", addition = "")
-
-mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", ahn_raster, AHN3, azimuth, radius){
-  if(missing(aws_name)){
-    aws_name <- ""
-    aws_name_trim <- ""
+#'@title mask raster
+#'@description section mask of raster
+#'@param spatialpoint single sf point in RD new coordinates
+#'@param name of AWS or location
+#'@param ahn_raster AHN raster
+#'@param AHN3 Default TRUE. Set to FALSE if AHN2 needs to be used.
+#'@param azimuith solar azimuth angle in degrees
+#'@param radius distance radius of raster in metres.
+#'@author Jelle Stuurman
+#'@examples
+#'
+#'
+#'@return ahn mask
+mask_raster <- function(spatialpoint, name, name.supplement = "", ahn_raster, AHN3 = TRUE, azimuth, radius){
+  #View(spatialpoint)
+  if(missing(name)){
+    name <- ""
+    name_trim <- ""
   } else {
-    aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
+    name_trim <- getName_trim(name = name, name.supplement = name.supplement)
   }
-  if(missing(AHN3)){
-    AHN3 <- FALSE
-    AHN <- "AHN2"
-  }
+
   if(AHN3 == TRUE){
     AHN <- "AHN3"
   } else{
     AHN <- "AHN2"
   }
-  
+
   #angles east and west from azimuth
   azimuth_west <- azimuth+5
   azimuth_east <- azimuth-5
 
   #Circle centre point
-  X0 <- spatialpoint@coords[,"X"] 
-  Y0 <- spatialpoint@coords[,"Y"]
-  
+  geom <- data.frame(sf::st_coordinates(spatialpoint))
+  X0 <- geom$X
+  Y0 <- geom$Y
+
+  #View(X0)
+
   #X point East from line
   PXe <- X0 + (radius * sin((azimuth_east*(pi/180))))
   PYe <- Y0 + (radius * cos((azimuth_east*(pi/180))))
-  
-  #Y point West from line  
+
+  #Y point West from line
   PXw <- X0 + (radius * sin((azimuth_west*(pi/180))))
   PYw <- Y0 + (radius * cos((azimuth_west*(pi/180))))
-    
+
   s_radius <- 15
-  
+
   #point other side
   TXe <- X0 + (s_radius * sin((360-(180 - azimuth_west))*(pi/180)))
   TYe <- Y0 + (s_radius * cos((360-(180 - azimuth_west))*(pi/180)))
-  
+
   TXw <- X0 + (s_radius * sin((360-(180 - azimuth_east))*(pi/180)))
   TYw <- Y0 + (s_radius * cos((360-(180 - azimuth_east))*(pi/180)))
 
   #perpendicular points sun side
   PTXe <- TXe + ((s_radius + radius) * sin((azimuth*(pi/180))))
   PTYe <- TYe + ((s_radius + radius) * cos((azimuth*(pi/180))))
-  
+
   PTXw <- TXw + ((s_radius + radius) * sin((azimuth*(pi/180))))
   PTYw <- TYw + ((s_radius + radius) * cos((azimuth*(pi/180))))
-  
+
   #perpendicular points nearby aws other side
   PAXw <- TXw + ((s_radius - 3) * sin((azimuth*(pi/180))))
   PAYw <- TYw + ((s_radius - 3) * cos((azimuth*(pi/180))))
-  
+
   PAXe <- TXe + ((s_radius - 3) * sin((azimuth*(pi/180))))
   PAYe <- TYe + ((s_radius - 3) * cos((azimuth*(pi/180))))
-  
+
   #create Polygon
   coords <- matrix(c(  PAXw, PAYw
                      , PAXe, PAYe
@@ -85,17 +75,15 @@ mask_raster <- function(aws.df = AWS.df, aws_name, spatialpoint, addition = "", 
                      , PTXw, PTYw
                      , PAXw, PAYw),
                   ncol = 2, byrow = TRUE)
-  P1 <- Polygon(coords)
-  
-  Ps1 <- SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(epsg_rd))
-  aws_mask <- SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
+  P1 <- sp::Polygon(coords)
+
+  Ps1 <- sp::SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS(rgdal::CRSargs(CRS("+init=epsg:28992"))))
+  aws_mask <- sp::SpatialPolygonsDataFrame(Ps1, data.frame(row.names=c('a'), y=runif(1)))
   #plot(aws_mask, axes = TRUE)
   ahn_mask <- raster::mask(ahn_raster, aws_mask)
-  
-  writeRaster(ahn_mask, paste0("output/", aws_name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", aws_name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE, rasterOptions = rasterOptions(tmpdir = "Rtmp/"))
+
+  raster::writeRaster(ahn_mask, paste0("output/", name_trim, "/solar_shadow_angles/rasters/", AHN, "/Masks/", name_trim, "_", AHN,"_Mask_", azimuth, ".tif"), overwrite = TRUE)
   print("Masked the raster object.")
   #print(summary(ahn_mask))
   return(ahn_mask)
 }
-ahn_deBilt_mask <- mask_raster(aws_name = "De Bilt", spatialpoint = deBilt_rd.sp  , cropped_ahn_DeBilt, azimuth = 120, radius = 300)
-cropped_ahn_DeBilt <- raster("data/AHN2/DeBilt/raw/DeBilt_raw_ahn.tif")

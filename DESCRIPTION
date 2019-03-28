@@ -1,20 +1,23 @@
-Package: wmoSC
-Title: WMO Site Classification of automatic weather stations
-Version: 0.0.0.9000
+Package: temperatureSC
+Title: WMO air temperature Siting Classification of automatic weather stations
+Version: 0.5
 Authors@R: person("Jelle", "Stuurman", email = "jelle.stuurman@knmi.nl", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.4.4)
 License: GPL3
 Encoding: UTF-8
 LazyData: true
-Imports: data.table,
+Imports: dplyr,
+         data.table,
+         rgdal,
+         sf,
          lubridate,
          horizon,
          raster,
          rgdal,
          sp,
          insol
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

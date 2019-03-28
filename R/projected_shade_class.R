@@ -1,6 +1,15 @@
-projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, criteria_columnName = "Criteria_Value", aws_name, AHN3 = FALSE){
-  if(missing(aws_name)){
-    aws_name <- ""
+#'Projected shade classes
+#'
+#'@title Projected shade classes
+#'@description Projected shade classes
+#'@param name coordidnate in RD New or WGS84 (LON)
+#'@param data.path data path of shadow angles csv
+#'@param AHN3 Default TRUE. Set to FALSE if AHN2 needs to be used.
+#'@author Jelle Stuurman
+#'@return  data frame with all Projected shading Cass of all calculated shadow angles
+projected_shade_classes <- function(name, data.path, AHN3 = TRUE, name.supplement = "", criteria_columnName = "Criteria_Value"){
+  if(missing(name)){
+    name <- ""
   }
   if(AHN3 == TRUE){
     AHN <- "AHN3"
@@ -8,9 +17,9 @@ projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, c
     AHN <- "AHN2"
   }
   
-  aws_name_trim <- getAWS_name_trim(aws.df = aws.df, aws_name = aws_name, addition = addition)
+  name_trim <- getName_trim(name = name, name.supplement = name.supplement)
   
-  df <- fread(data_path, data.table = FALSE)
+  df <- fread(data.path, data.table = FALSE)
   
   tshac <- dplyr::filter(guideline_criteria, Variable == "temperature" & Criteria_Type == "shading")
   tshac <- check_criteria(df = tshac, criteria_columnName = criteria_columnName)
@@ -131,26 +140,22 @@ projected_shade_classes <- function(aws.df = AWS.df, addition = "", data_path, c
   final_class <- max(df[,"final_indiv_class"]) 
   #print(final_class)
   df$final_class <- final_class 
-  if(aws_name_trim == ""){
+  if(name_trim == ""){
     dir.create("output/solar_shadow_angles", showWarnings = FALSE)
   }
-  if(!dir.exists(paste0("output/", aws_name_trim))){
-    dir.create(paste0("output/", aws_name_trim), showWarnings = FALSE)
+  if(!dir.exists(paste0("output/", name_trim))){
+    dir.create(paste0("output/", name_trim), showWarnings = FALSE)
   }
-  if(!dir.exists(paste0("output/", aws_name_trim, "/solar_shadow_angles"))){
-    dir.create(paste0("output/", aws_name_trim, "/solar_shadow_angles"), showWarnings = FALSE)
+  if(!dir.exists(paste0("output/", name_trim, "/solar_shadow_angles"))){
+    dir.create(paste0("output/", name_trim, "/solar_shadow_angles"), showWarnings = FALSE)
   }
   
-  if(aws_name != ""){
-    fwrite(df, paste0("output/", aws_name_trim, "/solar_shadow_angles/", aws_name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"))
+  if(name != ""){
+    fwrite(df, paste0("output/", name_trim, "/solar_shadow_angles/", name_trim, "_", AHN, "_ah_solar_shadow_angles_classes.csv"))
   } else {
-    fwrite(df, paste0("output/solar_shadow_angles/",AHN, "_ah_solar_shadow_angles_classes.csv"))
+    fwrite(df, paste0("output/solar_shadow_angles/", AHN, "_ah_solar_shadow_angles_classes.csv"))
   }
   #View(df)
   message(paste0("Shading passed criteria for class ", final_class, "."))
   return (df)
 }
-
-projected_shade_class(data_path = "output/solar_shadow_angles/Voorschoten/Voorschoten_AHN2_ah_solar_shadow_angles.csv",
-                      aws_name = "De Bilt")
-

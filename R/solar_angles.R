@@ -1,68 +1,60 @@
-library(scatterplot3d)
 library(lubridate)
 library(insol)
-library(ggplot2)
-library(reshape)
-#'Calculating the solar angles for AWS locations
+#'Calculating the solar angles at locations
 #'
 #'@title solar angles
-#'@description iets over wat de functie doet 
-#'@param lat latitude of the station in WGS84
-#'@param lon longitude  of the station in WGS84
-#'@param elv elevation of the measurement
-#'@param jd julian day
+#'@description Determine solarangles at the selected point for the determined year(s), moth(s) day(s) for the selected time interval.
+#'@param spatialpoint single sf point.
+#'@param LONLAT Logic. Dfeault FALSE. Set to TRUE if spatialpoint is in WGS84
+#'@param day vector list. Days of the month to determine solar angles.
+#'@param month numerical vector list. Numerical months of the year to determine solar angles.
+#'@param year vector list. years to determine solar angles
+#'@param s_hour Numeric. start hour to determine solar angles. dEFULT 0
+#'@param f_hour Numeric. finish hour to determine solar angles. Default 23.
+#'@param minutes.interval default 60. numerical minutes interval
 #'@author Jelle Stuurman
-#'@examples
-#'
-#'data(AWS.df)
-#'solar_angles(jd=seq(1,20,by=0.1)) #for the first 20 days with an accuracy of approximately 2.5 hours
-#'@return dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,... 
-#'@export
+#'@return dataframe with variables lat (latitude), lon (longitude), elv (elevation), jd (julian day), azimuth, zenith,... This includes all
 
-solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interval, LONLAT = FALSE){
-  if(LONLAT != FALSE & LONLAT != TRUE){
-   stop("set LONLAT to TRUE or FALSE only. Set LATLON to TRUE if X and Y are longitude and lattitde coordinates.")
-  }
-
-  if(LONLAT == FALSE){
-    point.sp <- data.frame("X"=X,"Y"=Y)
-    coordinates(point.sp) <- ~X+Y
-    crs(point.sp) <- CRS(epsg_rd)
-    point.sf <- st_as_sf(point.sp)
-    wgs_point.sp <- spTransform(point.sp, CRS = CRS("+init=epsg:4238"))
-    View(wgs_point.sp)
-    LON = wgs_point.sp@coords[,"LON"]
-    LAT = wgs_point.sp@coords[,"LAT"]
-  } else if(LONLAT == TRUE){
-    LON = X
-    LAT = Y
-  }
-  
-  if(missing(minutes_interval)){
-    minutes_int = "60 mins"
+solar_angles <- function(spatialpoint, AWS = FALSE, day, month, year, s_hour, f_hour, minutes.interval = 60){
+  # if(LONLAT != FALSE & LONLAT != TRUE){
+  #  stop("set LONLAT to TRUE or FALSE only. Set LATLON to TRUE if X and Y are longitude and lattitde coordinates.")
+  # }
+  #print(AWS)
+  #View(spatialpoint)
+  if(AWS == FALSE){
+      #convert to WGS 84 and get coordinates
+      spatialpoint.wgs <- sf::st_transform(spatialpoint, rgdal::CRSargs(CRS("+init=epsg:4326")))
+      geom <- data.frame(sf::st_coordinates(spatialpoint.wgs))
+      LON <- geom$X
+      LAT = geom$Y
   } else {
-    minutes_int = paste0(minutes_interval, " min")
+      #get LONLAT coordinates from AWs list
+      LON <- spatialpoint$LON
+      LAT <- spatialpoint$LAT
   }
-  
+  #print(LON)
+
+  minutes_int = paste0(minutes.interval, " min")
+
   get_solar_angles<-function(lon, lat, julian_day){
-    
-    requireNamespace("insol")
-    
-    sun_vector <- sunvector(jd = julian_day,
+
+    #requireNamespace("insol")
+
+    sun_vector <- insol::sunvector(jd = julian_day,
                             latitude = LAT,
                             longitude = LON,
                             timezone = 1)
-    
-    sun_position <- sunpos(sun_vector)
+
+    sun_position <- insol::sunpos(sun_vector)
     summary(sun_position)
-    
+
     m <- cbind(LON, LAT, julian_day, sun_position)
     df <- data.frame(m)
     df$elevation <- 90 - df$zenith
     return(df)
   }
-  
-  julian_day_hour <- function(year,month,day, s_hour, f_hour, minutes_interval){
+
+  julian_day_hour <- function(year,month,day, s_hour, f_hour, minutes.interval){
     #print(paste(day, month, year))
     if(missing(s_hour)){
       s_hour <- 0
@@ -70,13 +62,13 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     if(missing(f_hour)){
       f_hour <- 23
     }
-    
-    jd <- JD(seq(ISOdate(year,month,day,s_hour, 0),ISOdate(year,month,day,f_hour, 59),by=minutes_interval))
+
+    jd <- insol::JD(base::seq(base::ISOdate(year,month,day,s_hour, 0),base::ISOdate(year,month,day,f_hour, 59),by=minutes.interval))
     return(jd)
   }
-  
-  julian_day <- julian_day_hour(year = year, month = month, day = day, s_hour, f_hour, minutes_interval = minutes_int)
-  
+
+  julian_day <- julian_day_hour(year = year, month = month, day = day, s_hour, f_hour, minutes.interval = minutes_int)
+
   getDate <- function(day, month){
     if(month == 1){
       month_name = "Jan"
@@ -118,13 +110,14 @@ solar_angles <- function(X, Y, day, month, year, s_hour, f_hour, minutes_interva
     #print(date)
     return (date)
   }
-  
+
   #print(paste(day, month))
   all_solar_angles <- data.frame(get_solar_angles(lon = LON,
                                               lat = LAT,
                                               julian_day = julian_day), day = getDate(day, month), stringsAsFactors = FALSE)
-                                              
+
   #select only above horizon elevation anngles
-  ah_solar_angles <- subset(all_solar_angles, elevation > 0)
+  ah_solar_angles <- dplyr::filter(all_solar_angles, elevation > 0)
+
 return(list("all angles"= all_solar_angles, "ah angles" = ah_solar_angles))
 }

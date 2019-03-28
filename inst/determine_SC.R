@@ -1,0 +1,12 @@
+determine_temperatureSC(name = c("De Bilt"), name.supplement = "", summary_name.supplement = "", AWS = TRUE, LONLAT = FALSE,
+                        sensor.name = temperature_sensor_name, criteria_columnName = "Criteria_Value", class_selection = "final_class",
+                        AHN3 = TRUE, import_ahn = TRUE, redownload_ahn = TRUE, ahn_resolution = 0.5, ahn_radius = 500, delete_ahn_sheets = TRUE,
+                        import_bgt = TRUE, redownload_bgt = TRUE, bgt_radius = 150, delete_bgt_gmls = TRUE,
+                        solar_angles = TRUE, angle_selection_byIndexNr = c(37,40),
+                        years = c(2018), months = c(12, 1:6), days = c(21),
+                        s_hour = 0, f_hour = 23, minutes.interval = 15,
+                        include_shadow_angles = TRUE, calculate_shadow_angles = TRUE, read_only_shadow_values = FALSE,
+                        radius = 100, full_circle_mask = FALSE, extract_method = 'bilinear',
+                        sensor_height = 0,
+                        vegetation_radius = 10,
+                        exportShp = FALSE, exportCSV = TRUE, printChart = FALSE, test = FALSE)
